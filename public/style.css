@@ -1,56 +1,229 @@
-body {
-  font-family: system-ui, sans-serif;
-  background: #0f172a;
-  color: #e5e7eb;
+/* =========================
+   RESET + BASE
+========================= */
+
+* {
+  box-sizing: border-box;
   margin: 0;
+  padding: 0;
 }
+
+html, body {
+  height: 100%;
+}
+
+body {
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background: linear-gradient(180deg, #020617, #0f172a);
+  color: #e5e7eb;
+  line-height: 1.5;
+}
+
+/* =========================
+   HENRYK HEADER 🐶
+========================= */
 
 .henryk {
-  background: #020617;
-  padding: 10px 16px;
+  width: 100%;
+  background: rgba(2, 6, 23, 0.8);
+  backdrop-filter: blur(6px);
+  padding: 12px 20px;
   text-align: center;
-  font-weight: bold;
+  font-weight: 600;
+  color: #e5e7eb;
+  border-bottom: 1px solid #1e293b;
 }
+
+/* =========================
+   LAYOUT
+========================= */
 
 .container {
-  max-width: 700px;
+  max-width: 1100px;
   margin: 0 auto;
-  padding: 20px;
+  padding: 40px 20px 80px;
 }
 
-.apps {
+/* =========================
+   TYPOGRAFIA
+========================= */
+
+h1 {
+  font-size: 42px;
+  font-weight: 700;
+  margin-bottom: 10px;
+}
+
+.accent {
+  color: #38bdf8;
+}
+
+.subtitle {
+  color: #94a3b8;
+  margin-bottom: 30px;
+  font-size: 16px;
+}
+
+/* =========================
+   PANEL APLIKACJI
+========================= */
+
+.apps-panel {
+  background: linear-gradient(180deg, #020617, #020617);
+  padding: 28px;
+  border-radius: 22px;
+
+  max-width: 900px;
+  margin: 0 auto;
+
   display: grid;
-  grid-template-columns: 1fr;
-  gap: 16px;
-  margin-top: 30px;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 22px;
+
+  box-shadow:
+    0 30px 60px rgba(0,0,0,.55),
+    inset 0 1px 0 rgba(255,255,255,.02);
 }
 
-.app-card {
-  display: block;
-  background: #020617;
-  padding: 20px;
-  border-radius: 12px;
+/* =========================
+   KAFELKI APLIKACJI
+========================= */
+
+.app-tile {
+  aspect-ratio: 1 / 1;
+  border-radius: 20px;
+  padding: 22px;
+
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+
   text-decoration: none;
   color: #e5e7eb;
-  box-shadow: 0 10px 30px rgba(0,0,0,.3);
+
+  background: linear-gradient(145deg, #020617, #0f172a);
+  border: 1px solid #1e293b;
+
+  transition:
+    transform .25s ease,
+    box-shadow .25s ease,
+    border-color .25s ease;
 }
 
-.app-card small {
-  display: block;
-  margin-top: 6px;
+.app-tile:hover {
+  transform: translateY(-6px) scale(1.02);
+  box-shadow: 0 18px 40px rgba(0,0,0,.6);
+}
+
+/* =========================
+   ZAWARTOŚĆ KAFELKA
+========================= */
+
+.app-tile .icon {
+  font-size: 40px;
+  margin-bottom: 12px;
+}
+
+.app-tile .name {
+  font-weight: 600;
+  font-size: 17px;
+  margin-bottom: 4px;
+}
+
+.app-tile .desc {
+  font-size: 13px;
   color: #94a3b8;
+  text-align: center;
 }
 
-.card {
-  background: #020617;
-  padding: 20px;
-  border-radius: 12px;
-  margin-top: 20px;
+/* =========================
+   KOLOR APLIKACJI
+========================= */
+
+.app-tile.car-log {
+  border-color: #38bdf8;
+  box-shadow: inset 0 0 0 1px rgba(56,189,248,.25);
 }
 
-.back {
+.app-tile.car-log:hover {
+  border-color: #7dd3fc;
+}
+
+/* =========================
+   NIEAKTYWNE / WKRÓTCE
+========================= */
+
+.app-tile.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.4);
+}
+
+/* =========================
+   RESPONSYWNOŚĆ
+========================= */
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 32px;
+  }
+
+  .apps-panel {
+    padding: 20px;
+  }
+}
+
+/* =========================
+   CAR LOG – STRONA SAMOCHODU
+========================= */
+
+.page-title {
+  margin: 20px 0 30px;
+  font-size: 36px;
+}
+
+.back-link {
   display: inline-block;
-  margin-bottom: 20px;
-  color: #94a3b8;
+  margin-bottom: 16px;
+  color: #38bdf8;
   text-decoration: none;
+  font-size: 14px;
+}
+
+.back-link:hover {
+  text-decoration: underline;
+}
+
+/* KARTY */
+.card {
+  background: linear-gradient(180deg, #020617, #020617);
+  border-radius: 20px;
+  padding: 24px;
+  margin-bottom: 24px;
+
+  max-width: 700px;
+  box-shadow:
+    0 20px 40px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.02);
+}
+
+/* LISTA INFO */
+.info-list {
+  list-style: none;
+  margin-top: 16px;
+}
+
+.info-list li {
+  margin-bottom: 10px;
+  color: #e5e7eb;
+}
+
+.info-list strong {
+  color: #38bdf8;
+}
+
+/* SPECJALNA KARTA HENRYKA */
+.henryk-card {
+  border-left: 4px solid #fbbf24;
 }

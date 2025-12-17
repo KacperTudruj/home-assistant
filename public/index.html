@@ -2,8 +2,9 @@
 <html lang="pl">
 <head>
   <meta charset="UTF-8">
-  <title>Tudruj HomeAssistant</title>
+  <title>Tudruj Home Assistant</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <link rel="stylesheet" href="/style.css">
 </head>
 <body>
@@ -13,15 +14,22 @@
 </header>
 
 <main class="container">
-  <h1>Tudruj HomeAssistant</h1>
-  <p>Wybierz aplikację:</p>
+  <h1>Tudruj <span class="accent">Home Assistant</span></h1>
+  <p class="subtitle">Wybierz aplikację:</p>
 
-  <div class="apps">
-    <a class="app-card" href="/car-log">
-      🚗 Car Log
-      <small>Mój samochód</small>
+  <section class="apps-panel">
+    <a class="app-tile car-log" href="/car-log">
+      <div class="icon">🚗</div>
+      <div class="name">Car Log</div>
+      <div class="desc">Mój samochód</div>
     </a>
-  </div>
+
+    <div class="app-tile disabled">
+      <div class="icon">🏠</div>
+      <div class="name">Home</div>
+      <div class="desc">Wkrótce</div>
+    </div>
+  </section>
 </main>
 
 <script src="/app.js"></script>
