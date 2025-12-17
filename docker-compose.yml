@@ -1,9 +1,10 @@
 version: "3.8"
 
 services:
-  car-api:
+  home-assistant:
     build: .
-    container_name: car-api
+    container_name: home-assistant
     ports:
       - "3000:3000"
     restart: unless-stopped
+
