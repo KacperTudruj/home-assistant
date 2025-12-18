@@ -9,15 +9,15 @@ const henrykQuotes = [
 const el = document.getElementById('henryk-text');
 
 if (el) {
-  el.innerText = henrykQuotes[
-    Math.floor(Math.random() * henrykQuotes.length)
-  ];
+  fetch('/api/commentary?feature=car-log')
+    .then(res => {
+      if (!res.ok) throw new Error();
+      return res.json();
+    })
+    .then(data => {
+      el.innerText = data.text;
+    })
+    .catch(() => {
+      el.innerText = "🐶 Henryk chwilowo milczy...";
+    });
 }
-// fetch('/api/health')
-//   .then(res => res.json())
-//   .then(data => {
-//     document.getElementById('status').innerText = data.status;
-//   })
-//   .catch(() => {
-//     document.getElementById('status').innerText = '❌ Brak połączenia z API';
-//   });

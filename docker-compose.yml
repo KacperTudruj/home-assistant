@@ -1,10 +1,28 @@
 version: "3.8"
 
 services:
-  home-assistant:
+  api:
     build: .
     container_name: home-assistant
     ports:
       - "3000:3000"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
     restart: unless-stopped
 
+  postgres:
+    image: postgres:16
+    container_name: home-assistant-db
+    environment:
+      POSTGRES_USER: tudruj
+      POSTGRES_PASSWORD: secret
+      POSTGRES_DB: homeassistant
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+volumes:
+  pgdata:

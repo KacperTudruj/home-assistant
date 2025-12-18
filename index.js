@@ -32,3 +32,20 @@ app.get(/.*/, (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
+const prisma = new PrismaClient();
+
+const commentaryRepo = new CommentaryRepositoryPrisma(prisma);
+const narratorRepo = new FeatureNarratorRepositoryPrisma(prisma);
+const presenter = new CommentaryPresenter();
+
+const useCase = new GetCommentaryForFeatureUseCase(
+  commentaryRepo,
+  narratorRepo,
+  presenter
+);
+
+const controller = new CommentaryController(useCase);
+
+app.get("/api/commentary", (req, res) =>
+  controller.handle(req, res)
+);
