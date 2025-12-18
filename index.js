@@ -44,8 +44,16 @@ const useCase = new GetCommentaryForFeatureUseCase(
   presenter
 );
 
-const controller = new CommentaryController(useCase);
+const commentaryController = new commentaryController(useCase);
+
 
 app.get("/api/commentary", (req, res) =>
-  controller.handle(req, res)
+  commentaryController.get(req, res)
+);
+app.post("/api/commentary", (req, res) =>
+  commentaryController.create(req, res)
+);
+
+app.get("/api/commentators", (req, res) =>
+  commentaryController.listCommentators(req, res)
 );

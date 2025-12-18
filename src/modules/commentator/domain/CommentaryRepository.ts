@@ -6,4 +6,6 @@ export interface CommentaryRepository {
     tags?: string[];
     commentatorId: string;
   }): Promise<Commentary[]>;
+
+  save(commentary: Commentary): Promise<void>;
 }
