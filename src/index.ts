@@ -3,13 +3,13 @@ import path from "path";
 import { PrismaClient } from "@prisma/client";
 
 import { CommentaryRepositoryPrisma } from "@modules/commentary/infrastructure/CommentaryRepositoryPrisma";
-import { CommentaryPresenterRepositoryPrisma } from "./modules/commentary/infrastructure/CommentaryPresenterRepositoryPrisma";
 
 import { CommentaryPresenter } from "./modules/commentary/domain/CommentaryPresenter";
 import { GetCommentaryForFeatureUseCase } from "./modules/commentary/application/GetCommentaryUseCase";
 import { CreateCommentaryUseCase } from "./modules/commentary/application/CreateCommentaryUseCase";
-import { GetCommentatorsUseCase } from "./modules/commentary/application/GetCommentatorsUseCase";
 import { CommentaryController } from "./modules/commentary/interface/CommentaryController";
+import { CommentatorRepositoryPrisma } from "@modules/commentary/infrastructure/CommentatorRepositoryPrisma";
+import { ListCommentatorsUseCase } from "@modules/commentary/application/ListCommentatorsUseCase";
 
 const app = express();
 const PORT = 3000;
@@ -32,7 +32,7 @@ app.get("/car-log", (_, res) => {
 const prisma = new PrismaClient();
 
 const commentaryRepo = new CommentaryRepositoryPrisma(prisma);
-const narratorRepo = new CommentaryPresenterRepositoryPrisma(prisma);
+const narratorRepo = new CommentatorRepositoryPrisma(prisma);
 
 const presenter = new CommentaryPresenter();
 
@@ -46,13 +46,13 @@ const getCommentaryForFeatureUseCase =
 const createCommentaryUseCase =
   new CreateCommentaryUseCase(commentaryRepo);
 
-const getCommentatorsUseCase =
-  new GetCommentatorsUseCase(narratorRepo);
+const listCommentatorsUseCase =
+  new ListCommentatorsUseCase(narratorRepo);
 
 const commentaryController = new CommentaryController(
   getCommentaryForFeatureUseCase,
   createCommentaryUseCase,
-  getCommentatorsUseCase
+  listCommentatorsUseCase
 );
 
 // ===== ROUTES =====
