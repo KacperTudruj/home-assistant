@@ -6,6 +6,9 @@ datasource db {
   provider = "postgresql"
 }
 
+/// =======================
+/// features MODULE
+/// =======================
 
 model App {
   id          String  @id @default(uuid())
@@ -17,6 +20,10 @@ model App {
   enabled     Boolean @default(true)
   order       Int
 }
+
+/// =======================
+/// COMMENTARY MODULE
+/// =======================
 
 model Commentator {
   id      String @id @default(uuid())
@@ -39,11 +46,15 @@ model Commentary {
   commentator    Commentator @relation(fields: [commentatorId], references: [id])
 }
 
-model FeatureNarrator {
+model CommentaryPresenter {
   featureKey     String
   commentatorId  String
   priority       Int
-
   @@id([featureKey])
 }
+
+
+/// =======================
+/// Car MODULE
+/// =======================
 
