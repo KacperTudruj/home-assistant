@@ -9,4 +9,4 @@ COPY . .
 
 EXPOSE 3000
 
-CMD ["node", "src/index.js"]
+CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "src/index.ts"]
