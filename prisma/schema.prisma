@@ -47,14 +47,6 @@ model Commentary {
   commentator    Commentator @relation(fields: [commentatorId], references: [id])
 }
 
-model CommentaryPresenter {
-  featureKey     String
-  commentatorId  String
-  priority       Int
-  @@id([featureKey])
-}
-
-
 /// =======================
 /// Car MODULE
 /// =======================
