@@ -6,6 +6,8 @@ services:
     container_name: home-assistant
     ports:
       - "3000:3000"
+    environment:
+      DATABASE_URL: postgresql://tudruj:secret@postgres:5432/homeassistant
     depends_on:
       - postgres
     env_file:

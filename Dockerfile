@@ -5,8 +5,11 @@ WORKDIR /app
 COPY package*.json ./
 RUN npm install
 
+COPY prisma ./prisma
+RUN npx prisma generate
+
 COPY . .
 
 EXPOSE 3000
 
-CMD ["npx", "ts-node", "-r", "tsconfig-paths/register", "src/index.ts"]
+CMD ["node", "node_modules/ts-node/dist/bin.js", "-r", "tsconfig-paths/register", "src/index.ts"]
