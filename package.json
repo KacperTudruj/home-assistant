@@ -11,12 +11,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@prisma/client": "^7.2.0",
+    "@prisma/client": "6.9.0",
     "express": "^5.2.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
-    "prisma": "^7.2.0",
+    "prisma": "6.9.0",
     "ts-node": "^10.9.2",
     "tsconfig-paths": "^4.2.0",
     "typescript": "^5.9.3"
