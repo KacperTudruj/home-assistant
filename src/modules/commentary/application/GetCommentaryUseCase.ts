@@ -13,8 +13,10 @@ export class GetCommentaryForFeatureUseCase {
     const narrator =
       await this.commentatorRepo.find(id);
 
-    if (!narrator) return null;
-
+    if (!narrator || !narrator.enabled) {
+    throw new Error("Commentator not available");
+    } 
+    
     const commentaries =
       await this.commentaryRepo.find({
         featureKey,

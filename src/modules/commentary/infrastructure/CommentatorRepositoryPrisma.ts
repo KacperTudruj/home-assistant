@@ -8,14 +8,21 @@ export class CommentatorRepositoryPrisma implements CommentatorRepository {
   constructor(private readonly prisma: PrismaClient) {}
 
   async find(id: string): Promise<Commentator | null> {
-
-    const rows = await this.prisma.commentary.findMany({
-      where: {
-        id: id,
-      }
+    const row = await this.prisma.commentator.findUnique({
+      where: { id }
     });
-    throw new Error("Method not implemented.");
-  }
+
+    if (!row) return null;
+
+    return new Commentator(
+      row.id,
+      row.key,
+      row.name,
+      row.style,
+      row.enabled
+    );
+}
+
 
   async findAll(): Promise<Commentator[]> {
     const rows = await this.prisma.commentator.findMany({
