@@ -1,23 +1,51 @@
-const henrykQuotes = [
-  "Henryk melduje: wszystko działa, ale nie dotykaj kabli 🐾",
-  "Jamnik Henryk tu był. Zostawił porządek. Prawie.",
-  "Serwer działa. Henryk czuwa. 🌭",
-  "Nie pytaj jak to działa. Henryk pilnuje.",
-  "Jeśli to widzisz – znaczy, że Henryk pozwolił."
-];
+const commentaryEl = document.getElementById("commentary-text");
+const commentatorSelect = document.getElementById("commentator-select");
 
-const el = document.getElementById('henryk-text');
+const FEATURE_KEY = "app";
 
-if (el) {
-  fetch('/api/commentary?feature=car-log')
+// ====== LOAD COMMENTATORS ======
+fetch("/api/commentators")
+  .then(res => res.json())
+  .then(commentators => {
+    commentators.forEach(c => {
+      const option = document.createElement("option");
+      option.value = c.id;
+      option.textContent = c.name;
+      commentatorSelect.appendChild(option);
+    });
+
+    const saved = localStorage.getItem("commentatorId");
+    if (saved) {
+      commentatorSelect.value = saved;
+      loadCommentary(saved);
+    }
+  })
+  .catch(err => {
+    console.error("Błąd ładowania komentatorów", err);
+  });
+
+// ====== CHANGE COMMENTATOR ======
+commentatorSelect.addEventListener("change", () => {
+  const id = commentatorSelect.value;
+  if (!id) return;
+
+  localStorage.setItem("commentatorId", id);
+  loadCommentary(id);
+});
+
+// ====== LOAD COMMENTARY ======
+function loadCommentary(commentatorId) {
+  commentaryEl.innerText = "🗣️ Myślę…";
+
+  fetch(`/api/commentary?feature=${FEATURE_KEY}&commentatorId=${commentatorId}`)
     .then(res => {
       if (!res.ok) throw new Error();
       return res.json();
     })
     .then(data => {
-      el.innerText = data.text;
+      commentaryEl.innerText = data.text;
     })
     .catch(() => {
-      el.innerText = "🐶 Henryk chwilowo milczy...";
+      commentaryEl.innerText = "🤐 Komentator dziś milczy...";
     });
 }

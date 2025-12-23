@@ -29,7 +29,7 @@ export class CommentaryController {
         );
 
         if (!commentary) {
-        res.status(204).send();
+        res.status(404).send();
         return;
         }
 

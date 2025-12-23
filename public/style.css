@@ -23,15 +23,38 @@ body {
    HENRYK HEADER 🐶
 ========================= */
 
-.henryk {
-  width: 100%;
-  background: rgba(2, 6, 23, 0.8);
-  backdrop-filter: blur(6px);
-  padding: 12px 20px;
-  text-align: center;
+.commentary-line {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
   font-weight: 600;
-  color: #e5e7eb;
-  border-bottom: 1px solid #1e293b;
+}
+
+/* SELECT WYGLĄDA JAK TEKST */
+#commentator-select {
+  appearance: none;
+  background: transparent;
+  border: none;
+  color: #38bdf8;
+  font-weight: 700;
+  cursor: pointer;
+  padding: 0;
+  margin: 0;
+}
+
+/* usuń focus box */
+#commentator-select:focus {
+  outline: none;
+}
+
+/* usuń strzałkę w Firefox */
+#commentator-select::-ms-expand {
+  display: none;
+}
+
+.colon {
+  color: #94a3b8;
 }
 
 /* =========================
@@ -227,3 +250,5 @@ h1 {
 .henryk-card {
   border-left: 4px solid #fbbf24;
 }
+
+
