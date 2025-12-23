@@ -24,7 +24,7 @@ export class CommentaryRepositoryPrisma implements CommentaryRepository {
     });
 
     return rows.map(
-      r =>
+      (r: Commentary) =>
         new Commentary(
           r.id,
           r.text,
@@ -48,22 +48,4 @@ export class CommentaryRepositoryPrisma implements CommentaryRepository {
       }
     });
   }
-
-    async findAll(): Promise<Commentator[]> {
-    const rows = await this.prisma.commentator.findMany({
-      where: { enabled: true },
-    });
-
-    return rows.map(
-      r => new Commentator(
-        r.id,
-        r.key,
-        r.name,
-        r.style,
-        r.enabled
-      )
-    );
-  }
-
-
 }
