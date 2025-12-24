@@ -1,7 +1,7 @@
 const commentaryEl = document.getElementById("commentary-text");
 const commentatorSelect = document.getElementById("commentator-select");
 
-const FEATURE_KEY = "app";
+const FEATURE_KEY = window.FEATURE_KEY || "app";
 
 // ====== LOAD COMMENTATORS ======
 fetch("/api/commentators")
@@ -48,4 +48,10 @@ function loadCommentary(commentatorId) {
     .catch(() => {
       commentaryEl.innerText = "🤐 Komentator dziś milczy...";
     });
+
+  // ⛔ JEŚLI NIE MA HEADERA — NIE RÓB NIC
+  if (!commentaryEl || !commentatorSelect) {
+    console.warn("Commentary header not present on this page");
+    return;
+  }
 }

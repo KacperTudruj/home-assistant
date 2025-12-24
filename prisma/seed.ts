@@ -56,7 +56,7 @@ async function main() {
   const appCommentsBluzgator = [
     "No to klikaj kurwa, nie mamy całego jebanego dnia.",
     "Znowu tu jesteś kurwa twoja mac? No dawaj.",
-    "Wybierz coś albo spierdalaj z tym cyrkiem ten cyrk.",
+    "Wybierz coś albo spierdalaj z tym cyrkiem.",
     "To znowu ty? ja jebie...",
     "Serio… ile można się zastanawiać?",
   ];
@@ -83,8 +83,8 @@ async function main() {
     "Jedź ostrożnie, bo laweta droga.",
   ];
 
-  await seedComments(carCommentsHenryk, henryk.id, ["car-info"]);
-  await seedComments(carCommentsBluzgator, bluzgator.id, ["car-info"]);
+  await seedComments(carCommentsHenryk, henryk.id, ["car-log"]);
+  await seedComments(carCommentsBluzgator, bluzgator.id, ["car-log"]);
 
   console.log("✅ Seed completed");
 }

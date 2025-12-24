@@ -13,19 +13,19 @@ import { ListCommentatorsUseCase } from "@modules/commentary/application/ListCom
 
 const app = express();
 const PORT = 3000;
+const PAGES_DIR = path.join(__dirname, "..", "src", "pages");
 
 app.use(express.json());
-
 // static
 app.use(express.static(path.join(__dirname, "..", "public")));
 
 // pages
 app.get("/", (_, res) => {
-  res.sendFile(path.join(__dirname, "..", "pages", "home.html"));
+  res.sendFile(path.join(PAGES_DIR, "home.html"));
 });
 
 app.get("/car-log", (_, res) => {
-  res.sendFile(path.join(__dirname, "..", "pages", "car-log.html"));
+  res.sendFile(path.join(PAGES_DIR, "car-log.html"));
 });
 
 // ===== COMPOSITION ROOT =====

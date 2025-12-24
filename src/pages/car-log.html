@@ -1,37 +1,43 @@
 <!DOCTYPE html>
 <html lang="pl">
+
 <head>
   <meta charset="UTF-8">
   <title>Car Log – Tudruj</title>
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <link rel="stylesheet" href="/style.css">
 </head>
+
 <body>
+  <script> window.FEATURE_KEY = "car-log";</script>
+  <header class="commentary">
+    <div class="commentary-line">
+      <select id="commentator-select" aria-label="Wybierz komentatora"></select>
+      <span class="colon">:</span>
+      <span id="commentary-text">Ładowanie komentarza…</span>
+    </div>
+  </header>
 
-<header class="henryk">
-   <span id="henryk-text"></span>
-</header>
+  <main class="container">
+    <a href="/" class="back-link">← Wróć do wyboru aplikacji</a>
 
-<main class="container">
-  <a href="/" class="back">← Wróć do wyboru aplikacji</a>
+    <h1>🚗 Mój samochód</h1>
 
-  <h1>🚗 Mój samochód</h1>
+    <div class="card">
+      <h2>Podstawowe informacje</h2>
+      <ul>
+        <li><strong>Model:</strong> (uzupełnimy)</li>
+        <li><strong>Rok:</strong> (uzupełnimy)</li>
+        <li><strong>Silnik:</strong> (uzupełnimy)</li>
+      </ul>
+    </div>
 
-  <div class="card">
-    <h2>Podstawowe informacje</h2>
-    <ul>
-      <li><strong>Model:</strong> (uzupełnimy)</li>
-      <li><strong>Rok:</strong> (uzupełnimy)</li>
-      <li><strong>Silnik:</strong> (uzupełnimy)</li>
-    </ul>
-  </div>
-
-  <div class="card">
-    <h2>Status Henryka</h2>
-    <p>Henryk patrzy na samochód z podejrzliwością 🐕</p>
-  </div>
-</main>
-
-<script src="/app.js"></script>
+    <div class="card">
+      <h2>Status Henryka</h2>
+      <p>Henryk patrzy na samochód z podejrzliwością 🐕</p>
+    </div>
+  </main>
+  <script src="/app.js"></script>
 </body>
+
 </html>
