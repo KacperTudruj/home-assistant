@@ -16,6 +16,16 @@ async function main() {
     },
   });
 
+  const gandalf = await prisma.commentator.upsert({
+    where: { key: "gandalf" },
+    update: {},
+    create: {
+      key: "gandalf",
+      name: "Gandalf 🧙‍♂️",
+      style: "Mądry, spokojny mentor, komentuje z dystansem i sensem istnienia",
+    },
+  });
+
   const bluzgator = await prisma.commentator.upsert({
     where: { key: "bluzgator" },
     update: {},
@@ -42,6 +52,19 @@ async function main() {
     },
   });
 
+  await prisma.app.upsert({
+    where: { key: "health" },
+    update: {},
+    create: {
+      key: "health",
+      name: "Health",
+      description: "Monitorowanie zdrowia, wagi i progresu",
+      icon: "🩺",
+      route: "/health",
+      order: 2,
+    },
+  });
+
   // =====================
   // COMMENTARIES – APP
   // =====================
@@ -53,6 +76,14 @@ async function main() {
     "Miłego klikania! 🐶",
   ];
 
+  const appCommentsGandalf = [
+    "A wizard arrives precisely when he means to.",
+    "Każda podróż zaczyna się od jednego kliknięcia.",
+    "Nie wszystko, co się ładuje, jest stracone.",
+    "Cierpliwość, mój przyjacielu. System myśli.",
+    "Wybór aplikacji jest jak wybór drogi w Śródziemiu.",
+  ];
+
   const appCommentsBluzgator = [
     "No to klikaj kurwa, nie mamy całego jebanego dnia.",
     "Znowu tu jesteś kurwa twoja mac? No dawaj.",
@@ -62,6 +93,7 @@ async function main() {
   ];
 
   await seedComments(appCommentsHenryk, henryk.id, ["app"]);
+  await seedComments(appCommentsGandalf, gandalf.id, ["app"]);
   await seedComments(appCommentsBluzgator, bluzgator.id, ["app"]);
 
   // =====================
@@ -75,6 +107,14 @@ async function main() {
     "Henryk poleca regularny serwis!",
   ];
 
+  const carCommentsGandalf = [
+    "Ten pojazd wiele już widział… i jeszcze więcej zobaczy.",
+    "Maszyna, jak każdy byt, wymaga troski.",
+    "Nie ignoruj znaków – nawet tych na desce rozdzielczej.",
+    "To nie awaria… to wyzwanie.",
+    "Droga przed tobą jest długa, ale przejezdna.",
+  ];
+
   const carCommentsBluzgator = [
     "No i co, znowu ten JEBANY check engine?!",
     "Ten samochód to chuj, tak samo jak kierowca.",
@@ -84,7 +124,40 @@ async function main() {
   ];
 
   await seedComments(carCommentsHenryk, henryk.id, ["car-log"]);
+  await seedComments(carCommentsGandalf, gandalf.id, ["car-log"]);
   await seedComments(carCommentsBluzgator, bluzgator.id, ["car-log"]);
+
+  // =====================
+  // COMMENTARIES – HEALTH
+  // =====================
+
+  const healthCommentsHenryk = [
+    "Henryk widzi postęp! I merda ogonem z dumy 🐾",
+    "Każdy krok się liczy, nawet ten malutki!",
+    "Spokojnie, forma przyjdzie. Henryk wierzy.",
+    "Dzisiaj lepiej niż wczoraj – a to już sukces!",
+    "Zdrowie to maraton, nie sprint. Hau!",
+  ];
+
+  const healthCommentsGandalf = [
+    "Postęp nie zawsze jest szybki, ale bywa nieunikniony.",
+    "Nie oceniaj dnia po jednym wyniku.",
+    "Twoje ciało pamięta więcej, niż myślisz.",
+    "To, co dziś trudne, jutro stanie się normą.",
+    "Każdy krok naprzód ma znaczenie.",
+  ];
+
+  const healthCommentsBluzgator = [
+    "No i co? Znowu +0.5kg? Może mniej żreć, co?",
+    "Forma sama się nie zrobi, geniuszu.",
+    "Regres? Gratulacje, właśnie zjebałeś tydzień.",
+    "Albo robisz progres, albo się oszukujesz.",
+    "Waga nie kłamie. Ty tak.",
+  ];
+
+  await seedComments(healthCommentsHenryk, henryk.id, ["health"]);
+  await seedComments(healthCommentsGandalf, gandalf.id, ["health"]);
+  await seedComments(healthCommentsBluzgator, bluzgator.id, ["health"]);
 
   console.log("✅ Seed completed");
 }
