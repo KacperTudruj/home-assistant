@@ -17,6 +17,8 @@ import { Feature } from "@modules/features/domain/entity/Feature";
 import { FeatureController } from "@modules/features/interface/FeatureController";
 import { ListFeaturesUseCase } from "@modules/features/application/ListFeaturesUseCase";
 import { FeaturesRepositoryPrisma } from "@modules/features/infrastructure/FeaturesRepositoryPrisma";
+import { featureRoutes } from "@modules/features/interface/FeatureRoutes";
+import { commentaryRoutes } from "@modules/commentary/interface/CommentaryRoutes";
 
 const app = express();
 const PORT = 3000;
@@ -70,12 +72,8 @@ const featureController = new FeatureController(listFeaturesUseCase);
 
 // ===== ROUTES =====
 // commentary
-app.get("/api/commentary", (req, res) => commentaryController.getCommentary(req, res));
-app.post("/api/commentary", (req, res) => commentaryController.createCommentary(req, res));
-app.get("/api/commentators", (req, res) => commentaryController.listCommentators(req, res));
-
-// features
-app.get("/api/features", (req, res) => featureController.listFeatures(req, res));
+app.use("/api",commentaryRoutes(commentaryController));
+app.use("/api", featureRoutes(featureController));
 
 // health check
 app.get("/api/health", (_, res) => { res.json({ status: "ok" }); });
