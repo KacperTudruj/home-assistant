@@ -2,6 +2,9 @@ import express from "express";
 import path from "path";
 import { PrismaClient } from "@prisma/client";
 
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./docs/openapi";
+
 import { CommentaryRepositoryPrisma } from "@modules/commentary/infrastructure/CommentaryRepositoryPrisma";
 
 import { CommentaryPresenter } from "./modules/commentary/domain/CommentaryPresenter";
@@ -10,12 +13,23 @@ import { CreateCommentaryUseCase } from "./modules/commentary/application/Create
 import { CommentaryController } from "./modules/commentary/interface/CommentaryController";
 import { CommentatorRepositoryPrisma } from "@modules/commentary/infrastructure/CommentatorRepositoryPrisma";
 import { ListCommentatorsUseCase } from "@modules/commentary/application/ListCommentatorsUseCase";
+import { Feature } from "@modules/features/domain/entity/Feature";
+import { FeatureController } from "@modules/features/interface/FeatureController";
+import { ListFeaturesUseCase } from "@modules/features/application/ListFeaturesUseCase";
+import { FeaturesRepositoryPrisma } from "@modules/features/infrastructure/FeaturesRepositoryPrisma";
 
 const app = express();
 const PORT = 3000;
 const PAGES_DIR = path.join(__dirname, "..", "src", "pages");
 
 app.use(express.json());
+
+// swagger
+app.use(
+  "/api/docs",
+  swaggerUi.serve,
+  swaggerUi.setup(swaggerSpec)
+);
 // static
 app.use(express.static(path.join(__dirname, "..", "public")));
 
@@ -33,9 +47,7 @@ const prisma = new PrismaClient();
 
 const commentaryRepo = new CommentaryRepositoryPrisma(prisma);
 const narratorRepo = new CommentatorRepositoryPrisma(prisma);
-
 const presenter = new CommentaryPresenter();
-
 const getCommentaryForFeatureUseCase =
   new GetCommentaryForFeatureUseCase(
     commentaryRepo,
@@ -43,35 +55,30 @@ const getCommentaryForFeatureUseCase =
     presenter
   );
 
-const createCommentaryUseCase =
-  new CreateCommentaryUseCase(commentaryRepo);
-
-const listCommentatorsUseCase =
-  new ListCommentatorsUseCase(narratorRepo);
-
+const createCommentaryUseCase = new CreateCommentaryUseCase(commentaryRepo);
+const listCommentatorsUseCase = new ListCommentatorsUseCase(narratorRepo);
 const commentaryController = new CommentaryController(
   getCommentaryForFeatureUseCase,
   createCommentaryUseCase,
   listCommentatorsUseCase
 );
 
+const featuresRepo = new FeaturesRepositoryPrisma(prisma);
+const listFeaturesUseCase = new ListFeaturesUseCase(featuresRepo);
+const featureController = new FeatureController(listFeaturesUseCase);
+// ===== END COMPOSITION ROOT =====
+
 // ===== ROUTES =====
-app.get("/api/commentary", (req, res) =>
-  commentaryController.getCommentary(req, res)
-);
+// commentary
+app.get("/api/commentary", (req, res) => commentaryController.getCommentary(req, res));
+app.post("/api/commentary", (req, res) => commentaryController.createCommentary(req, res));
+app.get("/api/commentators", (req, res) => commentaryController.listCommentators(req, res));
 
-app.post("/api/commentary", (req, res) =>
-  commentaryController.createCommentary(req, res)
-);
+// features
+app.get("/api/features", (req, res) => featureController.listFeatures(req, res));
 
-app.get("/api/commentators", (req, res) =>
-  commentaryController.listCommentators(req, res)
-);
+// health check
+app.get("/api/health", (_, res) => { res.json({ status: "ok" }); });
 
-app.get("/api/health", (_, res) => {
-  res.json({ status: "ok" });
-});
-
-app.listen(PORT, "0.0.0.0", () => {
-  console.log("🐶 Jamnik Henryk uruchomił system");
-});
+// start server
+app.listen(PORT, "0.0.0.0", () => { console.log("🐶 Jamnik Henryk uruchomił system"); });

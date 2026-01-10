@@ -8,5 +8,5 @@ export class Feature {
     public readonly route: string,
     public readonly enabled: boolean,
     public readonly order: number,
-  ) {}
+  ) { }
 }
