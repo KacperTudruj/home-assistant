@@ -1,5 +1,5 @@
 import { PrismaClient } from "@prisma/client";
-import { CommentatorRepository } from "../domain/Repository/CommentatorRepository";
+import { CommentatorRepository } from "../domain/repository/CommentatorRepository";
 import { Commentator } from "../domain/entity/Commentator";
 
 

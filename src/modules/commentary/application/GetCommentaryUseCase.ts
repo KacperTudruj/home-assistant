@@ -1,6 +1,6 @@
 import { CommentaryPresenter } from "../domain/CommentaryPresenter";
-import { CommentaryRepository as CommentaryRepo } from "../domain/Repository/CommentaryRepository";
-import { CommentatorRepository } from "../domain/Repository/CommentatorRepository";
+import { CommentaryRepository as CommentaryRepo } from "../domain/repository/CommentaryRepository";
+import { CommentatorRepository } from "../domain/repository/CommentatorRepository";
 
 export class GetCommentaryForFeatureUseCase {
   constructor(

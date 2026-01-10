@@ -1,4 +1,4 @@
-import { CommentaryRepository } from "../domain/Repository/CommentaryRepository";
+import { CommentaryRepository } from "../domain/repository/CommentaryRepository";
 import { Commentary } from "../domain/entity/Commentary";
 import { randomUUID } from "crypto";
 

@@ -1,9 +1,9 @@
 import { PrismaClient } from "@prisma/client";
-import { CommentaryRepository } from "../domain/Repository/CommentaryRepository";
+import { CommentaryRepository } from "../domain/repository/CommentaryRepository";
 import { Commentary } from "../domain/entity/Commentary";
-import { Commentator } from "../domain/entity/Commentator";
 
 export class CommentaryRepositoryPrisma implements CommentaryRepository {
+  
   constructor(private readonly prisma: PrismaClient) {}
 
   async find(params: {
