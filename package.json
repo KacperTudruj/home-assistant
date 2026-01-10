@@ -7,9 +7,6 @@
     "start": "node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts",
     "migrate:deploy": "prisma migrate deploy"
   },
-  "prisma": {
-    "seed": "ts-node prisma/seed.ts"
-  },
   "keywords": [],
   "author": "",
   "license": "ISC",

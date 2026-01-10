@@ -51,3 +51,63 @@ model Commentary {
 /// Car MODULE
 /// =======================
 
+enum FuelType {
+  PB95
+  PB98
+  DIESEL
+  LPG
+  ELECTRIC
+}
+
+model Car {
+  id        String   @id @default(uuid())
+  name      String
+  createdAt DateTime @default(now())
+  soldAt    DateTime?
+
+  mileageRecords MileageRecord[]
+  fuelRecords    FuelRecord[]
+  serviceRecords ServiceRecord[]
+}
+
+model MileageRecord {
+  id        String   @id @default(uuid())
+  carId    String
+  mileageKm Int
+  date      DateTime
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+}
+
+model FuelRecord {
+  id        String   @id @default(uuid())
+  carId    String
+
+  fuelType FuelType
+
+  liters             Float
+  totalPrice         Float
+  mileageAtRefuelKm  Int
+  date               DateTime
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId, date])
+  @@index([fuelType, date])
+}
+
+model ServiceRecord {
+  id        String   @id @default(uuid())
+  carId    String
+
+  description String
+  cost        Float
+  mileageKm   Int
+  date        DateTime
+
+  car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+
+  @@index([carId, date])
+}
+
+
