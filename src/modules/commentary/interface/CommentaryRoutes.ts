@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { CommentaryController } from "./CommentaryController";
 
-export function commentaryRoutes(
+export function CommentaryRoutes(
   controller: CommentaryController
 ): Router {
   const router = Router();

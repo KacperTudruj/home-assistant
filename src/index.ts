@@ -13,12 +13,13 @@ import { CreateCommentaryUseCase } from "./modules/commentary/application/Create
 import { CommentaryController } from "./modules/commentary/interface/CommentaryController";
 import { CommentatorRepositoryPrisma } from "@modules/commentary/infrastructure/CommentatorRepositoryPrisma";
 import { ListCommentatorsUseCase } from "@modules/commentary/application/ListCommentatorsUseCase";
-import { Feature } from "@modules/features/domain/entity/Feature";
 import { FeatureController } from "@modules/features/interface/FeatureController";
 import { ListFeaturesUseCase } from "@modules/features/application/ListFeaturesUseCase";
 import { FeaturesRepositoryPrisma } from "@modules/features/infrastructure/FeaturesRepositoryPrisma";
 import { featureRoutes } from "@modules/features/interface/FeatureRoutes";
-import { commentaryRoutes } from "@modules/commentary/interface/CommentaryRoutes";
+import { CommentaryRoutes } from "@modules/commentary/interface/CommentaryRoutes";
+import { CarRoutes } from '@modules/car/interface/CarRoutes';
+import { CarController } from "@modules/car/interface/CarController";
 
 const app = express();
 const PORT = 3000;
@@ -68,12 +69,15 @@ const commentaryController = new CommentaryController(
 const featuresRepo = new FeaturesRepositoryPrisma(prisma);
 const listFeaturesUseCase = new ListFeaturesUseCase(featuresRepo);
 const featureController = new FeatureController(listFeaturesUseCase);
+const carController = new CarController();
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
 // commentary
-app.use("/api",commentaryRoutes(commentaryController));
+app.use("/api", CommentaryRoutes(commentaryController));
 app.use("/api", featureRoutes(featureController));
+app.use("/api", CarRoutes(carController));
+
 
 // health check
 app.get("/api/health", (_, res) => { res.json({ status: "ok" }); });
