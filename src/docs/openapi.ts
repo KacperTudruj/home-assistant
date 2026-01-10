@@ -7,13 +7,17 @@ export const swaggerSpec = swaggerJSDoc({
             title: "Tudruj Home Assistant API",
             version: "1.0.0",
             description: `
-Eksperymentalny backend do zarządzania feature’ami, komentarzami
-i narratorami (Henryk, Bluzgator i spółka 🐶).
+Eksperymentalny backend do zarządzania domem 🐶.
       `,
         },
         servers: [
             {
+                url: "http://192.168.1.46:3000",
+                description: "Home server (LAN)",
+            },
+            {
                 url: "http://localhost:3000",
+                description: "Local dev",
             },
         ],
     },
