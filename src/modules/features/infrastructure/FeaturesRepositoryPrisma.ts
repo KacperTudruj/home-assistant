@@ -13,9 +13,7 @@ export class FeaturesRepositoryPrisma implements FeaturesRepo {
     async listAll(): Promise<Feature[]> {
 
         const apps = await this.prisma.app.findMany({
-            where: {
-                enabled: true,
-            }, orderBy: {
+            orderBy: {
                 order: "asc",
             },
         });
