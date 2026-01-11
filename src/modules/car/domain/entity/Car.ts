@@ -5,6 +5,7 @@ import { ServiceRecord } from './ServiceRecord';
 export class Car {
     readonly id: string;
     readonly name: string;
+    readonly soldAt?: Date;
 
     private mileageRecords: MileageRecord[] = [];
     private fuelRecords: FuelRecord[] = [];
@@ -13,9 +14,11 @@ export class Car {
     constructor(params: {
         id: string;
         name: string;
+        soldAt?: Date;
     }) {
         this.id = params.id;
         this.name = params.name;
+        this.soldAt = params.soldAt;
     }
 
     // ===== MILEAGE =====

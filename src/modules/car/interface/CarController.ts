@@ -3,6 +3,7 @@ import { PrismaClient } from '@prisma/client';
 
 import { Car } from '../domain/entity/Car';
 import { CarRepositoryPrisma } from '../infrastructure/CarRepositoryPrisma';
+import { CarHttpMapper } from './mapper/CarHttpMapper';
 
 const prisma = new PrismaClient();
 const carRepository = new CarRepositoryPrisma(prisma);
@@ -47,10 +48,10 @@ export class CarController {
 
         await carRepository.save(car);
 
-        res.status(201).json({
-            id: car.id,
-            name: car.name,
-        });
+        const response =
+            CarHttpMapper.toResponse(car);
+
+        res.status(201).json(response);
     }
 
     /**
@@ -87,9 +88,8 @@ export class CarController {
             return;
         }
 
-        res.json({
-            id: car.id,
-            name: car.name,
-        });
+        const response =
+            CarHttpMapper.toResponse(car);
+        res.json(response);
     }
 }
