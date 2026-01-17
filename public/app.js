@@ -107,12 +107,13 @@ function renderAppNav() {
   const title = document.body.dataset.appTitle || "";
 
   root.innerHTML = `
-    <nav class="app-nav">
-      <a href="/" class="app-nav-back">← Aplikacje</a>
-      <span class="app-nav-title">${title}</span>
-    </nav>
-  `;
-}
+  <nav class="app-nav">
+    <a href="/" class="app-nav-back">Home</a>
+    <span class="app-nav-separator">/</span>
+    <span class="app-nav-title active">${title}</span>
+  </nav>
+`;
 
+}
 document.addEventListener("DOMContentLoaded", loadApps);
 document.addEventListener("DOMContentLoaded", renderAppNav);
