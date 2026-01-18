@@ -24,12 +24,8 @@ export class CarController {
      *           schema:
      *             $ref: '#/components/schemas/CreateCarRequest'
      *     responses:
-     *       201:
+     *       204:
      *         description: Samochód utworzony
-     *         content:
-     *           application/json:
-     *             schema:
-     *               $ref: '#/components/schemas/CarResponse'
      *       400:
      *         description: Nieprawidłowe dane wejściowe
      */
@@ -48,10 +44,7 @@ export class CarController {
 
         await carRepository.save(car);
 
-        const response =
-            CarHttpMapper.toResponse(car);
-
-        res.status(201).json(response);
+        res.status(204).send();
     }
 
     /**
@@ -74,11 +67,43 @@ export class CarController {
      *         content:
      *           application/json:
      *             schema:
-     *               $ref: '#/components/schemas/CarResponse'
+     *               $ref: '#/components/schemas/GetCarResponse'
      *       404:
      *         description: Samochód nie istnieje
      */
     async getById(req: Request, res: Response): Promise<void> {
+        const { id } = req.params;
+
+        const car = await carRepository.findById(id);
+
+        if (!car) {
+            res.status(404).json({ error: 'Car not found' });
+            return;
+        }
+
+        const response =
+            CarHttpMapper.toResponse(car);
+        res.json(response);
+    }
+
+    /**
+     * @openapi
+     * /api/cars:
+     *   get:
+     *     summary: Lista samochodów
+     *     tags:
+     *       - Car
+     *     responses:
+     *       200:
+     *         description: Lista samochodów
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: '#/components/schemas/ItemGetCarResponseDto'
+     */
+    async listCars(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
 
         const car = await carRepository.findById(id);

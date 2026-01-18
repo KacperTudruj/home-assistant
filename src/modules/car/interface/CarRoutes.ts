@@ -12,5 +12,9 @@ export function CarRoutes(controller: CarController): Router {
     controller.getById(req, res)
   );
 
+  router.get("/cars", (req, res) =>
+    controller.listCars(req, res)
+  );
+
   return router;
 }
