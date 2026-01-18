@@ -62,6 +62,9 @@ enum FuelType {
 model Car {
   id        String   @id @default(uuid())
   name      String
+  year      Int
+  isActive  Boolean  @default(true)
+  
   createdAt DateTime @default(now())
   soldAt    DateTime?
 

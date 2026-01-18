@@ -30,6 +30,7 @@ export class CarController {
      *         description: Nieprawidłowe dane wejściowe
      */
     async create(req: Request, res: Response): Promise<void> {
+        // fix
         const { name } = req.body;
 
         if (!name || typeof name !== 'string') {
@@ -40,6 +41,8 @@ export class CarController {
         const car = new Car({
             id: crypto.randomUUID(),
             name,
+            year: new Date().getFullYear(),
+            isActive: true,
         });
 
         await carRepository.save(car);
@@ -72,6 +75,7 @@ export class CarController {
      *         description: Samochód nie istnieje
      */
     async getById(req: Request, res: Response): Promise<void> {
+        // fix  
         const { id } = req.params;
 
         const car = await carRepository.findById(id);
@@ -104,17 +108,11 @@ export class CarController {
      *                 $ref: '#/components/schemas/ItemGetCarResponseDto'
      */
     async listCars(req: Request, res: Response): Promise<void> {
-        const { id } = req.params;
 
-        const car = await carRepository.findById(id);
-
-        if (!car) {
-            res.status(404).json({ error: 'Car not found' });
-            return;
-        }
+        const cars = await carRepository.list();
 
         const response =
-            CarHttpMapper.toResponse(car);
+            CarHttpMapper.toResponseList(cars);
         res.json(response);
     }
 }
