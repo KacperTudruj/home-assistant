@@ -12,14 +12,14 @@ export class CarRepositoryPrisma implements CarRepository {
     constructor(private readonly prisma: PrismaClient) { }
 
     async findById(id: string): Promise<Car | null> {
-        // const carData = await this.prisma.car.findUnique({
-        //     where: { id },
-        //     include: {
-        //         mileageRecords: true,
-        //         fuelRecords: true,
-        //         serviceRecords: true,
-        //     },
-        // });
+        const carData = await this.prisma.car.findUnique({
+            where: { id },
+            include: {
+                mileageRecords: true,
+                fuelRecords: true,
+                serviceRecords: true,
+            },
+        });
 
         // if (!carData) {
         //     return null;
@@ -90,10 +90,12 @@ export class CarRepositoryPrisma implements CarRepository {
             where: { id: car.id },
             update: {
                 name: car.name,
+                year: car.year,
             },
             create: {
                 id: car.id,
                 name: car.name,
+                year: car.year,
             },
         });
     }

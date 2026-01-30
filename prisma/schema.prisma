@@ -34,6 +34,7 @@ model Commentator {
   enabled Boolean @default(true)
 
   commentaries Commentary[]
+  @@map("CommentaryCommentator")
 }
 
 model Commentary {
@@ -80,6 +81,7 @@ model MileageRecord {
   date      DateTime
 
   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
+  @@map("CarMileageRecord")
 }
 
 model FuelRecord {
@@ -97,6 +99,7 @@ model FuelRecord {
 
   @@index([carId, date])
   @@index([fuelType, date])
+  @@map("CarFuelRecord")
 }
 
 model ServiceRecord {
@@ -111,6 +114,7 @@ model ServiceRecord {
   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
 
   @@index([carId, date])
+  @@map("CarServiceRecord")
 }
 
 
