@@ -32,16 +32,22 @@ export class CarController {
     async create(req: Request, res: Response): Promise<void> {
         // fix
         const { name } = req.body;
+        const { year } = req.body;
 
         if (!name || typeof name !== 'string') {
             res.status(400).json({ error: 'Invalid car name' });
             return;
         }
 
+        if (!year || typeof year !== 'number') {
+            res.status(400).json({ error: 'Invalid car year' });
+            return;
+        }
+
         const car = new Car({
             id: crypto.randomUUID(),
-            name,
-            year: new Date().getFullYear(),
+            name: name,
+            year: new Date(year).getFullYear(),
             isActive: true,
         });
 

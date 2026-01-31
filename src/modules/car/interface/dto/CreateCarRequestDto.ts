@@ -6,10 +6,14 @@
  *       type: object
  *       required:
  *         - name
+ *         - year
  *       properties:
  *         name:
  *           type: string
  *           example: "Cienistogrzywy"
+ *         year:
+ *           type: integer
+ *           example: 2020
  *         soldAt:
  *           type: string
  *           nullable: true
@@ -20,6 +24,7 @@ export class CreateCarRequestDto {
     constructor(
         public readonly id: string,
         public readonly name: string,
+        public readonly year: number,
         public readonly soldAt?: Date,
     ) { }
 }
