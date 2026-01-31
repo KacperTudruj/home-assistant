@@ -30,7 +30,6 @@ export class CarController {
      *         description: Nieprawidłowe dane wejściowe
      */
     async create(req: Request, res: Response): Promise<void> {
-        // fix
         const { name } = req.body;
         const { year } = req.body;
 

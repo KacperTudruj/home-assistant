@@ -20,6 +20,7 @@ import { featureRoutes } from "@modules/features/interface/FeatureRoutes";
 import { CommentaryRoutes } from "@modules/commentary/interface/CommentaryRoutes";
 import { CarRoutes } from '@modules/car/interface/CarRoutes';
 import { CarController } from "@modules/car/interface/CarController";
+import {FuelController} from "@modules/car/interface/FuelController";
 
 const app = express();
 const PORT = 3000;
@@ -70,13 +71,14 @@ const featuresRepo = new FeaturesRepositoryPrisma(prisma);
 const listFeaturesUseCase = new ListFeaturesUseCase(featuresRepo);
 const featureController = new FeatureController(listFeaturesUseCase);
 const carController = new CarController();
+const fuelController = new FuelController();
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
 // commentary
 app.use("/api", CommentaryRoutes(commentaryController));
 app.use("/api", featureRoutes(featureController));
-app.use("/api", CarRoutes(carController));
+app.use("/api", CarRoutes(carController, fuelController));
 
 
 // health check
