@@ -7,28 +7,59 @@
  *       properties:
  *         id:
  *           type: string
- *           example: "7c8a4e5a-9d4c-4c7f-b5d2-123456789abc"
- *         name:
+ *           example: "fuel-001"
+ *         date:
  *           type: string
- *           example: "Cienistogrzywy"
- *         year:
+ *           description: Data tankowania (YYYY-MM-DD)
+ *           example: "2023-12-07"
+ *         fuelType:
+ *           type: string
+ *           description: Rodzaj paliwa
+ *           example: "PB95"
+ *         liters:
+ *           type: number
+ *           format: float
+ *           description: Ilość zatankowanego paliwa
+ *           example: 45.5
+ *         totalPrice:
+ *           type: number
+ *           format: float
+ *           description: Całkowity koszt tankowania
+ *           example: 312.45
+ *         mileageAtRefuelKm:
  *           type: integer
- *           example: 2020
- *         isActive:
- *           type: boolean
- *           example: true
- *         soldAt:
- *           type: string
- *           format: date-time
  *           nullable: true
- *           example: "2023-12-31T23:59:59.000Z"
+ *           description: Kilometry przejechane od poprzedniego tankowania
+ *           example: 520
+ *         averageConsumptionLPer100Km:
+ *           type: number
+ *           format: float
+ *           nullable: true
+ *           description: Średnie spalanie (l / 100 km)
+ *           example: 8.75
+ *         costPer100Km:
+ *           type: number
+ *           format: float
+ *           nullable: true
+ *           description: Koszt przejechania 100 km
+ *           example: 60.29
+ *         daysSincePreviousRefuel:
+ *           type: integer
+ *           nullable: true
+ *           description: Liczba dni od poprzedniego tankowania
+ *           example: 25
  */
+
 export class ItemGetFuelResponse {
     constructor(
         public readonly id: string,
-        public readonly name: string,
-        public readonly year: number,
-        public readonly isActive: boolean,
-        public readonly soldAt?: Date,
-    ) { }
+        public readonly date: string,
+        public readonly fuelType: string,
+        public readonly liters: number,
+        public readonly totalPrice: number,
+        public readonly mileageAtRefuelKm: number | null,
+        public readonly averageConsumptionLPer100Km: number | null,
+        public readonly costPer100Km: number | null,
+        public readonly daysSincePreviousRefuel: number | null,
+    ) {}
 }

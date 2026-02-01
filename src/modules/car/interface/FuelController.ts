@@ -72,7 +72,10 @@ export class FuelController {
             mileageAtRefuelKm: 183450,
             date: "3019-03-01",
             fuelPricePerLiter: 7.4,
-            meter: 5
+            meter: 5,
+            fuelConsumptionPer100Km: 100,
+            costPer100Km: 234.2,
+            daysSincePreviousRefuel: 5
         };
 
         res.status(200).json(response);
@@ -110,7 +113,10 @@ export class FuelController {
                 mileageAtRefuelKm: 182000,
                 date: "3019-02-10T10:00:00Z",
                 meter: 7.2,
-                fuelPricePerLiter: 0
+                fuelPricePerLiter: 0,
+                fuelConsumptionPer100Km: 100,
+                costPer100Km: 234.2,
+                daysSincePreviousRefuel: 5
             },
             {
                 id: "fuel-002",
@@ -120,7 +126,10 @@ export class FuelController {
                 mileageAtRefuelKm: 183450,
                 date: "3019-03-01T12:00:00Z",
                 meter: 7.8,
-                fuelPricePerLiter: 0
+                fuelPricePerLiter: 0,
+                fuelConsumptionPer100Km: 100,
+                costPer100Km: 234.2,
+                daysSincePreviousRefuel: 5
             }
         ];
 
