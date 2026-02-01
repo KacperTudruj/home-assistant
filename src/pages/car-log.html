@@ -9,30 +9,98 @@
 </head>
 
 <body data-page="app" data-app-title="🚗 Car Log">
-  <script> window.FEATURE_KEY = "car-log";</script>
-  <header class="commentary">
-    <div class="commentary-line">
-      <select id="commentator-select" aria-label="Wybierz komentatora"></select>
-      <span class="colon">:</span>
-      <span id="commentary-text">Ładowanie komentarza…</span>
-    </div>
-  </header>
+<script>window.FEATURE_KEY = "car-log";</script>
 
-  <main class="container">
+<header class="commentary">
+  <div class="commentary-line">
+    <select id="commentator-select"></select>
+    <span class="colon">:</span>
+    <span id="commentary-text">Ładowanie komentarza…</span>
+  </div>
+</header>
 
-    <div id="app-nav-root"></div>
-    <h1 class="page-title">🚗 Mój samochód</h1>
-    <div class="card">
-      <h2>Podstawowe informacje</h2>
-      <ul class="info-list"></ul>
-      <ul>
-        <li><strong>Model:</strong> (uzupełnimy)</li>
-        <li><strong>Rok:</strong> (uzupełnimy)</li>
-        <li><strong>Silnik:</strong> (uzupełnimy)</li>
-      </ul>
+<main class="container">
+  <!-- NAWIGACJA -->
+  <div id="app-nav-root"></div>
+
+  <!-- TOOLBAR AUTA -->
+  <section class="car-toolbar">
+    <div class="car-current">
+      🚗 <strong id="car-name">Honda CR-V</strong>
+      <span class="car-year">(2009)</span>
+      <span class="car-status active">AKTYWNE</span>
     </div>
-  </main>
-  <script src="/app.js"></script>
+
+    <div class="car-actions">
+      <button class="btn-secondary" id="change-car-btn">Zmień auto</button>
+      <button class="btn-primary" id="add-fuel-btn">+ Tankowanie</button>
+    </div>
+  </section>
+
+  <!-- KARTA: PODSTAWOWE INFO -->
+  <section class="card">
+    <h2>🚗 Podstawowe informacje</h2>
+    <ul class="info-list">
+      <li><strong>Model:</strong> Honda CR-V</li>
+      <li><strong>Rok:</strong> 2009</li>
+      <li><strong>Silnik:</strong> 2.0 (placeholder 😄)</li>
+    </ul>
+  </section>
+
+  <!-- KARTA: PRZEBIEG -->
+  <section class="card mileage-card">
+    <h2>📊 Przebieg</h2>
+
+    <div class="mileage-grid">
+      <div>
+        <span class="label">Przy zakupie</span>
+        <span class="value">182 000 km</span>
+      </div>
+
+      <div>
+        <span class="label">Aktualny</span>
+        <span class="value">214 350 km</span>
+      </div>
+
+      <div class="owned">
+        <span class="label">Przejechane</span>
+        <span class="value accent">32 350 km</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- KARTA: OSTATNIE TANKOWANIA -->
+  <section class="card">
+    <h2>⛽ Ostatnie tankowania</h2>
+
+    <ul class="fuel-list">
+      <li>
+        <span class="fuel-date">2023-12-07</span>
+        <span class="fuel-type">PB95</span>
+        <span class="fuel-liters">45.5 l</span>
+        <span class="fuel-price">312 zł</span>
+      </li>
+      <li>
+        <span class="fuel-date">2023-11-12</span>
+        <span class="fuel-type">PB95</span>
+        <span class="fuel-liters">42.0 l</span>
+        <span class="fuel-price">296 zł</span>
+      </li>
+      <li>
+        <span class="fuel-date">2023-10-10</span>
+        <span class="fuel-type">PB98</span>
+        <span class="fuel-liters">40.0 l</span>
+        <span class="fuel-price">355 zł</span>
+      </li>
+    </ul>
+
+    <div class="card-footer">
+      <button class="btn-link">Zobacz wszystkie tankowania →</button>
+    </div>
+  </section>
+
+</main>
+
+<script src="/app.js"></script>
 </body>
-
 </html>

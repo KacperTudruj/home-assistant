@@ -13,9 +13,21 @@ body {
   height: 100%;
 }
 
+:root {
+  --content-width: 700px;
+
+  --accent: #38bdf8;
+  --accent-soft: #7dd3fc;
+  --muted: #94a3b8;
+
+  --bg-main-top: #020617;
+  --bg-main-bottom: #0f172a;
+  --bg-card: #020617;
+}
+
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: linear-gradient(180deg, #020617, #0f172a);
+  background: linear-gradient(180deg, var(--bg-main-top), var(--bg-main-bottom));
   color: #e5e7eb;
   line-height: 1.5;
 }
@@ -24,46 +36,39 @@ body {
    HENRYK HEADER 🐶
 ========================= */
 
+header.commentary {
+  padding: 8px 12px;
+}
+
 .commentary-line {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
   font-weight: 600;
+  font-size: 14px;
 }
 
-/* SELECT WYGLĄDA JAK TEKST */
 #commentator-select {
   appearance: none;
   background: transparent;
   border: none;
-  color: #38bdf8;
+  color: var(--accent);
   font-weight: 700;
   cursor: pointer;
-  padding: 0;
-  margin: 0;
 }
 
-/* usuń focus box */
 #commentator-select:focus {
   outline: none;
 }
 
-/* usuń strzałkę w Firefox */
-#commentator-select::-ms-expand {
-  display: none;
-}
-
 .colon {
-  color: #94a3b8;
+  color: var(--muted);
 }
 
 /* =========================
    LAYOUT
 ========================= */
-:root {
-  --content-width: 700px;
-}
 
 .container {
   max-width: 1100px;
@@ -81,18 +86,68 @@ h1 {
   margin-bottom: 10px;
 }
 
-.accent {
-  color: #38bdf8;
+.page-title {
+  margin: 20px 0 30px;
+  font-size: 36px;
 }
 
 .subtitle {
-  color: #94a3b8;
+  color: var(--muted);
   margin-bottom: 30px;
   font-size: 16px;
 }
 
+.accent {
+  color: var(--accent);
+}
+
 /* =========================
-   PANEL APLIKACJI
+   APP NAV
+========================= */
+
+.app-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 18px;
+  padding-bottom: 6px;
+  font-size: 14px;
+  opacity: 0.85;
+  border-bottom: 1px solid rgba(255,255,255,0.06);
+}
+
+.app-nav-back {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+.app-nav-back:hover {
+  text-decoration: underline;
+}
+
+.app-nav-separator {
+  opacity: 0.4;
+}
+
+.app-nav-title.active {
+  font-weight: 600;
+  color: #e5e7eb;
+  position: relative;
+}
+
+.app-nav-title.active::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: -6px;
+  width: 100%;
+  height: 2px;
+  background: linear-gradient(90deg, var(--accent), transparent);
+  opacity: 0.6;
+}
+
+/* =========================
+   HOME – APP TILES
 ========================= */
 
 .apps-panel {
@@ -108,62 +163,9 @@ h1 {
   gap: 22px;
 
   box-shadow:
-    0 30px 60px rgba(0, 0, 0, .55),
-    inset 0 1px 0 rgba(255, 255, 255, .02);
+          0 30px 60px rgba(0, 0, 0, .55),
+          inset 0 1px 0 rgba(255, 255, 255, .02);
 }
-
-.app-nav {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-
-  margin-bottom: 1.5rem;
-  padding-bottom: 0.5rem;
-
-  font-size: 0.9rem;
-  opacity: 0.85;
-  backdrop-filter: blur(6px);
-  border-bottom: 1px solid rgba(255,255,255,0.06);
-}
-
-.app-nav-back {
-  color: var(--accent-color, #6cbcff);
-  text-decoration: none;
-  display: flex;
-  align-items: center;
-  gap: 0.25rem;
-  transition: color .2s ease, transform .2s ease;
-}
-
-.app-nav-back:hover {
-  text-decoration: underline;
-  opacity: 1;
-}
-
-.app-nav-separator {
-  opacity: 0.4;
-}
-
-.app-nav-title.active {
-  color: #e5e7eb;
-  font-weight: 600;
-  position: relative;
-}
-
-.app-nav-title.active::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  bottom: -6px;
-  width: 100%;
-  height: 2px;
-  background: linear-gradient(90deg, #38bdf8, transparent);
-  opacity: 0.6;
-}
-
-/* =========================
-   KAFELKI APLIKACJI
-========================= */
 
 .app-tile {
   aspect-ratio: 1 / 1;
@@ -182,21 +184,22 @@ h1 {
   border: 1px solid #1e293b;
 
   transition:
-    transform .25s ease,
-    box-shadow .25s ease,
-    border-color .25s ease;
+          transform .25s ease,
+          box-shadow .25s ease,
+          color .25s ease;
 }
 
 .app-tile:hover {
   transform: translateY(-6px) scale(1.02);
   box-shadow: 0 18px 40px rgba(0, 0, 0, .6);
-  color: #7dd3fc;
-  transform: translateX(-2px);
+  color: var(--accent-soft);
 }
 
-/* =========================
-   ZAWARTOŚĆ KAFELKA
-========================= */
+.app-tile.disabled {
+  opacity: 0.45;
+  pointer-events: none;
+  filter: grayscale(0.4);
+}
 
 .app-tile .icon {
   font-size: 40px;
@@ -211,84 +214,103 @@ h1 {
 
 .app-tile .desc {
   font-size: 13px;
-  color: #94a3b8;
+  color: var(--muted);
   text-align: center;
 }
 
 /* =========================
-   KOLOR APLIKACJI
+   CAR LOG – TOOLBAR
 ========================= */
 
-.app-tile.car-log {
-  border-color: #38bdf8;
-  box-shadow: inset 0 0 0 1px rgba(56, 189, 248, .25);
+.car-toolbar {
+  max-width: var(--content-width);
+  margin: 0 auto 24px;
+
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
 }
 
-.app-tile.car-log:hover {
-  border-color: #7dd3fc;
+.car-current {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 600;
+}
+
+.car-year {
+  color: var(--muted);
+}
+
+.car-status {
+  font-size: 12px;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: rgba(34,197,94,.15);
+  color: #4ade80;
+}
+
+.car-actions {
+  display: flex;
+  gap: 8px;
 }
 
 /* =========================
-   NIEAKTYWNE
+   BUTTONS
 ========================= */
 
-.app-tile.disabled {
-  opacity: 0.45;
-  pointer-events: none;
-  filter: grayscale(0.4);
+.btn-primary {
+  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+  color: #020617;
+  border: none;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* =========================
-   RESPONSYWNOŚĆ
-========================= */
-
-@media (max-width: 600px) {
-  h1 {
-    font-size: 32px;
-  }
-
-  .apps-panel {
-    padding: 20px;
-  }
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #e5e7eb;
+  padding: 8px 14px;
+  border-radius: 10px;
+  cursor: pointer;
 }
 
-/* =========================
-   CAR LOG – STRONA SAMOCHODU
-========================= */
-
-.page-title {
-  margin: 20px 0 30px;
-  font-size: 36px;
-}
-
-.back-link {
-  display: inline-block;
-  margin-bottom: 16px;
-  color: #38bdf8;
-  text-decoration: none;
+.btn-link {
+  background: none;
+  border: none;
+  color: var(--accent);
   font-size: 14px;
+  cursor: pointer;
 }
 
-.back-link:hover {
+.btn-link:hover {
   text-decoration: underline;
 }
 
-/* KARTY */
+/* =========================
+   CARDS
+========================= */
+
 .card {
   max-width: var(--content-width);
   margin: 0 auto 24px;
 
-  background: linear-gradient(180deg, #020617, #020617);
+  background: linear-gradient(180deg, var(--bg-card), var(--bg-card));
   border-radius: 20px;
   padding: 24px;
 
   box-shadow:
-    0 20px 40px rgba(0,0,0,.45),
-    inset 0 1px 0 rgba(255,255,255,.02);
+          0 20px 40px rgba(0,0,0,.45),
+          inset 0 1px 0 rgba(255,255,255,.02);
 }
 
+/* =========================
+   INFO LIST
+========================= */
 
-/* LISTA INFO */
 .info-list {
   list-style: none;
   margin-top: 16px;
@@ -296,14 +318,95 @@ h1 {
 
 .info-list li {
   margin-bottom: 10px;
-  color: #e5e7eb;
 }
 
 .info-list strong {
-  color: #38bdf8;
+  color: var(--accent);
 }
 
-/* SPECJALNA KARTA HENRYKA */
-.henryk-card {
-  border-left: 4px solid #fbbf24;
+/* =========================
+   MILEAGE
+========================= */
+
+.mileage-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.mileage-grid .label {
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.mileage-grid .value {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+/* =========================
+   FUEL LIST
+========================= */
+
+.fuel-list {
+  list-style: none;
+  margin-top: 16px;
+}
+
+.fuel-list li {
+  display: grid;
+  grid-template-columns: 90px 60px 1fr auto;
+  gap: 10px;
+  font-size: 14px;
+  padding: 6px 0;
+  border-bottom: 1px solid rgba(255,255,255,.06);
+}
+
+.fuel-date {
+  color: var(--muted);
+}
+
+.fuel-type {
+  font-weight: 600;
+}
+
+.fuel-price {
+  font-weight: 600;
+}
+
+/* =========================
+   MOBILE
+========================= */
+
+@media (max-width: 600px) {
+  h1 {
+    font-size: 32px;
+  }
+
+  .page-title {
+    font-size: 28px;
+  }
+
+  .car-toolbar {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .car-actions {
+    width: 100%;
+  }
+
+  .car-actions button {
+    flex: 1;
+  }
+
+  .mileage-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .fuel-list li {
+    grid-template-columns: 1fr 1fr;
+    row-gap: 4px;
+  }
 }
