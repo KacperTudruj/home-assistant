@@ -63,19 +63,17 @@ export class FuelController {
      *         description: Samochód nie istnieje
      */
     async getById(req: Request, res: Response): Promise<void> {
-        // todo implement
         const response: GetFuelResponse = {
             id: "fuel-001",
-            fuelType: "PB95",
+            date: "2024-01-15",
             liters: 42.0,
+            meter: 183450,
             totalPrice: 315.00,
-            mileageAtRefuelKm: 183450,
-            date: "3019-03-01",
-            fuelPricePerLiter: 7.4,
-            meter: 5,
-            fuelConsumptionPer100Km: 100,
-            costPer100Km: 234.2,
-            daysSincePreviousRefuel: 5
+            fuelPricePerLiter: 7.50,
+            mileageAtRefuelKm: 520,
+            fuelConsumptionPer100Km: 8.08,
+            costPer100Km: 60.58,
+            daysSincePreviousRefuel: 14
         };
 
         res.status(200).json(response);
@@ -106,30 +104,28 @@ export class FuelController {
     async listFuels(req: Request, res: Response): Promise<void> {
         const response: GetFuelResponse[] = [
             {
-                id: "fuel-001",
-                fuelType: "PB95",
-                liters: 40.0,
-                totalPrice: 296.00,
-                mileageAtRefuelKm: 182000,
-                date: "3019-02-10T10:00:00Z",
-                meter: 7.2,
-                fuelPricePerLiter: 0,
-                fuelConsumptionPer100Km: 100,
-                costPer100Km: 234.2,
-                daysSincePreviousRefuel: 5
+                id: "fuel-002",
+                date: "2024-02-01",
+                liters: 45.5,
+                meter: 184000,
+                totalPrice: 332.15,
+                fuelPricePerLiter: 7.30,
+                mileageAtRefuelKm: 550,
+                fuelConsumptionPer100Km: 8.27,
+                costPer100Km: 60.39,
+                daysSincePreviousRefuel: 17
             },
             {
-                id: "fuel-002",
-                fuelType: "PB98",
-                liters: 45.5,
-                totalPrice: 355.00,
-                mileageAtRefuelKm: 183450,
-                date: "3019-03-01T12:00:00Z",
-                meter: 7.8,
-                fuelPricePerLiter: 0,
-                fuelConsumptionPer100Km: 100,
-                costPer100Km: 234.2,
-                daysSincePreviousRefuel: 5
+                id: "fuel-001",
+                date: "2024-01-15",
+                liters: 42.0,
+                meter: 183450,
+                totalPrice: 315.00,
+                fuelPricePerLiter: 7.50,
+                mileageAtRefuelKm: 520,
+                fuelConsumptionPer100Km: 8.08,
+                costPer100Km: 60.58,
+                daysSincePreviousRefuel: 14
             }
         ];
 

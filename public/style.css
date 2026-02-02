@@ -355,24 +355,48 @@ h1 {
 }
 
 .fuel-list li {
-  display: grid;
-  grid-template-columns: 90px 60px 1fr auto;
-  gap: 10px;
-  font-size: 14px;
-  padding: 6px 0;
+  padding: 12px 0;
   border-bottom: 1px solid rgba(255,255,255,.06);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fuel-main-info {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.fuel-details {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 13px;
+  color: var(--muted);
+}
+
+.fuel-stats {
+  opacity: 0.9;
+}
+
+.fuel-meter {
+  font-family: monospace;
 }
 
 .fuel-date {
   color: var(--muted);
+  font-size: 13px;
 }
 
-.fuel-type {
+.fuel-liters {
   font-weight: 600;
+  color: #e5e7eb;
 }
 
 .fuel-price {
-  font-weight: 600;
+  font-weight: 700;
+  color: var(--accent);
 }
 
 /* =========================
@@ -403,10 +427,5 @@ h1 {
 
   .mileage-grid {
     grid-template-columns: 1fr;
-  }
-
-  .fuel-list li {
-    grid-template-columns: 1fr 1fr;
-    row-gap: 4px;
   }
 }

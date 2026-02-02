@@ -20,6 +20,7 @@
 </header>
 
 <main class="container">
+
   <!-- NAWIGACJA -->
   <div id="app-nav-root"></div>
 
@@ -73,25 +74,8 @@
   <section class="card">
     <h2>⛽ Ostatnie tankowania</h2>
 
-    <ul class="fuel-list">
-      <li>
-        <span class="fuel-date">2023-12-07</span>
-        <span class="fuel-type">PB95</span>
-        <span class="fuel-liters">45.5 l</span>
-        <span class="fuel-price">312 zł</span>
-      </li>
-      <li>
-        <span class="fuel-date">2023-11-12</span>
-        <span class="fuel-type">PB95</span>
-        <span class="fuel-liters">42.0 l</span>
-        <span class="fuel-price">296 zł</span>
-      </li>
-      <li>
-        <span class="fuel-date">2023-10-10</span>
-        <span class="fuel-type">PB98</span>
-        <span class="fuel-liters">40.0 l</span>
-        <span class="fuel-price">355 zł</span>
-      </li>
+    <ul class="fuel-list" id="fuel-list-container">
+      <li class="loading">Ładowanie tankowań...</li>
     </ul>
 
     <div class="card-footer">
@@ -103,4 +87,5 @@
 
 <script src="/app.js"></script>
 </body>
+
 </html>

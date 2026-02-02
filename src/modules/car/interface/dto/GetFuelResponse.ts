@@ -53,10 +53,6 @@
  *           nullable: true
  *           description: Liczba dni od poprzedniego tankowania
  *           example: 12
- *         fuelType:
- *           type: string
- *           description: Rodzaj paliwa
- *           example: "PB95"
  */
 export class GetFuelResponse {
     constructor(
@@ -70,6 +66,5 @@ export class GetFuelResponse {
         public readonly fuelConsumptionPer100Km: number | null,
         public readonly costPer100Km: number | null,
         public readonly daysSincePreviousRefuel: number | null,
-        public readonly fuelType: string,
     ) {}
 }
