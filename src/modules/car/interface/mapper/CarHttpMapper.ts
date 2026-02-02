@@ -6,8 +6,8 @@ export class CarHttpMapper {
         return new ItemGetCarResponseDto(
             car.id,
             car.name,
-            car.soldAt ? new Date().getFullYear() : new Date().getFullYear(), // Example logic for year and isActive
-            true,
+            car.year,
+            car.isActive,
             car.soldAt,
         );
     }

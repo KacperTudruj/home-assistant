@@ -80,7 +80,6 @@ export class CarController {
      *         description: Samochód nie istnieje
      */
     async getById(req: Request, res: Response): Promise<void> {
-        // fix  
         const { id } = req.params;
 
         const car = await carRepository.findById(id);

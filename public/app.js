@@ -2,7 +2,130 @@ const commentaryEl = document.getElementById("commentary-text");
 const commentatorSelect = document.getElementById("commentator-select");
 
 const FEATURE_KEY = window.FEATURE_KEY || "app";
-const DEFAULT_CAR_ID = "car_1"; // na razie mock
+
+// ====== CAR LOG LOGIC ======
+const carOverlay = document.getElementById("car-selection-overlay");
+const carListEl = document.getElementById("car-selection-list");
+const changeCarBtn = document.getElementById("change-car-btn");
+
+if (carOverlay && carListEl) {
+  initCarLog();
+}
+
+async function initCarLog() {
+  const savedCarId = localStorage.getItem("selectedCarId");
+  if (savedCarId) {
+    loadCarData(savedCarId);
+  } else {
+    showCarSelection();
+  }
+
+  if (changeCarBtn) {
+    changeCarBtn.addEventListener("click", showCarSelection);
+  }
+}
+
+async function showCarSelection() {
+  carOverlay.classList.remove("hidden");
+  carListEl.innerHTML = "<li>Ładowanie samochodów...</li>";
+
+  try {
+    const res = await fetch("/api/cars");
+    const cars = await res.json();
+    carListEl.innerHTML = "";
+
+    cars.forEach(car => {
+      const li = document.createElement("li");
+      li.className = "car-selection-item";
+      li.innerHTML = `
+        <span class="car-name">${car.name}</span>
+        <span class="car-year">${car.year}</span>
+      `;
+      li.onclick = () => selectCar(car.id);
+      carListEl.appendChild(li);
+    });
+  } catch (err) {
+    console.error("Błąd ładowania listy aut", err);
+    carListEl.innerHTML = "<li>Błąd ładowania listy</li>";
+  }
+}
+
+function selectCar(carId) {
+  localStorage.setItem("selectedCarId", carId);
+  carOverlay.classList.add("hidden");
+  loadCarData(carId);
+}
+
+async function loadCarData(carId) {
+  try {
+    const res = await fetch(`/api/cars/${carId}`);
+    if (!res.ok) throw new Error("Car not found");
+    const car = await res.json();
+
+    // Update UI
+    document.getElementById("car-name-display").textContent = car.name;
+    document.getElementById("car-year-display").textContent = `(${car.year})`;
+    document.getElementById("info-model").textContent = car.name;
+    document.getElementById("info-year").textContent = car.year;
+
+    if (car.mileage) {
+      document.getElementById("mileage-purchase").textContent = `${car.mileage.atPurchase.toLocaleString()} km`;
+      document.getElementById("mileage-current").textContent = `${car.mileage.current.toLocaleString()} km`;
+      document.getElementById("mileage-owned").textContent = `${car.mileage.ownedDistance.toLocaleString()} km`;
+    }
+
+    // Load fuel history for this car
+    loadFuelHistory(carId);
+
+  } catch (err) {
+    console.error("Błąd ładowania danych auta", err);
+    localStorage.removeItem("selectedCarId");
+    showCarSelection();
+  }
+}
+
+async function loadFuelHistory(carId) {
+  const container = document.getElementById("fuel-list-container");
+  if (!container) return;
+
+  container.innerHTML = '<li class="loading">Ładowanie tankowań...</li>';
+
+  try {
+    const res = await fetch(`/api/cars/${carId}/fuels`);
+    if (!res.ok) throw new Error("Failed to fetch fuel history");
+    const fuels = await res.json();
+
+    container.innerHTML = "";
+
+    if (fuels.length === 0) {
+      container.innerHTML = "<li>Brak danych o tankowaniach</li>";
+      return;
+    }
+
+    fuels.forEach(fuel => {
+      const li = document.createElement("li");
+      li.innerHTML = `
+        <div class="fuel-main-info">
+          <span class="fuel-date">${fuel.date}</span>
+          <span class="fuel-liters">⛽ ${fuel.liters} l</span>
+          <span class="fuel-price">${fuel.totalPrice} zł</span>
+        </div>
+        <div class="fuel-details">
+          <span class="fuel-stats">
+             ${fuel.fuelConsumptionPer100Km} l/100km · 
+             ${fuel.costPer100Km} zł/100km · 
+             ${fuel.mileageAtRefuelKm} km od ost.
+          </span>
+          <span class="fuel-meter">📍 ${fuel.meter} km</span>
+        </div>
+      `;
+      container.appendChild(li);
+    });
+  } catch (err) {
+    console.error(err);
+    container.innerHTML = "<li>Błąd ładowania danych</li>";
+  }
+}
 
 if (commentaryEl && commentatorSelect) {
   // ====== LOAD COMMENTATORS ======
@@ -117,48 +240,6 @@ function renderAppNav() {
 
 }
 
-async function loadFuelHistory() {
-  const container = document.getElementById("fuel-list-container");
-  if (!container) return;
-
-  try {
-    const carId = DEFAULT_CAR_ID;
-    const res = await fetch(`/api/cars/${carId}/fuels`);
-    if (!res.ok) throw new Error("Failed to fetch fuel history");
-    const fuels = await res.json();
-
-    container.innerHTML = "";
-
-    if (fuels.length === 0) {
-      container.innerHTML = "<li>Brak danych o tankowaniach</li>";
-      return;
-    }
-
-    fuels.forEach(fuel => {
-      const li = document.createElement("li");
-      li.innerHTML = `
-        <div class="fuel-main-info">
-          <span class="fuel-date">${fuel.date}</span>
-          <span class="fuel-liters">⛽ ${fuel.liters} l</span>
-          <span class="fuel-price">${fuel.totalPrice} zł</span>
-        </div>
-        <div class="fuel-details">
-          <span class="fuel-stats">
-             ${fuel.fuelConsumptionPer100Km} l/100km · 
-             ${fuel.costPer100Km} zł/100km · 
-             ${fuel.mileageAtRefuelKm} km od ost.
-          </span>
-          <span class="fuel-meter">📍 ${fuel.meter} km</span>
-        </div>
-      `;
-      container.appendChild(li);
-    });
-  } catch (err) {
-    console.error(err);
-    container.innerHTML = "<li>Błąd ładowania danych</li>";
-  }
-}
 
 document.addEventListener("DOMContentLoaded", loadApps);
 document.addEventListener("DOMContentLoaded", renderAppNav);
-document.addEventListener("DOMContentLoaded", loadFuelHistory);

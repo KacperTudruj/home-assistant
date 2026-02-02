@@ -24,11 +24,21 @@
   <!-- NAWIGACJA -->
   <div id="app-nav-root"></div>
 
+  <!-- MODAL WYBORU AUTA -->
+  <div id="car-selection-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>Wybierz samochód</h2>
+      <ul id="car-selection-list" class="car-selection-list">
+        <!-- Lista aut wpadnie tu dynamicznie -->
+      </ul>
+    </div>
+  </div>
+
   <!-- TOOLBAR AUTA -->
   <section class="car-toolbar">
     <div class="car-current">
-      🚗 <strong id="car-name">Honda CR-V</strong>
-      <span class="car-year">(2009)</span>
+      🚗 <strong id="car-name-display">---</strong>
+      <span class="car-year" id="car-year-display">---</span>
       <span class="car-status active">AKTYWNE</span>
     </div>
 
@@ -42,8 +52,8 @@
   <section class="card">
     <h2>🚗 Podstawowe informacje</h2>
     <ul class="info-list">
-      <li><strong>Model:</strong> Honda CR-V</li>
-      <li><strong>Rok:</strong> 2009</li>
+      <li><strong>Model:</strong> <span id="info-model">---</span></li>
+      <li><strong>Rok:</strong> <span id="info-year">---</span></li>
       <li><strong>Silnik:</strong> 2.0 (placeholder 😄)</li>
     </ul>
   </section>
@@ -55,17 +65,17 @@
     <div class="mileage-grid">
       <div>
         <span class="label">Przy zakupie</span>
-        <span class="value">182 000 km</span>
+        <span class="value" id="mileage-purchase">--- km</span>
       </div>
 
       <div>
         <span class="label">Aktualny</span>
-        <span class="value">214 350 km</span>
+        <span class="value" id="mileage-current">--- km</span>
       </div>
 
       <div class="owned">
         <span class="label">Przejechane</span>
-        <span class="value accent">32 350 km</span>
+        <span class="value accent" id="mileage-owned">--- km</span>
       </div>
     </div>
   </section>

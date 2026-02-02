@@ -21,55 +21,54 @@ export class CarRepositoryPrisma implements CarRepository {
             },
         });
 
-        // if (!carData) {
-        //     return null;
-        // }
+        if (!carData) {
+            return null;
+        }
 
-        // const car = new Car({
-        //     id: carData.id,
-        //     name: carData.name,
-        //     year: carData.year,
-        //     isActive: carData.isActive,
-        //     soldAt: carData.soldAt,
-        // });
+        const car = new Car({
+            id: carData.id,
+            name: carData.name,
+            year: carData.year,
+            isActive: carData.isActive,
+            soldAt: carData.soldAt || undefined,
+        });
 
-        // // ===== MILEAGE =====
-        // for (const record of carData.mileageRecords) {
-        //     car.addMileageRecord(
-        //         new MileageRecord({
-        //             mileageKm: record.mileageKm,
-        //             date: record.date,
-        //         }),
-        //     );
-        // }
+        // ===== MILEAGE =====
+        for (const record of carData.mileageRecords) {
+            car.addMileageRecord(
+                new MileageRecord({
+                    mileageKm: record.mileageKm,
+                    date: record.date,
+                }),
+            );
+        }
 
-        // // ===== FUEL =====
-        // for (const record of carData.fuelRecords) {
-        //     car.addFuelRecord(
-        //         new FuelRecord({
-        //             fuelType: record.fuelType as FuelType,
-        //             liters: record.liters,
-        //             totalPrice: record.totalPrice,
-        //             mileageAtRefuelKm: record.mileageAtRefuelKm,
-        //             date: record.date,
-        //         }),
-        //     );
-        // }
+        // ===== FUEL =====
+        for (const record of carData.fuelRecords) {
+            car.addFuelRecord(
+                new FuelRecord({
+                    fuelType: record.fuelType as FuelType,
+                    liters: record.liters,
+                    totalPrice: record.totalPrice,
+                    mileageAtRefuelKm: record.mileageAtRefuelKm,
+                    date: record.date,
+                }),
+            );
+        }
 
-        // // ===== SERVICE =====
-        // for (const record of carData.serviceRecords) {
-        //     car.addServiceRecord(
-        //         new ServiceRecord({
-        //             description: record.description,
-        //             cost: record.cost,
-        //             mileageKm: record.mileageKm,
-        //             date: record.date,
-        //         }),
-        //     );
-        // }
+        // ===== SERVICE =====
+        for (const record of carData.serviceRecords) {
+            car.addServiceRecord(
+                new ServiceRecord({
+                    description: record.description,
+                    cost: record.cost,
+                    mileageKm: record.mileageKm,
+                    date: record.date,
+                }),
+            );
+        }
 
-        // return car;
-        return null; // tymczasowo
+        return car;
     }
 
     async list(): Promise<Car[]> {

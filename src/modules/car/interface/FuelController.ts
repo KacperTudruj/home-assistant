@@ -102,34 +102,60 @@ export class FuelController {
      *                 $ref: '#/components/schemas/ItemGetFuelResponse'
      */
     async listFuels(req: Request, res: Response): Promise<void> {
-        const response: GetFuelResponse[] = [
-            {
-                id: "fuel-002",
-                date: "2024-02-01",
-                liters: 45.5,
-                meter: 184000,
-                totalPrice: 332.15,
-                fuelPricePerLiter: 7.30,
-                mileageAtRefuelKm: 550,
-                fuelConsumptionPer100Km: 8.27,
-                costPer100Km: 60.39,
-                daysSincePreviousRefuel: 17
-            },
-            {
-                id: "fuel-001",
-                date: "2024-01-15",
-                liters: 42.0,
-                meter: 183450,
-                totalPrice: 315.00,
-                fuelPricePerLiter: 7.50,
-                mileageAtRefuelKm: 520,
-                fuelConsumptionPer100Km: 8.08,
-                costPer100Km: 60.58,
-                daysSincePreviousRefuel: 14
-            }
-        ];
+        const { carId } = req.params;
 
-        res.status(200).json(response);
+        // Mocki dopasowane do konkretnych aut (Honda i Audi)
+        if (carId === "a729f102-77a6-4f14-8a21-283c827b2bac") {
+            const response: GetFuelResponse[] = [
+                {
+                    id: "fuel-h-002",
+                    date: "2024-02-01",
+                    liters: 45.5,
+                    meter: 214350,
+                    totalPrice: 332.15,
+                    fuelPricePerLiter: 7.30,
+                    mileageAtRefuelKm: 550,
+                    fuelConsumptionPer100Km: 8.27,
+                    costPer100Km: 60.39,
+                    daysSincePreviousRefuel: 17
+                },
+                {
+                    id: "fuel-h-001",
+                    date: "2024-01-15",
+                    liters: 42.0,
+                    meter: 213800,
+                    totalPrice: 315.00,
+                    fuelPricePerLiter: 7.50,
+                    mileageAtRefuelKm: 520,
+                    fuelConsumptionPer100Km: 8.08,
+                    costPer100Km: 60.58,
+                    daysSincePreviousRefuel: 14
+                }
+            ];
+            res.status(200).json(response);
+            return;
+        }
+
+        if (carId === "0506413c-c52c-4a4c-b4d3-c619e1c8a5db") {
+            const response: GetFuelResponse[] = [
+                {
+                    id: "fuel-a-001",
+                    date: "2024-02-05",
+                    liters: 55.0,
+                    meter: 125100,
+                    totalPrice: 401.50,
+                    fuelPricePerLiter: 7.30,
+                    mileageAtRefuelKm: 480,
+                    fuelConsumptionPer100Km: 11.45,
+                    costPer100Km: 83.65,
+                    daysSincePreviousRefuel: 20
+                }
+            ];
+            res.status(200).json(response);
+            return;
+        }
+
+        res.status(200).json([]);
     }
 
 }
