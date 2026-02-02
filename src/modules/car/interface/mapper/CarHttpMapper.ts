@@ -11,7 +11,9 @@ export class CarHttpMapper {
         const mileageSummary = new MileageSummaryDto();
         mileageSummary.atPurchase = purchaseMileage;
         mileageSummary.current = latestMileage;
-        mileageSummary.ownedDistance = latestMileage - purchaseMileage;
+        // Calculation moved to frontend for now to avoid inconsistencies, 
+        // but we can also set it here if we want it to be part of the API contract.
+        mileageSummary.ownedDistance = latestMileage > 0 ? (latestMileage - purchaseMileage) : 0;
 
         return new GetCarResponse(
             car.id,

@@ -7,6 +7,9 @@ const FEATURE_KEY = window.FEATURE_KEY || "app";
 const carOverlay = document.getElementById("car-selection-overlay");
 const carListEl = document.getElementById("car-selection-list");
 const changeCarBtn = document.getElementById("change-car-btn");
+const addFuelBtn = document.getElementById("add-fuel-btn");
+const addFuelOverlay = document.getElementById("add-fuel-overlay");
+const addFuelForm = document.getElementById("add-fuel-form");
 
 if (carOverlay && carListEl) {
   initCarLog();
@@ -22,6 +25,14 @@ async function initCarLog() {
 
   if (changeCarBtn) {
     changeCarBtn.addEventListener("click", showCarSelection);
+  }
+  if (addFuelBtn) {
+    addFuelBtn.addEventListener("click", openAddFuelModal);
+  }
+  if (addFuelForm) {
+    addFuelForm.addEventListener("submit", submitAddFuelForm);
+    const cancelBtn = document.getElementById("cancel-add-fuel");
+    if (cancelBtn) cancelBtn.addEventListener("click", closeAddFuelModal);
   }
 }
 
@@ -71,9 +82,11 @@ async function loadCarData(carId) {
     document.getElementById("info-vin").textContent = car.vin || "Brak danych";
 
     if (car.mileage) {
-      document.getElementById("mileage-purchase").textContent = `${car.mileage.atPurchase.toLocaleString()} km`;
-      document.getElementById("mileage-current").textContent = `${car.mileage.current.toLocaleString()} km`;
-      document.getElementById("mileage-owned").textContent = `${car.mileage.ownedDistance.toLocaleString()} km`;
+      document.getElementById("mileage-purchase").textContent = `${(car.mileage.atPurchase || 0).toLocaleString()} km`;
+      document.getElementById("mileage-current").textContent = `${(car.mileage.current || 0).toLocaleString()} km`;
+      
+      const owned = car.mileage.ownedDistance > 0 ? car.mileage.ownedDistance : 0;
+      document.getElementById("mileage-owned").textContent = `${owned.toLocaleString()} km`;
     }
 
     // Load fuel history for this car
@@ -83,6 +96,49 @@ async function loadCarData(carId) {
     console.error("Błąd ładowania danych auta", err);
     localStorage.removeItem("selectedCarId");
     showCarSelection();
+  }
+}
+
+function openAddFuelModal() {
+  if (!addFuelOverlay) return;
+  addFuelOverlay.classList.remove("hidden");
+}
+
+function closeAddFuelModal() {
+  if (!addFuelOverlay) return;
+  addFuelOverlay.classList.add("hidden");
+}
+
+async function submitAddFuelForm(e) {
+  e.preventDefault();
+  const carId = localStorage.getItem("selectedCarId");
+  if (!carId) return;
+
+  const date = /** @type {HTMLInputElement} */(document.getElementById("fuel-date")).value;
+  const liters = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-liters")).value);
+  const meter = parseInt(/** @type {HTMLInputElement} */(document.getElementById("fuel-meter")).value, 10);
+  const totalPrice = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-total-price")).value);
+  const fuelPricePerLiter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-price-per-liter")).value);
+
+  try {
+    const res = await fetch(`/api/cars/${carId}/fuel`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        date,
+        liters,
+        meter,
+        totalPrice,
+        fuelPricePerLiter,
+        fuelType: "PB95"
+      })
+    });
+    if (!res.ok) throw new Error("Nie udało się dodać tankowania");
+    closeAddFuelModal();
+    await loadFuelHistory(carId);
+  } catch (err) {
+    console.error(err);
+    alert("Błąd podczas dodawania tankowania");
   }
 }
 
@@ -106,18 +162,19 @@ async function loadFuelHistory(carId) {
 
     fuels.forEach(fuel => {
       const li = document.createElement("li");
+      
+      const stats = fuel.mileageAtRefuelKm 
+        ? `${fuel.fuelConsumptionPer100Km || '?.??'} l/100km · ${fuel.costPer100Km || '?.??'} zł/100km · ${fuel.mileageAtRefuelKm} km od ost.`
+        : 'Pierwsze tankowanie w systemie';
+
       li.innerHTML = `
         <div class="fuel-main-info">
           <span class="fuel-date">${fuel.date}</span>
           <span class="fuel-liters">⛽ ${fuel.liters} l</span>
-          <span class="fuel-price">${fuel.totalPrice} zł</span>
+          <span class="fuel-price">${fuel.totalPrice.toFixed(2)} zł</span>
         </div>
         <div class="fuel-details">
-          <span class="fuel-stats">
-             ${fuel.fuelConsumptionPer100Km} l/100km · 
-             ${fuel.costPer100Km} zł/100km · 
-             ${fuel.mileageAtRefuelKm} km od ost.
-          </span>
+          <span class="fuel-stats">${stats}</span>
           <span class="fuel-meter">📍 ${fuel.meter} km</span>
         </div>
       `;

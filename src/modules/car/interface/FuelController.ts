@@ -1,5 +1,8 @@
 import {Request, Response} from "express";
 import {GetFuelResponse} from "@modules/car/interface/dto/GetFuelResponse";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 export class FuelController {
 
@@ -30,10 +33,78 @@ export class FuelController {
      *         description: Samochód nie istnieje
      */
     async create(req: Request, res: Response): Promise<void> {
-        res.status(201).json({
-            id: "fuel-mock-001",
-            message: "Fuel record created (mock)"
-        });
+        try {
+            const carId = req.params.id || req.params.carId;
+            const {
+                date,
+                liters,
+                meter,
+                totalPrice,
+                fuelPricePerLiter,
+                mileageAtRefuelKm,
+                fuelType
+            } = req.body || {};
+
+            if (!carId) {
+                res.status(400).json({ error: "Brak parametru id samochodu" });
+                return;
+            }
+            if (!date || !liters || !meter || !totalPrice || !fuelPricePerLiter) {
+                res.status(400).json({ error: "Nieprawidłowe dane wejściowe" });
+                return;
+            }
+
+            // Sprawdź czy auto istnieje
+            const car = await prisma.car.findUnique({ where: { id: carId } });
+            if (!car) {
+                res.status(404).json({ error: "Samochód nie istnieje" });
+                return;
+            }
+
+            const parsedDate = new Date(date);
+            const odometer = Number(meter);
+
+            const created = await prisma.fuelRecord.create({
+                data: {
+                    carId,
+                    fuelType: (fuelType as any) || "PB95",
+                    liters: Number(liters),
+                    totalPrice: Number(totalPrice),
+                    mileageAtRefuelKm: mileageAtRefuelKm ? Number(mileageAtRefuelKm) : odometer,
+                    date: parsedDate,
+                },
+            });
+
+            // policz statystyki względem poprzedniego tankowania
+            const prev = await prisma.fuelRecord.findFirst({
+                where: { carId, date: { lt: created.date } },
+                orderBy: { date: "desc" },
+            });
+
+            const distance = prev ? (created.mileageAtRefuelKm - prev.mileageAtRefuelKm) : null;
+            const daysSincePreviousRefuel = prev ? Math.round((+created.date - +prev.date) / (1000 * 60 * 60 * 24)) : null;
+
+            const fuelConsumptionPer100Km = distance && distance > 0 ? Number(((created.liters / distance) * 100).toFixed(2)) : null;
+            const costPer100Km = distance && distance > 0 ? Number(((created.totalPrice / distance) * 100).toFixed(2)) : null;
+
+            const response: GetFuelResponse = {
+                id: created.id,
+                date: created.date.toISOString().split("T")[0],
+                liters: created.liters,
+                meter: created.mileageAtRefuelKm,
+                totalPrice: created.totalPrice,
+                fuelPricePerLiter: fuelPricePerLiter ?? Number((created.totalPrice / created.liters).toFixed(2)),
+                mileageAtRefuelKm: distance,
+                fuelConsumptionPer100Km,
+                costPer100Km,
+                daysSincePreviousRefuel,
+            } as any;
+
+            res.status(201).json(response);
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ error: "Błąd serwera podczas zapisu tankowania" });
+        }
     }
 
     /**
@@ -63,20 +134,48 @@ export class FuelController {
      *         description: Samochód nie istnieje
      */
     async getById(req: Request, res: Response): Promise<void> {
-        const response: GetFuelResponse = {
-            id: "fuel-001",
-            date: "2024-01-15",
-            liters: 42.0,
-            meter: 183450,
-            totalPrice: 315.00,
-            fuelPricePerLiter: 7.50,
-            mileageAtRefuelKm: 520,
-            fuelConsumptionPer100Km: 8.08,
-            costPer100Km: 60.58,
-            daysSincePreviousRefuel: 14
-        };
+        try {
+            const carId = req.params.id || req.params.carId;
+            const fuelId = req.params.fuelId;
+            if (!carId || !fuelId) {
+                res.status(400).json({ error: "Brak wymaganych parametrów" });
+                return;
+            }
 
-        res.status(200).json(response);
+            const fuel = await prisma.fuelRecord.findUnique({ where: { id: fuelId } });
+            if (!fuel || fuel.carId !== carId) {
+                res.status(404).json({ error: "Tankowanie nie istnieje" });
+                return;
+            }
+
+            const prev = await prisma.fuelRecord.findFirst({
+                where: { carId, date: { lt: fuel.date } },
+                orderBy: { date: "desc" },
+            });
+
+            const distance = prev ? (fuel.mileageAtRefuelKm - prev.mileageAtRefuelKm) : null;
+            const daysSincePreviousRefuel = prev ? Math.round((+fuel.date - +prev.date) / (1000 * 60 * 60 * 24)) : null;
+            const fuelConsumptionPer100Km = distance && distance > 0 ? Number(((fuel.liters / distance) * 100).toFixed(2)) : null;
+            const costPer100Km = distance && distance > 0 ? Number(((fuel.totalPrice / distance) * 100).toFixed(2)) : null;
+
+            const response: GetFuelResponse = {
+                id: fuel.id,
+                date: fuel.date.toISOString().split("T")[0],
+                liters: fuel.liters,
+                meter: fuel.mileageAtRefuelKm,
+                totalPrice: fuel.totalPrice,
+                fuelPricePerLiter: Number((fuel.totalPrice / fuel.liters).toFixed(2)),
+                mileageAtRefuelKm: distance,
+                fuelConsumptionPer100Km,
+                costPer100Km,
+                daysSincePreviousRefuel,
+            } as any;
+
+            res.status(200).json(response);
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ error: "Błąd serwera" });
+        }
     }
 
     /**
@@ -102,60 +201,51 @@ export class FuelController {
      *                 $ref: '#/components/schemas/ItemGetFuelResponse'
      */
     async listFuels(req: Request, res: Response): Promise<void> {
-        const { carId } = req.params;
+        try {
+            const carId = req.params.id || req.params.carId;
+            if (!carId) {
+                res.status(400).json({ error: "Brak parametru id samochodu" });
+                return;
+            }
 
-        // Mocki dopasowane do konkretnych aut (Honda i Audi)
-        if (carId === "a729f102-77a6-4f14-8a21-283c827b2bac") {
-            const response: GetFuelResponse[] = [
-                {
-                    id: "fuel-h-002",
-                    date: "2024-02-01",
-                    liters: 45.5,
-                    meter: 214350,
-                    totalPrice: 332.15,
-                    fuelPricePerLiter: 7.30,
-                    mileageAtRefuelKm: 550,
-                    fuelConsumptionPer100Km: 8.27,
-                    costPer100Km: 60.39,
-                    daysSincePreviousRefuel: 17
-                },
-                {
-                    id: "fuel-h-001",
-                    date: "2024-01-15",
-                    liters: 42.0,
-                    meter: 213800,
-                    totalPrice: 315.00,
-                    fuelPricePerLiter: 7.50,
-                    mileageAtRefuelKm: 520,
-                    fuelConsumptionPer100Km: 8.08,
-                    costPer100Km: 60.58,
-                    daysSincePreviousRefuel: 14
-                }
-            ];
+            const fuels = await prisma.fuelRecord.findMany({
+                where: { carId },
+                orderBy: { date: "desc" },
+            });
+
+            // aby wyliczyć statystyki, potrzebujemy poprzedniego wpisu – pracujemy na kopii posortowanej rosnąco
+            const sortedAsc = [...fuels].sort((a, b) => +a.date - +b.date);
+            const computed: GetFuelResponse[] = [] as any;
+
+            for (let i = 0; i < sortedAsc.length; i++) {
+                const curr = sortedAsc[i];
+                const prev = i > 0 ? sortedAsc[i - 1] : undefined;
+                const distance = prev ? (curr.mileageAtRefuelKm - prev.mileageAtRefuelKm) : null;
+                const daysSincePreviousRefuel = prev ? Math.round((+curr.date - +prev.date) / (1000 * 60 * 60 * 24)) : null;
+                const fuelConsumptionPer100Km = distance && distance > 0 ? Number(((curr.liters / distance) * 100).toFixed(2)) : null;
+                const costPer100Km = distance && distance > 0 ? Number(((curr.totalPrice / distance) * 100).toFixed(2)) : null;
+
+                computed.push({
+                    id: curr.id,
+                    date: curr.date.toISOString().split("T")[0],
+                    liters: curr.liters,
+                    meter: curr.mileageAtRefuelKm,
+                    totalPrice: curr.totalPrice,
+                    fuelPricePerLiter: Number((curr.totalPrice / curr.liters).toFixed(2)),
+                    mileageAtRefuelKm: distance,
+                    fuelConsumptionPer100Km,
+                    costPer100Km,
+                    daysSincePreviousRefuel,
+                } as any);
+            }
+
+            // chcemy zwracać w kolejności malejącej po dacie
+            const response = computed.sort((a, b) => (a.date < b.date ? 1 : -1));
             res.status(200).json(response);
-            return;
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ error: "Błąd serwera" });
         }
-
-        if (carId === "0506413c-c52c-4a4c-b4d3-c619e1c8a5db") {
-            const response: GetFuelResponse[] = [
-                {
-                    id: "fuel-a-001",
-                    date: "2024-02-05",
-                    liters: 55.0,
-                    meter: 125100,
-                    totalPrice: 401.50,
-                    fuelPricePerLiter: 7.30,
-                    mileageAtRefuelKm: 480,
-                    fuelConsumptionPer100Km: 11.45,
-                    costPer100Km: 83.65,
-                    daysSincePreviousRefuel: 20
-                }
-            ];
-            res.status(200).json(response);
-            return;
-        }
-
-        res.status(200).json([]);
     }
 
 }

@@ -44,7 +44,7 @@
 
     <div class="car-actions">
       <button class="btn-secondary" id="change-car-btn">Zmień auto</button>
-      <button class="btn-primary" id="add-fuel-btn">+ Tankowanie</button>
+      <button class="btn-primary" id="add-fuel-btn">Dodaj tankowanie</button>
     </div>
   </section>
 
@@ -93,6 +93,39 @@
       <button class="btn-link">Zobacz wszystkie tankowania →</button>
     </div>
   </section>
+
+  <!-- MODAL: DODAJ TANKOWANIE -->
+  <div id="add-fuel-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>Dodaj tankowanie</h2>
+      <form id="add-fuel-form">
+        <div class="form-row">
+          <label>Data</label>
+          <input type="date" id="fuel-date" required />
+        </div>
+        <div class="form-row">
+          <label>Litry</label>
+          <input type="number" id="fuel-liters" step="0.01" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Licznik (km)</label>
+          <input type="number" id="fuel-meter" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Łączna cena (zł)</label>
+          <input type="number" id="fuel-total-price" step="0.01" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Cena za litr (zł)</label>
+          <input type="number" id="fuel-price-per-liter" step="0.01" min="0" required />
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancel-add-fuel">Anuluj</button>
+          <button type="submit" class="btn-primary">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
 
 </main>
 
