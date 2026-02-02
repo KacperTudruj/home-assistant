@@ -26,6 +26,14 @@ import { MileageSummaryDto } from "./MileageSummary";
  *           example: "2023-12-31T23:59:59.000Z"
  *         mileage: 
  *           $ref: '#/components/schemas/MileageSummary'
+ *         engine:
+ *           type: string
+ *           nullable: true
+ *           example: "2.0 TDI"
+ *         vin:
+ *           type: string
+ *           nullable: true
+ *           example: "WVWZZZ1JZ1W123456"
  */
 export class GetCarResponse {
   constructor(
@@ -35,5 +43,7 @@ export class GetCarResponse {
     public readonly isActive: boolean,
     public readonly soldAt: Date | null,
     public readonly mileage: MileageSummaryDto,
+    public readonly engine: string | null = null,
+    public readonly vin: string | null = null,
   ) { }
 }

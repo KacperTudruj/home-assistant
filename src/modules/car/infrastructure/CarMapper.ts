@@ -8,6 +8,8 @@ export class CarMapper {
             year: car.year,
             isActive: car.isActive,
             soldAt: car.soldAt,
+            engine: car.engine,
+            vin: car.vin,
         });
     }
 }

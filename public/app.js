@@ -67,6 +67,8 @@ async function loadCarData(carId) {
     document.getElementById("car-year-display").textContent = `(${car.year})`;
     document.getElementById("info-model").textContent = car.name;
     document.getElementById("info-year").textContent = car.year;
+    document.getElementById("info-engine").textContent = car.engine || "Brak danych";
+    document.getElementById("info-vin").textContent = car.vin || "Brak danych";
 
     if (car.mileage) {
       document.getElementById("mileage-purchase").textContent = `${car.mileage.atPurchase.toLocaleString()} km`;

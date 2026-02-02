@@ -8,6 +8,8 @@ export class Car {
     readonly year: number;
     readonly isActive: boolean;
     readonly soldAt?: Date;
+    readonly engine?: string;
+    readonly vin?: string;
 
     private mileageRecords: MileageRecord[] = [];
     private fuelRecords: FuelRecord[] = [];
@@ -19,12 +21,16 @@ export class Car {
         year: number;
         isActive: boolean;
         soldAt?: Date;
+        engine?: string;
+        vin?: string;
     }) {
         this.id = params.id;
         this.name = params.name;
         this.year = params.year;
         this.isActive = params.isActive;
         this.soldAt = params.soldAt;
+        this.engine = params.engine;
+        this.vin = params.vin;
     }
 
     // ===== MILEAGE =====

@@ -65,6 +65,8 @@ model Car {
   name      String
   year      Int
   isActive  Boolean  @default(true)
+  engine    String?
+  vin       String?
   
   createdAt DateTime @default(now())
   soldAt    DateTime?

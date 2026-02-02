@@ -31,6 +31,8 @@ export class CarRepositoryPrisma implements CarRepository {
             year: carData.year,
             isActive: carData.isActive,
             soldAt: carData.soldAt || undefined,
+            engine: carData.engine || undefined,
+            vin: carData.vin || undefined,
         });
 
         // ===== MILEAGE =====
@@ -90,11 +92,15 @@ export class CarRepositoryPrisma implements CarRepository {
             update: {
                 name: car.name,
                 year: car.year,
+                engine: car.engine,
+                vin: car.vin,
             },
             create: {
                 id: car.id,
                 name: car.name,
                 year: car.year,
+                engine: car.engine,
+                vin: car.vin,
             },
         });
     }
