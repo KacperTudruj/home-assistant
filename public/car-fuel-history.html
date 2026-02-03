@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <title>Wszystkie tankowania – Tudruj</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body data-page="car-fuel-history" data-app-title="⛽ Historia tankowań">
+<script>window.FEATURE_KEY = "car-log";</script>
+
+<header class="commentary">
+  <div class="commentary-line">
+    <select id="commentator-select"></select>
+    <span class="colon">:</span>
+    <span id="commentary-text">Ładowanie komentarza…</span>
+  </div>
+</header>
+
+<main class="container">
+  <div id="app-nav-root"></div>
+
+  <section class="card">
+    <h2>⛽ Wszystkie tankowania</h2>
+
+    <div id="fuel-history-meta" class="subtitle"></div>
+
+    <div class="table-scroll">
+      <table class="table" id="fuel-history-table">
+        <thead>
+          <tr>
+            <th>Data</th>
+            <th>Odometr</th>
+            <th>Trip</th>
+            <th>L</th>
+            <th>zł</th>
+            <th>zł/L</th>
+            <th>l/100</th>
+            <th>zł/100</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="pagination" id="fuel-history-pager">
+      <button class="btn-secondary" id="fuel-prev">← Poprzednia</button>
+      <span id="fuel-page-info" style="opacity:.8"></span>
+      <button class="btn-secondary" id="fuel-next">Następna →</button>
+    </div>
+  </section>
+</main>
+
+<script src="/app.js"></script>
+</body>
+</html>

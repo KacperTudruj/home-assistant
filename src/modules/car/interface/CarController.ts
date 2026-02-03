@@ -96,6 +96,68 @@ export class CarController {
 
     /**
      * @openapi
+     * /api/cars/{id}/stats:
+     *   get:
+     *     summary: Statystyki samochodu (paliwo i przebieg)
+     *     tags:
+     *       - Car
+     *     parameters:
+     *       - in: path
+     *         name: id
+     *         required: true
+     *         schema:
+     *           type: string
+     *     responses:
+     *       200:
+     *         description: Statystyki samochodu
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: object
+     *               properties:
+     *                 totalCost:
+     *                   type: number
+     *                 totalLiters:
+     *                   type: number
+     *                 avgPricePerLiter:
+     *                   type: number
+     *                 avgLitersPerRefuel:
+     *                   type: number
+     *                 avgConsumption:
+     *                   type: number
+     *                   nullable: true
+     *                 yearlyStats:
+     *                   type: array
+     *                   items:
+     *                     type: object
+     *                     properties:
+     *                       year:
+     *                         type: integer
+     *                       distance:
+     *                         type: number
+     *                       cost:
+     *                         type: number
+     */
+    async getStats(req: Request, res: Response): Promise<void> {
+        const { id } = req.params;
+        const car = await carRepository.findById(id);
+        if (!car) {
+            res.status(404).json({ error: 'Car not found' });
+            return;
+        }
+        const stats = car.getStatistics();
+        res.json(stats || {
+            totalCost: 0,
+            totalLiters: 0,
+            avgPricePerLiter: 0,
+            avgLitersPerRefuel: 0,
+            avgConsumption: null,
+            yearlyStats: []
+        });
+    }
+
+    /**
+     * @openapi
      * /api/cars:
      *   get:
      *     summary: Lista samochodów

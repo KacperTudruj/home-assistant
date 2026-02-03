@@ -59,6 +59,34 @@
     </ul>
   </section>
 
+  <!-- KAFELEK: STATYSTYKI -->
+  <section class="card" id="stats-card">
+    <h2>📈 Statystyki</h2>
+    <div class="mileage-grid">
+      <div>
+        <span class="label">Średnio zł/L</span>
+        <span class="value" id="stats-avg-price">—</span>
+      </div>
+      <div>
+        <span class="label">Średnie spalanie</span>
+        <span class="value" id="stats-avg-consumption">—</span>
+      </div>
+      <div>
+        <span class="label">Średnio L/tank</span>
+        <span class="value" id="stats-avg-liters">—</span>
+      </div>
+      <div>
+        <span class="label">Łączny koszt</span>
+        <span class="value" id="stats-total-cost">—</span>
+      </div>
+    </div>
+
+    <div style="margin-top:16px">
+      <span class="label">Rocznie</span>
+      <ul class="info-list" id="stats-yearly"></ul>
+    </div>
+  </section>
+
   <!-- KARTA: PRZEBIEG -->
   <section class="card mileage-card">
     <h2>📊 Przebieg</h2>
@@ -90,7 +118,7 @@
     </ul>
 
     <div class="card-footer">
-      <button class="btn-link">Zobacz wszystkie tankowania →</button>
+      <a class="btn-link" href="/car-fuel-history.html">Zobacz wszystkie tankowania →</a>
     </div>
   </section>
 

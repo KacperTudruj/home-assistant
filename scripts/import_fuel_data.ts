@@ -23,6 +23,9 @@ async function importCsv(filePath: string, carId: string) {
     // Audi: Data;licznik (Km);Zaplacilem;zl/L;L;...
     
     let importedCount = 0;
+    let withOdometer = 0;
+    let withoutOdometer = 0;
+    let skipped = 0;
 
     for (let i = 1; i < lines.length; i++) {
         const line = lines[i].trim();
@@ -50,6 +53,7 @@ async function importCsv(filePath: string, carId: string) {
         const tripDistance = parseValue(tripStr);
 
         if (!date || isNaN(liters) || liters <= 0 || isNaN(totalPrice) || totalPrice <= 0) {
+            skipped++;
             continue;
         }
 
@@ -71,15 +75,16 @@ async function importCsv(filePath: string, carId: string) {
                 date,
                 liters,
                 totalPrice,
-                mileageAtRefuelKm: odometer || 0, // Set to 0 or odometer, we will fix logic to handle 0/null
+                mileageAtRefuelKm: odometer || 0,
                 tripDistance: tripDistance,
                 fuelType: 'PB95'
             }
         });
         importedCount++;
+        if (odometer && odometer > 0) withOdometer++; else withoutOdometer++;
     }
     
-    console.log(`Imported ${importedCount} records for car ${carId}.`);
+    console.log(`Imported ${importedCount} records for car ${carId}. (with odometer: ${withOdometer}, without odometer: ${withoutOdometer}, skipped: ${skipped})`);
 }
 
 function parseDate(str: string): Date | null {
@@ -105,6 +110,10 @@ function parseValue(str: string): number {
 
 async function main() {
     try {
+        // Set mileageAtPurchase = null for target cars
+        await prisma.car.update({ where: { id: AUDI_ID }, data: { mileageAtPurchase: null as any } });
+        await prisma.car.update({ where: { id: HONDA_ID }, data: { mileageAtPurchase: null as any } });
+
         await importCsv(path.join(__dirname, 'Audi a3 1999Auto Spalanie.csv'), AUDI_ID);
         await importCsv(path.join(__dirname, 'HONDA CR-v 2009 Auto Spalanie.csv'), HONDA_ID);
     } catch (e) {
