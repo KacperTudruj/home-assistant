@@ -108,8 +108,12 @@
           <input type="number" id="fuel-liters" step="0.01" min="0" required />
         </div>
         <div class="form-row">
-          <label>Licznik (km)</label>
-          <input type="number" id="fuel-meter" min="0" required />
+          <label>Licznik całkowity (km)</label>
+          <input type="number" id="fuel-meter" step="0.1" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Dystans od tankowania (km)</label>
+          <input type="number" id="fuel-trip" step="0.1" min="0" />
         </div>
         <div class="form-row">
           <label>Łączna cena (zł)</label>

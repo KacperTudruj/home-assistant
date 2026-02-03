@@ -42,6 +42,7 @@ export class FuelController {
                 totalPrice,
                 fuelPricePerLiter,
                 mileageAtRefuelKm,
+                tripDistance,
                 fuelType
             } = req.body || {};
 
@@ -73,6 +74,7 @@ export class FuelController {
             const litersNum = parseNumber(liters);
             const totalPriceNum = parseNumber(totalPrice);
             const mileageAtRefuelNum = mileageAtRefuelKm !== undefined && mileageAtRefuelKm !== null ? parseNumber(mileageAtRefuelKm) : undefined;
+            const tripDistanceNum = tripDistance !== undefined && tripDistance !== null ? parseNumber(tripDistance) : undefined;
 
             if (odometer === undefined || litersNum === undefined || totalPriceNum === undefined) {
                 res.status(400).json({ error: "Nieprawidłowe wartości liczbowe" });
@@ -90,6 +92,7 @@ export class FuelController {
                     liters: litersNum,
                     totalPrice: totalPriceNum,
                     mileageAtRefuelKm: mileageAtRefuelNum !== undefined ? mileageAtRefuelNum : odometer,
+                    tripDistance: tripDistanceNum,
                     date: parsedDate,
                 },
             });
@@ -114,6 +117,7 @@ export class FuelController {
                 totalPrice: created.totalPrice,
                 fuelPricePerLiter: fuelPricePerLiter ?? Number((created.totalPrice / created.liters).toFixed(2)),
                 mileageAtRefuelKm: distance,
+                tripDistance: created.tripDistance,
                 fuelConsumptionPer100Km,
                 costPer100Km,
                 daysSincePreviousRefuel,
@@ -185,6 +189,7 @@ export class FuelController {
                 totalPrice: fuel.totalPrice,
                 fuelPricePerLiter: Number((fuel.totalPrice / fuel.liters).toFixed(2)),
                 mileageAtRefuelKm: distance,
+                tripDistance: fuel.tripDistance,
                 fuelConsumptionPer100Km,
                 costPer100Km,
                 daysSincePreviousRefuel,
@@ -293,6 +298,7 @@ export class FuelController {
                     totalPrice: curr.totalPrice,
                     fuelPricePerLiter: Number((curr.totalPrice / curr.liters).toFixed(2)),
                     mileageAtRefuelKm: distance,
+                    tripDistance: curr.tripDistance,
                     fuelConsumptionPer100Km,
                     costPer100Km,
                     daysSincePreviousRefuel,

@@ -69,7 +69,7 @@ export class Car {
         const lastMileage = this.getLatestMileage();
 
         if (lastMileage && record.mileageAtRefuelKm < lastMileage.mileageKm) {
-            throw new Error('Fuel record mileage is lower than latest mileage');
+            throw new Error('Fgrd mileage is lower than latest mileage');
         }
 
         this.fuelRecords.push(record);

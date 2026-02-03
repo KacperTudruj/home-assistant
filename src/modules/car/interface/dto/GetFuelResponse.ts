@@ -63,6 +63,7 @@ export class GetFuelResponse {
         public readonly totalPrice: number,
         public readonly fuelPricePerLiter: number,
         public readonly mileageAtRefuelKm: number | null,
+        public readonly tripDistance: number | null,
         public readonly fuelConsumptionPer100Km: number | null,
         public readonly costPer100Km: number | null,
         public readonly daysSincePreviousRefuel: number | null,

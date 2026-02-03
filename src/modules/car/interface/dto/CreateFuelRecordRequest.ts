@@ -37,7 +37,13 @@
  *           type: number
  *           format: float
  *           nullable: true
- *           description: Przebieg w momencie tankowania. Jeżeli puste, zostanie użyty "meter".
+ *           description: Całkowity stan licznika w momencie tankowania. Jeżeli puste, zostanie użyty "meter".
+ *           example: 123456.7
+ *         tripDistance:
+ *           type: number
+ *           format: float
+ *           nullable: true
+ *           description: Dystans przejechany od ostatniego tankowania (trip meter).
  *           example: 520.3
  *         fuelType:
  *           type: string
@@ -51,6 +57,7 @@ export class CreateFuelRecordRequest {
         public readonly totalPrice: number,
         public readonly fuelPricePerLiter: number,
         public readonly mileageAtRefuelKm: number | null,
+        public readonly tripDistance: number | null,
         public readonly fuelType: string,
     ) { }
 }

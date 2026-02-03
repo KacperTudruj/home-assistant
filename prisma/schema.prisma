@@ -96,6 +96,7 @@ model FuelRecord {
   liters             Float
   totalPrice         Float
   mileageAtRefuelKm  Float
+  tripDistance       Float?
   date               DateTime
 
   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)

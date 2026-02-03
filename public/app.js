@@ -117,6 +117,7 @@ async function submitAddFuelForm(e) {
   const date = /** @type {HTMLInputElement} */(document.getElementById("fuel-date")).value;
   const liters = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-liters")).value.replace(',', '.'));
   const meter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-meter")).value.replace(',', '.'));
+  const tripDistance = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-trip")).value.replace(',', '.')) || null;
   const totalPrice = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-total-price")).value.replace(',', '.'));
   const fuelPricePerLiter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-price-per-liter")).value.replace(',', '.'));
 
@@ -130,12 +131,14 @@ async function submitAddFuelForm(e) {
         meter,
         totalPrice,
         fuelPricePerLiter,
+        tripDistance,
         fuelType: "PB95"
       })
     });
     if (!res.ok) throw new Error("Nie udało się dodać tankowania");
     closeAddFuelModal();
     await loadFuelHistory(carId);
+    await loadCarData(carId);
   } catch (err) {
     console.error(err);
     alert("Błąd podczas dodawania tankowania");
@@ -163,9 +166,13 @@ async function loadFuelHistory(carId) {
     fuels.forEach(fuel => {
       const li = document.createElement("li");
       
-      const stats = fuel.mileageAtRefuelKm 
+      let stats = fuel.mileageAtRefuelKm 
         ? `${fuel.fuelConsumptionPer100Km || '?.??'} l/100km · ${fuel.costPer100Km || '?.??'} zł/100km · ${fuel.mileageAtRefuelKm} km od ost.`
         : 'Pierwsze tankowanie w systemie';
+      
+      if (fuel.tripDistance) {
+        stats += ` (trip: ${fuel.tripDistance} km)`;
+      }
 
       li.innerHTML = `
         <div class="fuel-main-info">
