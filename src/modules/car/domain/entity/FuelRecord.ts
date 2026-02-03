@@ -4,14 +4,16 @@ export class FuelRecord {
     readonly fuelType: FuelType;
     readonly liters: number;
     readonly totalPrice: number;
-    readonly mileageAtRefuelKm: number;
+    readonly mileageAtRefuelKm: number | null;
+    readonly tripDistance?: number | null;
     readonly date: Date;
 
     constructor(params: {
         fuelType: FuelType;
         liters: number;
         totalPrice: number;
-        mileageAtRefuelKm: number;
+        mileageAtRefuelKm: number | null;
+        tripDistance?: number | null;
         date: Date;
     }) {
         if (params.liters <= 0) {
@@ -22,7 +24,7 @@ export class FuelRecord {
             throw new Error('Total price must be greater than zero');
         }
 
-        if (params.mileageAtRefuelKm < 0) {
+        if (params.mileageAtRefuelKm !== null && params.mileageAtRefuelKm < 0) {
             throw new Error('Mileage cannot be negative');
         }
 
@@ -30,6 +32,7 @@ export class FuelRecord {
         this.liters = params.liters;
         this.totalPrice = params.totalPrice;
         this.mileageAtRefuelKm = params.mileageAtRefuelKm;
+        this.tripDistance = params.tripDistance;
         this.date = params.date;
     }
 

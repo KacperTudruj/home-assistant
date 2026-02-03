@@ -59,6 +59,7 @@ export class CarRepositoryPrisma implements CarRepository {
                     liters: record.liters,
                     totalPrice: record.totalPrice,
                     mileageAtRefuelKm: record.mileageAtRefuelKm,
+                    tripDistance: record.tripDistance,
                     date: record.date,
                 }),
             );

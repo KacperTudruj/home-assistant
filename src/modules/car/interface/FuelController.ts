@@ -91,7 +91,7 @@ export class FuelController {
                     fuelType: (fuelType as any) || "PB95",
                     liters: litersNum,
                     totalPrice: totalPriceNum,
-                    mileageAtRefuelKm: mileageAtRefuelNum !== undefined ? mileageAtRefuelNum : odometer,
+                    mileageAtRefuelKm: (mileageAtRefuelNum !== undefined && mileageAtRefuelNum !== null) ? mileageAtRefuelNum : (odometer > 0 ? odometer : null),
                     tripDistance: tripDistanceNum,
                     date: parsedDate,
                 },

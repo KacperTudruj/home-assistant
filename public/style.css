@@ -243,12 +243,20 @@ h1 {
   color: var(--muted);
 }
 
-.car-status {
-  font-size: 12px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  background: rgba(34,197,94,.15);
+.car-status.active {
+  background: rgba(34, 197, 94, 0.15);
   color: #4ade80;
+}
+
+.car-status.inactive {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.btn-primary.disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+  filter: grayscale(0.5);
 }
 
 .car-actions {

@@ -81,6 +81,29 @@ async function loadCarData(carId) {
     document.getElementById("info-engine").textContent = car.engine || "Brak danych";
     document.getElementById("info-vin").textContent = car.vin || "Brak danych";
 
+    const statusEl = document.querySelector(".car-status");
+    if (statusEl) {
+      if (car.isActive) {
+        statusEl.textContent = "AKTYWNE";
+        statusEl.className = "car-status active";
+      } else {
+        statusEl.textContent = "NIEAKTYWNE";
+        statusEl.className = "car-status inactive";
+      }
+    }
+
+    if (addFuelBtn) {
+      if (!car.isActive) {
+        addFuelBtn.disabled = true;
+        addFuelBtn.title = "To auto jest nieaktywne";
+        addFuelBtn.classList.add("disabled");
+      } else {
+        addFuelBtn.disabled = false;
+        addFuelBtn.title = "";
+        addFuelBtn.classList.remove("disabled");
+      }
+    }
+
     if (car.mileage) {
       document.getElementById("mileage-purchase").textContent = `${(car.mileage.atPurchase || 0).toLocaleString()} km`;
       document.getElementById("mileage-current").textContent = `${(car.mileage.current || 0).toLocaleString()} km`;
@@ -168,10 +191,11 @@ async function loadFuelHistory(carId) {
       
       let stats = fuel.mileageAtRefuelKm 
         ? `${fuel.fuelConsumptionPer100Km || '?.??'} l/100km · ${fuel.costPer100Km || '?.??'} zł/100km · ${fuel.mileageAtRefuelKm} km od ost.`
-        : 'Pierwsze tankowanie w systemie';
+        : '';
       
       if (fuel.tripDistance) {
-        stats += ` (trip: ${fuel.tripDistance} km)`;
+        if (stats) stats += ' · ';
+        stats += `trip: ${fuel.tripDistance} km`;
       }
 
       li.innerHTML = `
