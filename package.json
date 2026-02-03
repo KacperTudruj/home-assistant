@@ -4,9 +4,9 @@
   "main": "index.js",
   "scripts": {
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
-    "start": "node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts",
+    "prisma:generate": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
-    "postinstall": "prisma generate"
+    "start": "npm run prisma:generate && node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts"
   },
   "keywords": [],
   "author": "",

@@ -4,9 +4,13 @@ set -e
 echo "📥 Pulling changes..."
 git pull
 
-echo "🐳 Building & starting containers..."
+echo "🐳 Building containers..."
 docker compose build api
-docker compose run --rm api npx prisma migrate deploy
-docker compose up -d
+
+echo "🧬 Applying migrations..."
+docker compose run --rm api npm run migrate:deploy
+
+echo "🚀 Starting containers..."
+docker compose up -d --force-recreate
 
 echo "✅ Deploy done"
