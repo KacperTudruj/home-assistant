@@ -36,8 +36,13 @@ export class CarRepositoryPrisma implements CarRepository {
             mileageAtPurchase: carData.mileageAtPurchase || undefined,
         });
 
+        // Posortuj rekordy po przebiegu rosnąco, aby walidacje w encji nie wybuchały podczas hydratacji
+        const mileageRecordsSorted = [...carData.mileageRecords].sort((a, b) => a.mileageKm - b.mileageKm);
+        const fuelRecordsSorted = [...carData.fuelRecords].sort((a, b) => a.mileageAtRefuelKm - b.mileageAtRefuelKm);
+        const serviceRecordsSorted = [...carData.serviceRecords].sort((a, b) => a.mileageKm - b.mileageKm);
+
         // ===== MILEAGE =====
-        for (const record of carData.mileageRecords) {
+        for (const record of mileageRecordsSorted) {
             car.addMileageRecord(
                 new MileageRecord({
                     mileageKm: record.mileageKm,
@@ -47,7 +52,7 @@ export class CarRepositoryPrisma implements CarRepository {
         }
 
         // ===== FUEL =====
-        for (const record of carData.fuelRecords) {
+        for (const record of fuelRecordsSorted) {
             car.addFuelRecord(
                 new FuelRecord({
                     fuelType: record.fuelType as FuelType,
@@ -60,7 +65,7 @@ export class CarRepositoryPrisma implements CarRepository {
         }
 
         // ===== SERVICE =====
-        for (const record of carData.serviceRecords) {
+        for (const record of serviceRecordsSorted) {
             car.addServiceRecord(
                 new ServiceRecord({
                     description: record.description,

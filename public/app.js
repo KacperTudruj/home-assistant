@@ -115,10 +115,10 @@ async function submitAddFuelForm(e) {
   if (!carId) return;
 
   const date = /** @type {HTMLInputElement} */(document.getElementById("fuel-date")).value;
-  const liters = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-liters")).value);
-  const meter = parseInt(/** @type {HTMLInputElement} */(document.getElementById("fuel-meter")).value, 10);
-  const totalPrice = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-total-price")).value);
-  const fuelPricePerLiter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-price-per-liter")).value);
+  const liters = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-liters")).value.replace(',', '.'));
+  const meter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-meter")).value.replace(',', '.'));
+  const totalPrice = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-total-price")).value.replace(',', '.'));
+  const fuelPricePerLiter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-price-per-liter")).value.replace(',', '.'));
 
   try {
     const res = await fetch(`/api/cars/${carId}/fuel`, {
@@ -149,7 +149,7 @@ async function loadFuelHistory(carId) {
   container.innerHTML = '<li class="loading">Ładowanie tankowań...</li>';
 
   try {
-    const res = await fetch(`/api/cars/${carId}/fuels`);
+    const res = await fetch(`/api/cars/${carId}/fuels?limit=5`);
     if (!res.ok) throw new Error("Failed to fetch fuel history");
     const fuels = await res.json();
 

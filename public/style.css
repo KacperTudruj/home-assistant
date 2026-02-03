@@ -355,17 +355,18 @@ h1 {
 }
 
 .fuel-list li {
-  padding: 12px 0;
-  border-bottom: 1px solid rgba(255,255,255,.06);
+  padding: 16px 0;
+  border-bottom: 1px solid rgba(255,255,255,.08);
   display: flex;
   flex-direction: column;
-  gap: 6px;
+  gap: 10px;
 }
 
 .fuel-main-info {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: baseline;
+  gap: 12px;
 }
 
 .fuel-details {
@@ -374,6 +375,7 @@ h1 {
   align-items: center;
   font-size: 13px;
   color: var(--muted);
+  gap: 12px;
 }
 
 .fuel-stats {
@@ -387,6 +389,7 @@ h1 {
 .fuel-date {
   color: var(--muted);
   font-size: 13px;
+  letter-spacing: 0.2px;
 }
 
 .fuel-liters {
@@ -397,6 +400,7 @@ h1 {
 .fuel-price {
   font-weight: 700;
   color: var(--accent);
+  padding-left: 8px;
 }
 
 /* =========================

@@ -21,9 +21,10 @@
  *           format: float
  *           example: 45.5
  *         meter:
- *           type: integer
- *           description: Stan licznika (km)
- *           example: 123456
+ *           type: number
+ *           format: float
+ *           description: Stan licznika (km). Dopuszczalne wartości z przecinkiem.
+ *           example: 123456.7
  *         totalPrice:
  *           type: number
  *           format: float
@@ -33,9 +34,11 @@
  *           format: float
  *           example: 6.89
  *         mileageAtRefuelKm:
- *           type: integer
+ *           type: number
+ *           format: float
  *           nullable: true
- *           example: 520
+ *           description: Przebieg w momencie tankowania. Jeżeli puste, zostanie użyty "meter".
+ *           example: 520.3
  *         fuelType:
  *           type: string
  *           example: "PB95"

@@ -49,7 +49,7 @@ export class FuelController {
                 res.status(400).json({ error: "Brak parametru id samochodu" });
                 return;
             }
-            if (!date || !liters || !meter || !totalPrice || !fuelPricePerLiter) {
+            if (!date || liters === undefined || meter === undefined || totalPrice === undefined || fuelPricePerLiter === undefined) {
                 res.status(400).json({ error: "Nieprawidłowe dane wejściowe" });
                 return;
             }
@@ -62,15 +62,34 @@ export class FuelController {
             }
 
             const parsedDate = new Date(date);
-            const odometer = Number(meter);
+            const parseNumber = (v: any) => {
+                if (v === null || v === undefined) return undefined;
+                const s = String(v).replace(',', '.');
+                const n = parseFloat(s);
+                return Number.isFinite(n) ? n : undefined;
+            };
+
+            const odometer = parseNumber(meter);
+            const litersNum = parseNumber(liters);
+            const totalPriceNum = parseNumber(totalPrice);
+            const mileageAtRefuelNum = mileageAtRefuelKm !== undefined && mileageAtRefuelKm !== null ? parseNumber(mileageAtRefuelKm) : undefined;
+
+            if (odometer === undefined || litersNum === undefined || totalPriceNum === undefined) {
+                res.status(400).json({ error: "Nieprawidłowe wartości liczbowe" });
+                return;
+            }
+            if (odometer < 0) {
+                res.status(400).json({ error: "Licznik nie może być ujemny" });
+                return;
+            }
 
             const created = await prisma.fuelRecord.create({
                 data: {
                     carId,
                     fuelType: (fuelType as any) || "PB95",
-                    liters: Number(liters),
-                    totalPrice: Number(totalPrice),
-                    mileageAtRefuelKm: mileageAtRefuelKm ? Number(mileageAtRefuelKm) : odometer,
+                    liters: litersNum,
+                    totalPrice: totalPriceNum,
+                    mileageAtRefuelKm: mileageAtRefuelNum !== undefined ? mileageAtRefuelNum : odometer,
                     date: parsedDate,
                 },
             });
@@ -200,6 +219,37 @@ export class FuelController {
      *               items:
      *                 $ref: '#/components/schemas/ItemGetFuelResponse'
      */
+    /**
+     * @openapi
+     * /api/cars/{carId}/fuels:
+     *   get:
+     *     summary: Lista tankowań
+     *     tags:
+     *       - Car
+     *     parameters:
+     *       - in: path
+     *         name: carId
+     *         required: true
+     *         description: Identyfikator samochodu
+     *       - in: query
+     *         name: limit
+     *         required: false
+     *         schema:
+     *           type: integer
+     *           minimum: 1
+     *           maximum: 100
+     *           default: 5
+     *         description: Ile ostatnich tankowań zwrócić (domyślnie 5)
+     *     responses:
+     *       200:
+     *         description: ostatnich tankowań
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 $ref: '#/components/schemas/ItemGetFuelResponse'
+     */
     async listFuels(req: Request, res: Response): Promise<void> {
         try {
             const carId = req.params.id || req.params.carId;
@@ -208,24 +258,34 @@ export class FuelController {
                 return;
             }
 
-            const fuels = await prisma.fuelRecord.findMany({
+            const limitRaw = req.query.limit as string | undefined;
+            let limit = 5;
+            if (limitRaw) {
+                const parsed = parseInt(limitRaw, 10);
+                if (Number.isFinite(parsed) && parsed > 0) {
+                    limit = Math.min(Math.max(parsed, 1), 100);
+                }
+            }
+
+            // pobierz n+1 rekordów, aby policzyć statystyki względem poprzedniego
+            const fuelsDesc = await prisma.fuelRecord.findMany({
                 where: { carId },
                 orderBy: { date: "desc" },
+                take: limit + 1,
             });
 
-            // aby wyliczyć statystyki, potrzebujemy poprzedniego wpisu – pracujemy na kopii posortowanej rosnąco
-            const sortedAsc = [...fuels].sort((a, b) => +a.date - +b.date);
-            const computed: GetFuelResponse[] = [] as any;
+            const responses: GetFuelResponse[] = [] as any;
+            for (let i = 0; i < fuelsDesc.length; i++) {
+                if (i >= limit) break; // zwracamy tylko limit
+                const curr = fuelsDesc[i];
+                const prev = fuelsDesc[i + 1]; // starszy wpis
 
-            for (let i = 0; i < sortedAsc.length; i++) {
-                const curr = sortedAsc[i];
-                const prev = i > 0 ? sortedAsc[i - 1] : undefined;
                 const distance = prev ? (curr.mileageAtRefuelKm - prev.mileageAtRefuelKm) : null;
                 const daysSincePreviousRefuel = prev ? Math.round((+curr.date - +prev.date) / (1000 * 60 * 60 * 24)) : null;
                 const fuelConsumptionPer100Km = distance && distance > 0 ? Number(((curr.liters / distance) * 100).toFixed(2)) : null;
                 const costPer100Km = distance && distance > 0 ? Number(((curr.totalPrice / distance) * 100).toFixed(2)) : null;
 
-                computed.push({
+                responses.push({
                     id: curr.id,
                     date: curr.date.toISOString().split("T")[0],
                     liters: curr.liters,
@@ -239,9 +299,7 @@ export class FuelController {
                 } as any);
             }
 
-            // chcemy zwracać w kolejności malejącej po dacie
-            const response = computed.sort((a, b) => (a.date < b.date ? 1 : -1));
-            res.status(200).json(response);
+            res.status(200).json(responses);
         } catch (e) {
             console.error(e);
             res.status(500).json({ error: "Błąd serwera" });
