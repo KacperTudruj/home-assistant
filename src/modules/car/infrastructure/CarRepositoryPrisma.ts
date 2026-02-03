@@ -33,6 +33,7 @@ export class CarRepositoryPrisma implements CarRepository {
             soldAt: carData.soldAt || undefined,
             engine: carData.engine || undefined,
             vin: carData.vin || undefined,
+            mileageAtPurchase: carData.mileageAtPurchase || undefined,
         });
 
         // ===== MILEAGE =====
@@ -94,6 +95,7 @@ export class CarRepositoryPrisma implements CarRepository {
                 year: car.year,
                 engine: car.engine,
                 vin: car.vin,
+                mileageAtPurchase: car.mileageAtPurchase,
             },
             create: {
                 id: car.id,
@@ -101,6 +103,7 @@ export class CarRepositoryPrisma implements CarRepository {
                 year: car.year,
                 engine: car.engine,
                 vin: car.vin,
+                mileageAtPurchase: car.mileageAtPurchase,
             },
         });
     }

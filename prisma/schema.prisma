@@ -67,6 +67,7 @@ model Car {
   isActive  Boolean  @default(true)
   engine    String?
   vin       String?
+  mileageAtPurchase Int? @default(0)
   
   createdAt DateTime @default(now())
   soldAt    DateTime?

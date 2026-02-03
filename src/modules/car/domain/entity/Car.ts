@@ -10,6 +10,7 @@ export class Car {
     readonly soldAt?: Date;
     readonly engine?: string;
     readonly vin?: string;
+    readonly mileageAtPurchase?: number;
 
     private mileageRecords: MileageRecord[] = [];
     private fuelRecords: FuelRecord[] = [];
@@ -23,6 +24,7 @@ export class Car {
         soldAt?: Date;
         engine?: string;
         vin?: string;
+        mileageAtPurchase?: number;
     }) {
         this.id = params.id;
         this.name = params.name;
@@ -31,6 +33,7 @@ export class Car {
         this.soldAt = params.soldAt;
         this.engine = params.engine;
         this.vin = params.vin;
+        this.mileageAtPurchase = params.mileageAtPurchase;
     }
 
     // ===== MILEAGE =====
@@ -45,9 +48,18 @@ export class Car {
         this.mileageRecords.push(record);
     }
 
-    getLatestMileage(): MileageRecord | undefined {
-        return this.mileageRecords
-            .slice()
+    getLatestMileage(): { mileageKm: number; date: Date } | undefined {
+        const allReadings: { mileageKm: number; date: Date }[] = [
+            ...this.mileageRecords.map(r => ({ mileageKm: r.mileageKm, date: r.date })),
+            ...this.fuelRecords.map(r => ({ mileageKm: r.mileageAtRefuelKm, date: r.date })),
+            ...this.serviceRecords.map(r => ({ mileageKm: r.mileageKm, date: r.date }))
+        ];
+
+        if (allReadings.length === 0) {
+            return undefined;
+        }
+
+        return allReadings
             .sort((a, b) => b.mileageKm - a.mileageKm)[0];
     }
 

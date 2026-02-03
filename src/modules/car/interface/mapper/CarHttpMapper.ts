@@ -5,15 +5,13 @@ import { MileageSummaryDto } from "../dto/MileageSummary";
 
 export class CarHttpMapper {
     static toResponse(car: Car): GetCarResponse {
-        const latestMileage = car.getLatestMileage()?.mileageKm || 0;
-        const purchaseMileage = 0; // TODO: Implement this properly later
+        const latestMileage = car.getLatestMileage()?.mileageKm || car.mileageAtPurchase || 0;
+        const purchaseMileage = car.mileageAtPurchase || 0;
 
         const mileageSummary = new MileageSummaryDto();
         mileageSummary.atPurchase = purchaseMileage;
         mileageSummary.current = latestMileage;
-        // Calculation moved to frontend for now to avoid inconsistencies, 
-        // but we can also set it here if we want it to be part of the API contract.
-        mileageSummary.ownedDistance = latestMileage > 0 ? (latestMileage - purchaseMileage) : 0;
+        mileageSummary.ownedDistance = latestMileage > purchaseMileage ? (latestMileage - purchaseMileage) : 0;
 
         return new GetCarResponse(
             car.id,

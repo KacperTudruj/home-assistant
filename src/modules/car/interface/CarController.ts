@@ -30,8 +30,7 @@ export class CarController {
      *         description: Nieprawidłowe dane wejściowe
      */
     async create(req: Request, res: Response): Promise<void> {
-        const { name } = req.body;
-        const { year } = req.body;
+        const { name, year, mileageAtPurchase } = req.body;
 
         if (!name || typeof name !== 'string') {
             res.status(400).json({ error: 'Invalid car name' });
@@ -48,6 +47,7 @@ export class CarController {
             name: name,
             year: new Date(year).getFullYear(),
             isActive: true,
+            mileageAtPurchase: mileageAtPurchase ? Number(mileageAtPurchase) : 0,
         });
 
         await carRepository.save(car);

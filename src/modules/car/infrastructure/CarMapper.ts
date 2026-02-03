@@ -10,6 +10,7 @@ export class CarMapper {
             soldAt: car.soldAt,
             engine: car.engine,
             vin: car.vin,
+            mileageAtPurchase: car.mileageAtPurchase,
         });
     }
 }
