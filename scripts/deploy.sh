@@ -5,9 +5,8 @@ echo "📥 Pulling changes..."
 git pull
 
 echo "🐳 Building & starting containers..."
-docker compose up -d --build
-
-echo "🗄️ Running database migrations..."
-docker compose exec api npm run migrate:deploy
+docker compose build api
+docker compose run --rm api npx prisma migrate deploy
+docker compose up -d
 
 echo "✅ Deploy done"

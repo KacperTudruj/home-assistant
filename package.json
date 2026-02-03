@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "start": "node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts",
-    "migrate:deploy": "prisma migrate deploy"
+    "migrate:deploy": "prisma migrate deploy",
+    "postinstall": "prisma generate"
   },
   "keywords": [],
   "author": "",
