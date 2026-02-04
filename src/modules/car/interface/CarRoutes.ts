@@ -32,5 +32,9 @@ export function CarRoutes(
       fuelController.listFuels(req, res)
   );
 
+  router.get("/cars/:id/fuel/statistics", (req, res) =>
+      fuelController.getStatistics(req, res)
+  );
+
   return router;
 }

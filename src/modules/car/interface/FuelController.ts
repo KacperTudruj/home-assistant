@@ -1,5 +1,6 @@
 import {Request, Response} from "express";
 import {GetFuelResponse} from "@modules/car/interface/dto/GetFuelResponse";
+import { FuelStatisticsResponse } from "@modules/car/interface/dto/FuelStatisticsResponse";
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -214,28 +215,6 @@ export class FuelController {
      *         name: carId
      *         required: true
      *         description: Identyfikator samochodu
-     *     responses:
-     *       200:
-     *         description: ostatnich tankowań
-     *         content:
-     *           application/json:
-     *             schema:
-     *               type: array
-     *               items:
-     *                 $ref: '#/components/schemas/ItemGetFuelResponse'
-     */
-    /**
-     * @openapi
-     * /api/cars/{carId}/fuels:
-     *   get:
-     *     summary: Lista tankowań
-     *     tags:
-     *       - Car
-     *     parameters:
-     *       - in: path
-     *         name: carId
-     *         required: true
-     *         description: Identyfikator samochodu
      *       - in: query
      *         name: limit
      *         required: false
@@ -369,4 +348,90 @@ export class FuelController {
         }
     }
 
+    /**
+     * @openapi
+     * /api/cars/{carId}/fuel/statistics:
+     *   get:
+     *     summary: Statystyki paliwowe i spalania dla samochodu
+     *     tags:
+     *       - Car
+     *     parameters:
+     *       - in: path
+     *         name: carId
+     *         required: true
+     *         description: Identyfikator samochodu
+     *     responses:
+     *       200:
+     *         description: Statystyki paliwowe
+     *         content:
+     *           application/json:
+     *             schema:
+     *               $ref: '#/components/schemas/FuelStatisticsResponse'
+     */
+    async getStatistics(req: Request, res: Response): Promise<void> {
+        try {
+            const carId = req.params.id || req.params.carId;
+            if (!carId) {
+                res.status(400).json({ error: "Brak parametru id samochodu" });
+                return;
+            }
+
+            const fuels = await prisma.fuelRecord.findMany({
+                where: { carId },
+                orderBy: { date: "asc" },
+            });
+
+            // grupowanie roczne do średniej ceny za litr (ważonej litrami) i sumy wydatków
+            const yearAgg = new Map<number, { liters: number; totalPrice: number }>();
+
+            for (const f of fuels) {
+                const year = f.date.getFullYear();
+                const entry = yearAgg.get(year) || { liters: 0, totalPrice: 0 };
+                entry.liters += (f.liters || 0);
+                entry.totalPrice += (f.totalPrice || 0);
+                yearAgg.set(year, entry);
+            }
+
+            const avgPricePerLiterPerYear = Array.from(yearAgg.entries())
+                .sort((a, b) => a[0] - b[0])
+                .map(([year, { liters, totalPrice }]) => ({
+                    year,
+                    avgPricePerLiter: liters > 0 ? Number((totalPrice / liters).toFixed(2)) : 0,
+                }));
+
+            const totalSpentPerYear = Array.from(yearAgg.entries())
+                .sort((a, b) => a[0] - b[0])
+                .map(([year, { totalPrice }]) => ({
+                    year,
+                    totalSpent: Number((totalPrice).toFixed(2)),
+                }));
+
+            // ogólne średnie spalanie (l/100km) na podstawie różnic przebiegu
+            let prev: typeof fuels[number] | null = null;
+            let distSum = 0;
+            let litersSum = 0;
+            for (const curr of fuels) {
+                if (prev && prev.mileageAtRefuelKm != null && curr.mileageAtRefuelKm != null) {
+                    const distance = curr.mileageAtRefuelKm - prev.mileageAtRefuelKm;
+                    if (Number.isFinite(distance) && distance > 0) {
+                        distSum += distance;
+                        litersSum += curr.liters || 0;
+                    }
+                }
+                prev = curr;
+            }
+            const overallAvgConsumptionPer100Km = distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null;
+
+            const response: FuelStatisticsResponse = {
+                avgPricePerLiterPerYear,
+                totalSpentPerYear,
+                overallAvgConsumptionPer100Km,
+            } as any;
+
+            res.status(200).json(response);
+        } catch (e) {
+            console.error(e);
+            res.status(500).json({ error: "Błąd serwera" });
+        }
+    }
 }
