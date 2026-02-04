@@ -354,6 +354,78 @@ h1 {
 }
 
 /* =========================
+   STATISTICS CARD
+========================= */
+
+#stats-card .mileage-grid {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+@media (min-width: 600px) {
+  #stats-card .mileage-grid {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+#stats-card .mileage-grid > div {
+  background: rgba(255, 255, 255, 0.03);
+  padding: 12px;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+#stats-card .value {
+  color: var(--accent);
+  display: block;
+  margin-top: 8px;
+  font-size: 20px;
+}
+
+#stats-card h3 {
+  font-size: 14px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  margin: 24px 0 12px;
+}
+
+.stats-yearly-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding: 10px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.05);
+  font-size: 14px;
+}
+
+.stats-yearly-item:last-child {
+  border-bottom: none;
+}
+
+.year-label {
+  font-weight: 700;
+  color: #fff;
+  width: 60px;
+}
+
+.year-value {
+  flex-grow: 1;
+  text-align: right;
+  font-weight: 600;
+  margin-right: 12px;
+}
+
+.year-subvalue {
+  font-size: 12px;
+  color: var(--muted);
+  width: 100px;
+  text-align: right;
+}
+
+/* =========================
    FUEL LIST
 ========================= */
 

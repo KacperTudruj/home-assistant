@@ -24,16 +24,16 @@ export function CarRoutes(
       fuelController.create(req, res)
   );
 
+  router.get("/cars/:id/fuel/statistics", (req, res) =>
+      fuelController.getStatistics(req, res)
+  );
+
   router.get("/cars/:id/fuel/:fuelId", (req, res) =>
       fuelController.getById(req, res)
   );
 
   router.get("/cars/:id/fuels", (req, res) =>
       fuelController.listFuels(req, res)
-  );
-
-  router.get("/cars/:id/fuel/statistics", (req, res) =>
-      fuelController.getStatistics(req, res)
   );
 
   return router;

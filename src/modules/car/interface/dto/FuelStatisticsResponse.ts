@@ -38,9 +38,28 @@
  *           nullable: true
  *           description: Ogólne średnie spalanie (l/100km) obliczane na podstawie różnic przebiegu między kolejnymi tankowaniami
  *           example: 8.2
+ *         overallTotalSpent:
+ *           type: number
+ *           format: float
+ *           description: Łączna kwota wydana na paliwo
+ *           example: 12540.50
+ *         overallAvgPricePerLiter:
+ *           type: number
+ *           format: float
+ *           description: Ogólna średnia cena za litr
+ *           example: 6.45
+ *         overallAvgLitersPerRefuel:
+ *           type: number
+ *           format: float
+ *           description: Średnia ilość litrów na jedno tankowanie
+ *           example: 45.2
  */
 export class FuelStatisticsResponse {
   avgPricePerLiterPerYear!: { year: number; avgPricePerLiter: number }[];
   totalSpentPerYear!: { year: number; totalSpent: number }[];
   overallAvgConsumptionPer100Km!: number | null;
+  overallTotalSpent!: number;
+  overallAvgPricePerLiter!: number;
+  overallAvgLitersPerRefuel!: number;
+  overallAvgCostPer100Km!: number | null;
 }

@@ -410,23 +410,33 @@ export class FuelController {
             let prev: typeof fuels[number] | null = null;
             let distSum = 0;
             let litersSum = 0;
+            let totalPriceSumForConsumption = 0;
             for (const curr of fuels) {
                 if (prev && prev.mileageAtRefuelKm != null && curr.mileageAtRefuelKm != null) {
                     const distance = curr.mileageAtRefuelKm - prev.mileageAtRefuelKm;
                     if (Number.isFinite(distance) && distance > 0) {
                         distSum += distance;
                         litersSum += curr.liters || 0;
+                        totalPriceSumForConsumption += curr.totalPrice || 0;
                     }
                 }
                 prev = curr;
             }
             const overallAvgConsumptionPer100Km = distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null;
+            const overallAvgCostPer100Km = distSum > 0 ? Number(((totalPriceSumForConsumption / distSum) * 100).toFixed(2)) : null;
+
+            const totalLitersAll = fuels.reduce((acc, f) => acc + (f.liters || 0), 0);
+            const totalSpentAll = fuels.reduce((acc, f) => acc + (f.totalPrice || 0), 0);
 
             const response: FuelStatisticsResponse = {
                 avgPricePerLiterPerYear,
                 totalSpentPerYear,
                 overallAvgConsumptionPer100Km,
-            } as any;
+                overallAvgCostPer100Km,
+                overallTotalSpent: Number(totalSpentAll.toFixed(2)),
+                overallAvgPricePerLiter: totalLitersAll > 0 ? Number((totalSpentAll / totalLitersAll).toFixed(2)) : 0,
+                overallAvgLitersPerRefuel: fuels.length > 0 ? Number((totalLitersAll / fuels.length).toFixed(2)) : 0,
+            };
 
             res.status(200).json(response);
         } catch (e) {

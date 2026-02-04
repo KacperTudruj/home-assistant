@@ -114,6 +114,8 @@ async function loadCarData(carId) {
 
     // Load fuel history for this car
     loadFuelHistory(carId);
+    // Load statistics
+    loadCarStatistics(carId);
 
   } catch (err) {
     console.error("Błąd ładowania danych auta", err);
@@ -214,6 +216,55 @@ async function loadFuelHistory(carId) {
   } catch (err) {
     console.error(err);
     container.innerHTML = "<li>Błąd ładowania danych</li>";
+  }
+}
+
+async function loadCarStatistics(carId) {
+  const avgPriceEl = document.getElementById("stats-avg-price");
+  const avgConsumptionEl = document.getElementById("stats-avg-consumption");
+  const avgCostEl = document.getElementById("stats-avg-cost");
+  const avgLitersEl = document.getElementById("stats-avg-liters");
+  const totalCostEl = document.getElementById("stats-total-cost");
+  const yearlyListEl = document.getElementById("stats-yearly");
+
+  if (!avgPriceEl) return;
+
+  try {
+    const res = await fetch(`/api/cars/${carId}/fuel/statistics`);
+    if (!res.ok) throw new Error("Failed to fetch statistics");
+    const stats = await res.json();
+
+    avgPriceEl.textContent = `${stats.overallAvgPricePerLiter.toFixed(2)} zł/L`;
+    avgConsumptionEl.textContent = stats.overallAvgConsumptionPer100Km 
+      ? `${stats.overallAvgConsumptionPer100Km.toFixed(2)} l/100km` 
+      : "---";
+    if (avgCostEl) {
+      avgCostEl.textContent = stats.overallAvgCostPer100Km
+        ? `${stats.overallAvgCostPer100Km.toFixed(2)} zł/100km`
+        : "---";
+    }
+    avgLitersEl.textContent = `${stats.overallAvgLitersPerRefuel.toFixed(2)} L`;
+    totalCostEl.textContent = `${stats.overallTotalSpent.toLocaleString()} zł`;
+
+    if (yearlyListEl) {
+      yearlyListEl.innerHTML = "";
+      const years = stats.avgPricePerLiterPerYear.map(y => y.year);
+      years.reverse().forEach(year => {
+        const avgPrice = stats.avgPricePerLiterPerYear.find(y => y.year === year)?.avgPricePerLiter;
+        const totalSpent = stats.totalSpentPerYear.find(y => y.year === year)?.totalSpent;
+        
+        const li = document.createElement("li");
+        li.className = "stats-yearly-item";
+        li.innerHTML = `
+          <span class="year-label">${year}</span>
+          <span class="year-value">${totalSpent.toLocaleString()} zł</span>
+          <span class="year-subvalue">śr. ${avgPrice.toFixed(2)} zł/L</span>
+        `;
+        yearlyListEl.appendChild(li);
+      });
+    }
+  } catch (err) {
+    console.error("Błąd ładowania statystyk", err);
   }
 }
 
