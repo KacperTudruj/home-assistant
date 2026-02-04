@@ -2,10 +2,12 @@ import {Request, Response} from "express";
 import {GetFuelResponse} from "@modules/car/interface/dto/GetFuelResponse";
 import { FuelStatisticsResponse } from "@modules/car/interface/dto/FuelStatisticsResponse";
 import { PrismaClient } from "@prisma/client";
+import { GetFuelStatisticsUseCase } from "../application/GetFuelStatisticsUseCase";
 
 const prisma = new PrismaClient();
 
 export class FuelController {
+    constructor(private readonly getFuelStatisticsUseCase: GetFuelStatisticsUseCase) {}
 
     /**
      * @openapi
@@ -376,67 +378,7 @@ export class FuelController {
                 return;
             }
 
-            const fuels = await prisma.fuelRecord.findMany({
-                where: { carId },
-                orderBy: { date: "asc" },
-            });
-
-            // grupowanie roczne do średniej ceny za litr (ważonej litrami) i sumy wydatków
-            const yearAgg = new Map<number, { liters: number; totalPrice: number }>();
-
-            for (const f of fuels) {
-                const year = f.date.getFullYear();
-                const entry = yearAgg.get(year) || { liters: 0, totalPrice: 0 };
-                entry.liters += (f.liters || 0);
-                entry.totalPrice += (f.totalPrice || 0);
-                yearAgg.set(year, entry);
-            }
-
-            const avgPricePerLiterPerYear = Array.from(yearAgg.entries())
-                .sort((a, b) => a[0] - b[0])
-                .map(([year, { liters, totalPrice }]) => ({
-                    year,
-                    avgPricePerLiter: liters > 0 ? Number((totalPrice / liters).toFixed(2)) : 0,
-                }));
-
-            const totalSpentPerYear = Array.from(yearAgg.entries())
-                .sort((a, b) => a[0] - b[0])
-                .map(([year, { totalPrice }]) => ({
-                    year,
-                    totalSpent: Number((totalPrice).toFixed(2)),
-                }));
-
-            // ogólne średnie spalanie (l/100km) na podstawie różnic przebiegu
-            let prev: typeof fuels[number] | null = null;
-            let distSum = 0;
-            let litersSum = 0;
-            let totalPriceSumForConsumption = 0;
-            for (const curr of fuels) {
-                if (prev && prev.mileageAtRefuelKm != null && curr.mileageAtRefuelKm != null) {
-                    const distance = curr.mileageAtRefuelKm - prev.mileageAtRefuelKm;
-                    if (Number.isFinite(distance) && distance > 0) {
-                        distSum += distance;
-                        litersSum += curr.liters || 0;
-                        totalPriceSumForConsumption += curr.totalPrice || 0;
-                    }
-                }
-                prev = curr;
-            }
-            const overallAvgConsumptionPer100Km = distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null;
-            const overallAvgCostPer100Km = distSum > 0 ? Number(((totalPriceSumForConsumption / distSum) * 100).toFixed(2)) : null;
-
-            const totalLitersAll = fuels.reduce((acc, f) => acc + (f.liters || 0), 0);
-            const totalSpentAll = fuels.reduce((acc, f) => acc + (f.totalPrice || 0), 0);
-
-            const response: FuelStatisticsResponse = {
-                avgPricePerLiterPerYear,
-                totalSpentPerYear,
-                overallAvgConsumptionPer100Km,
-                overallAvgCostPer100Km,
-                overallTotalSpent: Number(totalSpentAll.toFixed(2)),
-                overallAvgPricePerLiter: totalLitersAll > 0 ? Number((totalSpentAll / totalLitersAll).toFixed(2)) : 0,
-                overallAvgLitersPerRefuel: fuels.length > 0 ? Number((totalLitersAll / fuels.length).toFixed(2)) : 0,
-            };
+            const response = await this.getFuelStatisticsUseCase.execute(carId);
 
             res.status(200).json(response);
         } catch (e) {

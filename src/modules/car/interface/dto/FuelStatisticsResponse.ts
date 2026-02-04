@@ -53,12 +53,18 @@
  *           format: float
  *           description: Średnia ilość litrów na jedno tankowanie
  *           example: 45.2
+ *         overallTotalLiters:
+ *           type: number
+ *           format: float
+ *           description: Łączna ilość zatankowanych litrów
+ *           example: 1540.5
  */
 export class FuelStatisticsResponse {
   avgPricePerLiterPerYear!: { year: number; avgPricePerLiter: number }[];
   totalSpentPerYear!: { year: number; totalSpent: number }[];
   overallAvgConsumptionPer100Km!: number | null;
   overallTotalSpent!: number;
+  overallTotalLiters!: number;
   overallAvgPricePerLiter!: number;
   overallAvgLitersPerRefuel!: number;
   overallAvgCostPer100Km!: number | null;

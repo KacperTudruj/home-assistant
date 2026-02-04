@@ -224,6 +224,7 @@ async function loadCarStatistics(carId) {
   const avgConsumptionEl = document.getElementById("stats-avg-consumption");
   const avgCostEl = document.getElementById("stats-avg-cost");
   const avgLitersEl = document.getElementById("stats-avg-liters");
+  const totalLitersEl = document.getElementById("stats-total-liters");
   const totalCostEl = document.getElementById("stats-total-cost");
   const yearlyListEl = document.getElementById("stats-yearly");
 
@@ -244,6 +245,9 @@ async function loadCarStatistics(carId) {
         : "---";
     }
     avgLitersEl.textContent = `${stats.overallAvgLitersPerRefuel.toFixed(2)} L`;
+    if (totalLitersEl) {
+      totalLitersEl.textContent = `${stats.overallTotalLiters.toLocaleString()} L`;
+    }
     totalCostEl.textContent = `${stats.overallTotalSpent.toLocaleString()} zł`;
 
     if (yearlyListEl) {
