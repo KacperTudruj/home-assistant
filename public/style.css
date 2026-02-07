@@ -22,14 +22,38 @@ body {
 
   --bg-main-top: #020617;
   --bg-main-bottom: #0f172a;
-  --bg-card: #020617;
+  --bg-card: rgba(15, 23, 42, 0.6);
+  --glass-border: rgba(255, 255, 255, 0.08);
 }
 
 body {
   font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: linear-gradient(180deg, var(--bg-main-top), var(--bg-main-bottom));
+  background: #020617;
   color: #e5e7eb;
   line-height: 1.5;
+  overflow-x: hidden;
+  position: relative;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+  background: 
+    radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
+    radial-gradient(circle at 90% 80%, rgba(125, 211, 252, 0.1) 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, #020617 100%);
+  filter: blur(60px);
+  animation: bgPulse 20s infinite alternate;
+}
+
+@keyframes bgPulse {
+  0% { transform: scale(1); }
+  100% { transform: scale(1.1); }
 }
 
 /* =========================
@@ -151,20 +175,23 @@ h1 {
 ========================= */
 
 .apps-panel {
-  background: linear-gradient(180deg, #020617, #020617);
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
   padding: 28px;
-  border-radius: 22px;
+  border-radius: 24px;
+  border: 1px solid var(--glass-border);
 
   max-width: 900px;
   margin: 0 auto;
 
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
   gap: 22px;
 
   box-shadow:
-          0 30px 60px rgba(0, 0, 0, .55),
-          inset 0 1px 0 rgba(255, 255, 255, .02);
+          0 30px 60px rgba(0, 0, 0, .4),
+          inset 0 1px 0 rgba(255, 255, 255, .05);
 }
 
 .app-tile {
@@ -180,18 +207,21 @@ h1 {
   text-decoration: none;
   color: #e5e7eb;
 
-  background: linear-gradient(145deg, #020617, #0f172a);
-  border: 1px solid #1e293b;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--glass-border);
 
   transition:
-          transform .25s ease,
+          transform .25s cubic-bezier(0.175, 0.885, 0.32, 1.275),
           box-shadow .25s ease,
+          background .25s ease,
           color .25s ease;
 }
 
 .app-tile:hover {
-  transform: translateY(-6px) scale(1.02);
-  box-shadow: 0 18px 40px rgba(0, 0, 0, .6);
+  transform: translateY(-8px) scale(1.03);
+  background: rgba(56, 189, 248, 0.08);
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
   color: var(--accent-soft);
 }
 
@@ -269,21 +299,36 @@ h1 {
 ========================= */
 
 .btn-primary {
-  background: linear-gradient(90deg, var(--accent), var(--accent-soft));
+  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
   color: #020617;
   border: none;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: 600;
   cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
 }
 
 .btn-secondary {
-  background: transparent;
-  border: 1px solid rgba(255,255,255,0.2);
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--glass-border);
   color: #e5e7eb;
-  padding: 8px 14px;
-  border-radius: 10px;
+  padding: 10px 18px;
+  border-radius: 14px;
+  font-weight: 500;
   cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.2);
 }
 
 .btn-link {
@@ -306,13 +351,16 @@ h1 {
   max-width: var(--content-width);
   margin: 0 auto 24px;
 
-  background: linear-gradient(180deg, var(--bg-card), var(--bg-card));
-  border-radius: 20px;
+  background: var(--bg-card);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-radius: 24px;
   padding: 24px;
+  border: 1px solid var(--glass-border);
 
   box-shadow:
-          0 20px 40px rgba(0,0,0,.45),
-          inset 0 1px 0 rgba(255,255,255,.02);
+          0 20px 40px rgba(0,0,0,.35),
+          inset 0 1px 0 rgba(255,255,255,.03);
 }
 
 /* =========================
@@ -493,8 +541,9 @@ h1 {
   left: 0;
   width: 100%;
   height: 100%;
-  background: rgba(2, 6, 23, 0.9);
-  backdrop-filter: blur(8px);
+  background: rgba(2, 6, 23, 0.7);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -509,12 +558,14 @@ h1 {
 
 .overlay-content {
   background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
   padding: 32px;
-  border-radius: 24px;
-  border: 1px solid #1e293b;
+  border-radius: 32px;
+  border: 1px solid var(--glass-border);
   width: 90%;
   max-width: 450px;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+  box-shadow: 0 40px 80px rgba(0, 0, 0, 0.6);
 }
 
 .overlay-content h2 {
@@ -587,6 +638,16 @@ h1 {
 
   .page-title {
     font-size: 28px;
+  }
+
+  .apps-panel {
+    padding: 16px;
+    gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+  }
+
+  .app-tile {
+    padding: 16px;
   }
 
   .car-toolbar {
