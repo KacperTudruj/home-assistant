@@ -11,8 +11,12 @@ const addFuelBtn = document.getElementById("add-fuel-btn");
 const addFuelOverlay = document.getElementById("add-fuel-overlay");
 const addFuelForm = document.getElementById("add-fuel-form");
 
-if (carOverlay && carListEl) {
+const pageType = document.body.dataset.page;
+
+if (pageType === "app") {
   initCarLog();
+} else if (pageType === "car-fuel-history") {
+  initFullFuelHistory();
 }
 
 async function initCarLog() {
@@ -145,6 +149,7 @@ async function submitAddFuelForm(e) {
   const tripDistance = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-trip")).value.replace(',', '.')) || null;
   const totalPrice = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-total-price")).value.replace(',', '.'));
   const fuelPricePerLiter = parseFloat(/** @type {HTMLInputElement} */(document.getElementById("fuel-price-per-liter")).value.replace(',', '.'));
+  const drivingMode = (/** @type {HTMLSelectElement} */(document.getElementById("fuel-driving-mode"))?.value) || "MIXED";
 
   try {
     const res = await fetch(`/api/cars/${carId}/fuel`, {
@@ -157,7 +162,8 @@ async function submitAddFuelForm(e) {
         totalPrice,
         fuelPricePerLiter,
         tripDistance,
-        fuelType: "PB95"
+        fuelType: "PB95",
+        drivingMode
       })
     });
     if (!res.ok) throw new Error("Nie udało się dodać tankowania");
@@ -195,6 +201,13 @@ async function loadFuelHistory(carId) {
         ? `${fuel.fuelConsumptionPer100Km || '?.??'} l/100km · ${fuel.costPer100Km || '?.??'} zł/100km · ${fuel.mileageAtRefuelKm} km od ost.`
         : '';
       
+      const modeLabels = {
+        'MIXED': '🔄',
+        'CITY': '🏙️',
+        'HIGHWAY': '🛣️'
+      };
+      const modeLabel = modeLabels[fuel.drivingMode] || '';
+
       if (fuel.tripDistance) {
         if (stats) stats += ' · ';
         stats += `trip: ${fuel.tripDistance} km`;
@@ -203,7 +216,7 @@ async function loadFuelHistory(carId) {
       li.innerHTML = `
         <div class="fuel-main-info">
           <span class="fuel-date">${fuel.date}</span>
-          <span class="fuel-liters">⛽ ${fuel.liters} l</span>
+          <span class="fuel-liters">⛽ ${fuel.liters} l ${modeLabel}</span>
           <span class="fuel-price">${fuel.totalPrice.toFixed(2)} zł</span>
         </div>
         <div class="fuel-details">
@@ -265,6 +278,27 @@ async function loadCarStatistics(carId) {
           <span class="year-subvalue">śr. ${avgPrice.toFixed(2)} zł/L</span>
         `;
         yearlyListEl.appendChild(li);
+      });
+    }
+
+    const modesListEl = document.getElementById("stats-modes");
+    if (modesListEl && stats.avgConsumptionPerDrivingMode) {
+      modesListEl.innerHTML = "";
+      const modeNames = {
+        'MIXED': '🔄 Mieszany',
+        'CITY': '🏙️ Miasto',
+        'HIGHWAY': '🛣️ Trasa'
+      };
+      
+      stats.avgConsumptionPerDrivingMode.forEach(m => {
+        const li = document.createElement("li");
+        li.className = "stats-yearly-item";
+        const val = m.avgConsumption ? `${m.avgConsumption.toFixed(2)} l/100km` : '---';
+        li.innerHTML = `
+          <span class="year-label">${modeNames[m.drivingMode] || m.drivingMode}</span>
+          <span class="year-value">${val}</span>
+        `;
+        modesListEl.appendChild(li);
       });
     }
   } catch (err) {
@@ -369,7 +403,7 @@ function renderAppNav() {
 
   const pageType = document.body.dataset.page;
 
-  if (pageType !== "app") {
+  if (pageType !== "app" && pageType !== "car-fuel-history") {
     return;
   }
 
@@ -388,3 +422,78 @@ function renderAppNav() {
 
 document.addEventListener("DOMContentLoaded", loadApps);
 document.addEventListener("DOMContentLoaded", renderAppNav);
+
+// ====== FULL HISTORY PAGE ======
+let currentHistoryPage = 1;
+async function initFullFuelHistory() {
+  const carId = localStorage.getItem("selectedCarId");
+  if (!carId) {
+    window.location.href = "/car-log.html";
+    return;
+  }
+  
+  loadFullFuelHistory(carId, currentHistoryPage);
+
+  const prevBtn = document.getElementById("fuel-prev");
+  const nextBtn = document.getElementById("fuel-next");
+
+  if (prevBtn) prevBtn.onclick = () => {
+    if (currentHistoryPage > 1) {
+      currentHistoryPage--;
+      loadFullFuelHistory(carId, currentHistoryPage);
+    }
+  };
+  if (nextBtn) nextBtn.onclick = () => {
+    currentHistoryPage++;
+    loadFullFuelHistory(carId, currentHistoryPage);
+  };
+}
+
+async function loadFullFuelHistory(carId, page = 1) {
+  const tableBody = document.querySelector("#fuel-history-table tbody");
+  const pageInfo = document.getElementById("fuel-page-info");
+  if (!tableBody) return;
+
+  tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center">Ładowanie...</td></tr>';
+
+  try {
+    const res = await fetch(`/api/cars/${carId}/fuels?page=${page}&pageSize=15`);
+    if (!res.ok) throw new Error("Błąd pobierania");
+    const data = await res.json();
+    
+    tableBody.innerHTML = "";
+    if (data.items.length === 0) {
+      tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center">Brak rekordów</td></tr>';
+    }
+
+    data.items.forEach(fuel => {
+      const tr = document.createElement("tr");
+      const modeLabels = { 'MIXED': '🔄', 'CITY': '🏙️', 'HIGHWAY': '🛣️' };
+      tr.innerHTML = `
+        <td>${fuel.date}</td>
+        <td>${fuel.meter}</td>
+        <td>${fuel.tripDistance || '---'}</td>
+        <td>${fuel.liters}</td>
+        <td>${fuel.totalPrice.toFixed(2)}</td>
+        <td>${fuel.fuelPricePerLiter.toFixed(2)}</td>
+        <td>${fuel.fuelConsumptionPer100Km || '---'}</td>
+        <td>${fuel.costPer100Km || '---'}</td>
+        <td style="text-align:center">${modeLabels[fuel.drivingMode] || fuel.drivingMode}</td>
+      `;
+      tableBody.appendChild(tr);
+    });
+
+    if (pageInfo) {
+      pageInfo.textContent = `Strona ${data.page} z ${Math.ceil(data.total / data.pageSize) || 1}`;
+    }
+    
+    const prevBtn = document.getElementById("fuel-prev");
+    const nextBtn = document.getElementById("fuel-next");
+    if (prevBtn) prevBtn.disabled = data.page <= 1;
+    if (nextBtn) nextBtn.disabled = data.page >= Math.ceil(data.total / data.pageSize);
+
+  } catch (err) {
+    console.error(err);
+    tableBody.innerHTML = '<tr><td colspan="9" style="text-align:center; color:red">Błąd ładowania danych</td></tr>';
+  }
+}

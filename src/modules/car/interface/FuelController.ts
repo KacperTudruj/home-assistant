@@ -46,7 +46,8 @@ export class FuelController {
                 fuelPricePerLiter,
                 mileageAtRefuelKm,
                 tripDistance,
-                fuelType
+                fuelType,
+                drivingMode
             } = req.body || {};
 
             if (!carId) {
@@ -97,6 +98,7 @@ export class FuelController {
                     mileageAtRefuelKm: (mileageAtRefuelNum !== undefined && mileageAtRefuelNum !== null) ? mileageAtRefuelNum : (odometer > 0 ? odometer : 0),
                     tripDistance: tripDistanceNum,
                     date: parsedDate,
+                    drivingMode: (drivingMode as any) || "MIXED",
                 },
             });
 
@@ -124,6 +126,7 @@ export class FuelController {
                 fuelConsumptionPer100Km,
                 costPer100Km,
                 daysSincePreviousRefuel,
+                drivingMode: created.drivingMode,
             } as any;
 
             res.status(201).json(response);
@@ -196,6 +199,7 @@ export class FuelController {
                 fuelConsumptionPer100Km,
                 costPer100Km,
                 daysSincePreviousRefuel,
+                drivingMode: fuel.drivingMode,
             } as any;
 
             res.status(200).json(response);
@@ -286,6 +290,7 @@ export class FuelController {
                         fuelConsumptionPer100Km,
                         costPer100Km,
                         daysSincePreviousRefuel,
+                        drivingMode: curr.drivingMode,
                     } as any);
                 }
 
@@ -340,6 +345,7 @@ export class FuelController {
                     fuelConsumptionPer100Km,
                     costPer100Km,
                     daysSincePreviousRefuel,
+                    drivingMode: curr.drivingMode,
                 } as any);
             }
 

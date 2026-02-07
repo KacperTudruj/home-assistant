@@ -53,6 +53,10 @@
  *           nullable: true
  *           description: Liczba dni od poprzedniego tankowania
  *           example: 12
+ *         drivingMode:
+ *           type: string
+ *           enum: [MIXED, CITY, HIGHWAY]
+ *           example: MIXED
  */
 export class GetFuelResponse {
     constructor(
@@ -67,5 +71,6 @@ export class GetFuelResponse {
         public readonly fuelConsumptionPer100Km: number | null,
         public readonly costPer100Km: number | null,
         public readonly daysSincePreviousRefuel: number | null,
+        public readonly drivingMode: string,
     ) {}
 }

@@ -25,6 +25,7 @@ export class GetFuelStatisticsUseCase {
 
         const yearAgg = this.aggregateByYear(fuels);
         const consumptionStats = this.calculateOverallConsumption(fuels);
+        const consumptionPerMode = this.calculateConsumptionPerMode(fuels);
         
         const totalLitersAll = fuels.reduce((acc, f) => acc + (f.liters || 0), 0);
         const totalSpentAll = fuels.reduce((acc, f) => acc + (f.totalPrice || 0), 0);
@@ -38,6 +39,7 @@ export class GetFuelStatisticsUseCase {
             overallTotalLiters: Number(totalLitersAll.toFixed(2)),
             overallAvgPricePerLiter: totalLitersAll > 0 ? Number((totalSpentAll / totalLitersAll).toFixed(2)) : 0,
             overallAvgLitersPerRefuel: fuels.length > 0 ? Number((totalLitersAll / fuels.length).toFixed(2)) : 0,
+            avgConsumptionPerDrivingMode: consumptionPerMode,
         };
     }
 
@@ -90,6 +92,39 @@ export class GetFuelStatisticsUseCase {
             avgConsumption: distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null,
             avgCost: distSum > 0 ? Number(((totalPriceSum / distSum) * 100).toFixed(2)) : null,
         };
+    }
+
+    private calculateConsumptionPerMode(fuels: any[]) {
+        const modes = ['CITY', 'HIGHWAY', 'MIXED'];
+        return modes.map(mode => {
+            let distSum = 0;
+            let litersSum = 0;
+            let prev: any = null;
+
+            for (const curr of fuels) {
+                if (curr.drivingMode === mode) {
+                    let distance = 0;
+                    if (curr.tripDistance && curr.tripDistance > 0) {
+                        distance = curr.tripDistance;
+                    } else if (prev && prev.mileageAtRefuelKm != null && curr.mileageAtRefuelKm != null) {
+                        const diff = curr.mileageAtRefuelKm - prev.mileageAtRefuelKm;
+                        if (diff > 0 && diff < 10000) {
+                            distance = diff;
+                        }
+                    }
+                    if (distance > 0) {
+                        distSum += distance;
+                        litersSum += curr.liters || 0;
+                    }
+                }
+                prev = curr;
+            }
+
+            return {
+                drivingMode: mode,
+                avgConsumption: distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null
+            };
+        });
     }
 
     private mapToAvgPricePerYear(yearAgg: Map<number, { liters: number; totalPrice: number }>) {

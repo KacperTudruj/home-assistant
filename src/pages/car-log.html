@@ -91,6 +91,9 @@
 
     <h3>Rocznie</h3>
     <ul class="info-list" style="margin-top:0" id="stats-yearly"></ul>
+
+    <h3>Wg trybu jazdy (spalanie)</h3>
+    <ul class="info-list" style="margin-top:0" id="stats-modes"></ul>
   </section>
 
   <!-- KARTA: PRZEBIEG -->
@@ -156,6 +159,14 @@
         <div class="form-row">
           <label>Cena za litr (zł)</label>
           <input type="number" id="fuel-price-per-liter" step="0.01" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Tryb jazdy</label>
+          <select id="fuel-driving-mode">
+            <option value="MIXED" selected>Mieszany</option>
+            <option value="CITY">Miasto</option>
+            <option value="HIGHWAY">Trasa</option>
+          </select>
         </div>
         <div class="form-actions">
           <button type="button" class="btn-secondary" id="cancel-add-fuel">Anuluj</button>

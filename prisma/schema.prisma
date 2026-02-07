@@ -60,6 +60,12 @@ enum FuelType {
   ELECTRIC
 }
 
+enum DrivingMode {
+  MIXED
+  CITY
+  HIGHWAY
+}
+
 model Car {
   id        String   @id @default(uuid())
   name      String
@@ -98,6 +104,7 @@ model FuelRecord {
   mileageAtRefuelKm  Float
   tripDistance       Float?
   date               DateTime
+  drivingMode        DrivingMode @default(MIXED)
 
   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
 

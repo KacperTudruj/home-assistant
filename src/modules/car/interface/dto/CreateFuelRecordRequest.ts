@@ -48,6 +48,11 @@
  *         fuelType:
  *           type: string
  *           example: "PB95"
+ *         drivingMode:
+ *           type: string
+ *           enum: [MIXED, CITY, HIGHWAY]
+ *           default: MIXED
+ *           example: MIXED
  */
 export class CreateFuelRecordRequest {
     constructor(
@@ -59,5 +64,6 @@ export class CreateFuelRecordRequest {
         public readonly mileageAtRefuelKm: number | null,
         public readonly tripDistance: number | null,
         public readonly fuelType: string,
+        public readonly drivingMode: string = 'MIXED',
     ) { }
 }

@@ -77,7 +77,8 @@ async function importCsv(filePath: string, carId: string) {
                 totalPrice,
                 mileageAtRefuelKm: odometer || 0,
                 tripDistance: tripDistance,
-                fuelType: 'PB95'
+                fuelType: 'PB95',
+                drivingMode: 'MIXED'
             }
         });
         importedCount++;

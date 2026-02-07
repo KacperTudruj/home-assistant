@@ -6,6 +6,7 @@ import { MileageRecord } from '../domain/entity/MileageRecord';
 import { FuelRecord } from '../domain/entity/FuelRecord';
 import { ServiceRecord } from '../domain/entity/ServiceRecord';
 import { FuelType } from '../domain/value-object/FuelType';
+import { DrivingMode } from '../domain/value-object/DrivingMode';
 import { CarMapper } from './CarMapper';
 
 export class CarRepositoryPrisma implements CarRepository {
@@ -61,6 +62,7 @@ export class CarRepositoryPrisma implements CarRepository {
                     mileageAtRefuelKm: record.mileageAtRefuelKm,
                     tripDistance: record.tripDistance,
                     date: record.date,
+                    drivingMode: record.drivingMode as DrivingMode,
                 }),
             );
         }

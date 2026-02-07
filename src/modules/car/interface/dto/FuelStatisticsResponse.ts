@@ -68,4 +68,5 @@ export class FuelStatisticsResponse {
   overallAvgPricePerLiter!: number;
   overallAvgLitersPerRefuel!: number;
   overallAvgCostPer100Km!: number | null;
+  avgConsumptionPerDrivingMode?: { drivingMode: string, avgConsumption: number | null }[];
 }
