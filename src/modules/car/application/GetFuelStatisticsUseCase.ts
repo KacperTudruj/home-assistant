@@ -99,6 +99,7 @@ export class GetFuelStatisticsUseCase {
         return modes.map(mode => {
             let distSum = 0;
             let litersSum = 0;
+            let totalPriceSum = 0;
             let prev: any = null;
 
             for (const curr of fuels) {
@@ -115,6 +116,7 @@ export class GetFuelStatisticsUseCase {
                     if (distance > 0) {
                         distSum += distance;
                         litersSum += curr.liters || 0;
+                        totalPriceSum += curr.totalPrice || 0;
                     }
                 }
                 prev = curr;
@@ -122,7 +124,8 @@ export class GetFuelStatisticsUseCase {
 
             return {
                 drivingMode: mode,
-                avgConsumption: distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null
+                avgConsumption: distSum > 0 ? Number(((litersSum / distSum) * 100).toFixed(2)) : null,
+                avgCost: distSum > 0 ? Number(((totalPriceSum / distSum) * 100).toFixed(2)) : null
             };
         });
     }

@@ -234,7 +234,9 @@ async function loadFuelHistory(carId) {
 
 async function loadCarStatistics(carId) {
   const avgPriceEl = document.getElementById("stats-avg-price");
-  const avgConsumptionEl = document.getElementById("stats-avg-consumption");
+  const cityEl = document.getElementById("stats-city");
+  const highwayEl = document.getElementById("stats-highway");
+  const mixedEl = document.getElementById("stats-mixed");
   const avgCostEl = document.getElementById("stats-avg-cost");
   const avgLitersEl = document.getElementById("stats-avg-liters");
   const totalLitersEl = document.getElementById("stats-total-liters");
@@ -249,9 +251,24 @@ async function loadCarStatistics(carId) {
     const stats = await res.json();
 
     avgPriceEl.textContent = `${stats.overallAvgPricePerLiter.toFixed(2)} zł/L`;
-    avgConsumptionEl.textContent = stats.overallAvgConsumptionPer100Km 
-      ? `${stats.overallAvgConsumptionPer100Km.toFixed(2)} l/100km` 
-      : "---";
+    
+    const setModeValue = (el, modeKey) => {
+      if (!el) return;
+      const m = stats.avgConsumptionPerDrivingMode?.find(x => x.drivingMode === modeKey);
+      if (m && m.avgConsumption) {
+        el.innerHTML = `
+          <div>${m.avgConsumption.toFixed(2)} <small>l/100km</small></div>
+          <div style="font-size: 0.8em; opacity: 0.8;">${m.avgCost ? m.avgCost.toFixed(2) : '---'} <small>zł/100km</small></div>
+        `;
+      } else {
+        el.textContent = "---";
+      }
+    };
+
+    setModeValue(cityEl, 'CITY');
+    setModeValue(highwayEl, 'HIGHWAY');
+    setModeValue(mixedEl, 'MIXED');
+
     if (avgCostEl) {
       avgCostEl.textContent = stats.overallAvgCostPer100Km
         ? `${stats.overallAvgCostPer100Km.toFixed(2)} zł/100km`
@@ -281,26 +298,6 @@ async function loadCarStatistics(carId) {
       });
     }
 
-    const modesListEl = document.getElementById("stats-modes");
-    if (modesListEl && stats.avgConsumptionPerDrivingMode) {
-      modesListEl.innerHTML = "";
-      const modeNames = {
-        'MIXED': '🔄 Mieszany',
-        'CITY': '🏙️ Miasto',
-        'HIGHWAY': '🛣️ Trasa'
-      };
-      
-      stats.avgConsumptionPerDrivingMode.forEach(m => {
-        const li = document.createElement("li");
-        li.className = "stats-yearly-item";
-        const val = m.avgConsumption ? `${m.avgConsumption.toFixed(2)} l/100km` : '---';
-        li.innerHTML = `
-          <span class="year-label">${modeNames[m.drivingMode] || m.drivingMode}</span>
-          <span class="year-value">${val}</span>
-        `;
-        modesListEl.appendChild(li);
-      });
-    }
   } catch (err) {
     console.error("Błąd ładowania statystyk", err);
   }
