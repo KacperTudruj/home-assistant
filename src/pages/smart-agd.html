@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Smart AGD � Tudruj</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+</head>
+<body data-page="smart-agd" data-app-title="Smart AGD">
+<script>window.FEATURE_KEY = "smart-agd";</script>
+<header class="commentary">
+    <div class="commentary-line">
+        <select id="commentator-select"></select>
+        <span class="colon">:</span>
+        <span id="commentary-text">Ładowanie komentarza…</span>
+    </div>
+</header>
+<main class="container">
+    <div id="app-nav-root"></div>
+    <section class="car-toolbar">
+        <div class="car-current">?? <strong>Moje urzdzenia AGD</strong></div>
+    </section>
+    <div id="agd-devices-container">
+        <div class="card"><p class="loading">ladowanie urzdzeń ...</p></div>
+    </div>
+</main>
+<script src="/app.js"></script>
+</body>
+</html>

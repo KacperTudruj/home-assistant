@@ -1,37 +1,39 @@
 import express from 'express';
 import path from 'path';
-import { PrismaClient } from '@prisma/client';
+import {PrismaClient} from '@prisma/client';
 
 import swaggerUi from 'swagger-ui-express';
-import { swaggerSpec } from './docs/openapi';
+import {swaggerSpec} from './docs/openapi';
 
-import { CommentaryRepositoryPrisma } from '@modules/commentary/infrastructure/CommentaryRepositoryPrisma';
+import {CommentaryRepositoryPrisma} from '@modules/commentary/infrastructure/CommentaryRepositoryPrisma';
 
-import { CommentaryPresenter } from './modules/commentary/domain/CommentaryPresenter';
-import { GetCommentaryForFeatureUseCase } from './modules/commentary/application/GetCommentaryUseCase';
-import { CreateCommentaryUseCase } from './modules/commentary/application/CreateCommentaryUseCase';
-import { CommentaryController } from './modules/commentary/interface/CommentaryController';
-import { CommentatorRepositoryPrisma } from '@modules/commentary/infrastructure/CommentatorRepositoryPrisma';
-import { ListCommentatorsUseCase } from '@modules/commentary/application/ListCommentatorsUseCase';
-import { FeatureController } from '@modules/features/interface/FeatureController';
-import { ListFeaturesUseCase } from '@modules/features/application/ListFeaturesUseCase';
-import { FeaturesRepositoryPrisma } from '@modules/features/infrastructure/FeaturesRepositoryPrisma';
-import { featureRoutes } from '@modules/features/interface/FeatureRoutes';
-import { CommentaryRoutes } from '@modules/commentary/interface/CommentaryRoutes';
-import { CarRoutes } from '@modules/car/interface/CarRoutes';
-import { CarController } from '@modules/car/interface/CarController';
+import {CommentaryPresenter} from './modules/commentary/domain/CommentaryPresenter';
+import {GetCommentaryForFeatureUseCase} from './modules/commentary/application/GetCommentaryUseCase';
+import {CreateCommentaryUseCase} from './modules/commentary/application/CreateCommentaryUseCase';
+import {CommentaryController} from './modules/commentary/interface/CommentaryController';
+import {CommentatorRepositoryPrisma} from '@modules/commentary/infrastructure/CommentatorRepositoryPrisma';
+import {ListCommentatorsUseCase} from '@modules/commentary/application/ListCommentatorsUseCase';
+import {FeatureController} from '@modules/features/interface/FeatureController';
+import {ListFeaturesUseCase} from '@modules/features/application/ListFeaturesUseCase';
+import {FeaturesRepositoryPrisma} from '@modules/features/infrastructure/FeaturesRepositoryPrisma';
+import {featureRoutes} from '@modules/features/interface/FeatureRoutes';
+import {CommentaryRoutes} from '@modules/commentary/interface/CommentaryRoutes';
+import {CarRoutes} from '@modules/car/interface/CarRoutes';
+import {CarController} from '@modules/car/interface/CarController';
 import {FuelController} from '@modules/car/interface/FuelController';
-import { GetFuelStatisticsUseCase } from '@modules/car/application/GetFuelStatisticsUseCase';
+import {GetFuelStatisticsUseCase} from '@modules/car/application/GetFuelStatisticsUseCase';
 
 // Shared Connectors
-import { SmartThingsHttpClient } from './shared/connectors/smartthings/infrastructure/SmartThingsHttpClient';
-import { SmartThingsConfigRepositoryPrisma } from './shared/connectors/smartthings/infrastructure/SmartThingsConfigRepositoryPrisma';
+import {SmartThingsHttpClient} from './shared/connectors/smartthings/infrastructure/SmartThingsHttpClient';
+import {
+    SmartThingsConfigRepositoryPrisma
+} from './shared/connectors/smartthings/infrastructure/SmartThingsConfigRepositoryPrisma';
 
 // AGD Module
-import { GetAgdDevicesUseCase } from '@modules/smart-agd/application/GetAgdDevicesUseCase';
-import { AgdController } from '@modules/smart-agd/interface/AgdController';
-import { AgdRoutes } from '@modules/smart-agd/interface/AgdRoutes';
-import { SmartThingsAgdAdapter } from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
+import {GetAgdDevicesUseCase} from '@modules/smart-agd/application/GetAgdDevicesUseCase';
+import {AgdController} from '@modules/smart-agd/interface/AgdController';
+import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
+import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
 
 const app = express();
 const PORT = 3000;
@@ -41,20 +43,23 @@ app.use(express.json());
 
 // swagger
 app.use(
-  '/api/docs',
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerSpec)
+    '/api/docs',
+    swaggerUi.serve,
+    swaggerUi.setup(swaggerSpec)
 );
 // static
 app.use(express.static(path.join(__dirname, '..', 'public')));
 
 // pages
 app.get('/', (_, res) => {
-  res.sendFile(path.join(PAGES_DIR, 'home.html'));
+    res.sendFile(path.join(PAGES_DIR, 'home.html'));
 });
 
 app.get('/car-log', (_, res) => {
-  res.sendFile(path.join(PAGES_DIR, 'car-log.html'));
+    res.sendFile(path.join(PAGES_DIR, 'car-log.html'));
+});
+app.get('/smart-agd', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
 });
 
 // ===== COMPOSITION ROOT =====
@@ -64,18 +69,18 @@ const commentaryRepo = new CommentaryRepositoryPrisma(prisma);
 const narratorRepo = new CommentatorRepositoryPrisma(prisma);
 const presenter = new CommentaryPresenter();
 const getCommentaryForFeatureUseCase =
-  new GetCommentaryForFeatureUseCase(
-    commentaryRepo,
-    narratorRepo,
-    presenter
-  );
+    new GetCommentaryForFeatureUseCase(
+        commentaryRepo,
+        narratorRepo,
+        presenter
+    );
 
 const createCommentaryUseCase = new CreateCommentaryUseCase(commentaryRepo);
 const listCommentatorsUseCase = new ListCommentatorsUseCase(narratorRepo);
 const commentaryController = new CommentaryController(
-  getCommentaryForFeatureUseCase,
-  createCommentaryUseCase,
-  listCommentatorsUseCase
+    getCommentaryForFeatureUseCase,
+    createCommentaryUseCase,
+    listCommentatorsUseCase
 );
 
 const featuresRepo = new FeaturesRepositoryPrisma(prisma);
@@ -88,7 +93,7 @@ const fuelController = new FuelController(fuelStatisticsUseCase);
 // --- SmartThings Connector (Shared Kernel) ---
 const stConfigRepo = new SmartThingsConfigRepositoryPrisma(prisma);
 const stClient = new SmartThingsHttpClient(stConfigRepo, () => {
-  console.log('ALARM: SmartThings token expired! Update it in SystemConfiguration table.');
+    console.log('ALARM: SmartThings token expired! Update it in SystemConfiguration table.');
 });
 
 // --- AGD Module ---
@@ -107,7 +112,11 @@ app.use('/api', AgdRoutes(agdController));
 
 
 // health check
-app.get('/api/health', (_, res) => { res.json({ status: 'ok' }); });
+app.get('/api/health', (_, res) => {
+    res.json({status: 'ok'});
+});
 
 // start server
-app.listen(PORT, '0.0.0.0', () => { console.log('?? Jamnik Henryk uruchomi system'); });
+app.listen(PORT, '0.0.0.0', () => {
+    console.log('?? Jamnik Henryk uruchomi system');
+});
