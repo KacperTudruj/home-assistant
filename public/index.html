@@ -9,15 +9,8 @@
   <link rel="stylesheet" href="/style.css">
 </head>
 
-<body>
-  <script> window.FEATURE_KEY = "app";</script>
-  <header class="commentary">
-    <div class="commentary-line">
-      <select id="commentator-select" aria-label="Wybierz komentatora"></select>
-      <span class="colon">:</span>
-      <span id="commentary-text">Ładowanie komentarza…</span>
-    </div>
-  </header>
+<body data-page="home">
+<script>window.FEATURE_KEY = "app";</script>
 
 
 
@@ -29,7 +22,7 @@
     </section>
   </main>
 
-  <script src="/app.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 
 </html>
