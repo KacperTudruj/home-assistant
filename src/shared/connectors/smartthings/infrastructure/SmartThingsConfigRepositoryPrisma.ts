@@ -5,9 +5,9 @@ export class SmartThingsConfigRepositoryPrisma implements SmartThingsConfigRepos
     constructor(private readonly prisma: PrismaClient) {}
 
     async getSmartThingsToken(): Promise<string | null> {
-        const config = await this.prisma.systemConfiguration.findFirst({
+        const config = await this.prisma.systemConfigurationSmartAgd.findFirst({
             where: { key: "SAMSUNG_SMARTTHINGS" }
         });
-        return config?.stToken || null;
+        return config?.samsungSmartThingsToken || null;
     }
 }

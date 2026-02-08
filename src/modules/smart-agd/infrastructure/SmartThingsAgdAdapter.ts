@@ -1,4 +1,4 @@
-import { AgdProvider } from '../domain/AgdProvider';
+ï»¿import { AgdProvider } from '../domain/AgdProvider';
 import { AgdDevice } from '../domain/AgdDevice';
 import { SmartThingsClient } from '../../../shared/connectors/smartthings/domain/SmartThingsClient';
 
@@ -17,7 +17,7 @@ export class SmartThingsAgdAdapter implements AgdProvider {
                        searchString.includes('fridge') ||
                        searchString.includes('pralka') ||
                        searchString.includes('suszarka') ||
-                       searchString.includes('lodówka');
+                       searchString.includes('lodÃ³wka');
             })
             .map(d => {
                 const searchString = (d.label + ' ' + d.name).toLowerCase();
@@ -25,7 +25,7 @@ export class SmartThingsAgdAdapter implements AgdProvider {
                 
                 if (searchString.includes('washer') || searchString.includes('pralka')) type = 'WASHER';
                 else if (searchString.includes('dryer') || searchString.includes('suszarka')) type = 'DRYER';
-                else if (searchString.includes('refrigerator') || searchString.includes('fridge') || searchString.includes('lodówka')) type = 'REFRIGERATOR';
+                else if (searchString.includes('refrigerator') || searchString.includes('fridge') || searchString.includes('lodÃ³wka')) type = 'REFRIGERATOR';
                 
                 return {
                     id: d.id,

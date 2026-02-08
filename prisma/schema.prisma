@@ -128,14 +128,14 @@ model ServiceRecord {
   @@map("CarServiceRecord")
 }
 
-model SystemConfiguration {
+model SystemConfigurationSmartAgd {
   id    String @id @default(uuid())
   key   String @unique
 
   // Samsung SmartThings
-  stToken String? @map("st_token")
+  samsungSmartThingsToken String? @map("samsung_smart_things_token")
   
-  @@map("SystemConfiguration")
+  @@map("SystemConfigurationSmartAgd")
 }
 
 
