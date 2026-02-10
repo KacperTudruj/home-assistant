@@ -34,6 +34,10 @@ import {GetAgdDevicesUseCase} from '@modules/smart-agd/application/GetAgdDevices
 import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
+import {MediaStorageController} from "@modules/media-storage/interface/MediaStorageController";
+import {StorageService} from "@modules/media-storage/domain/StorageService";
+import {StorageServiceMock} from "@modules/media-storage/infrastructure/StorageServiceMock";
+import {MediaStorageRoutes} from "@modules/media-storage/interface/MediaStorageRoutes";
 
 const app = express();
 const PORT = 3000;
@@ -101,6 +105,8 @@ const agdProvider = new SmartThingsAgdAdapter(stClient);
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 
+const storageServiceMock = new StorageServiceMock();
+const mediaStorageController = new MediaStorageController(storageServiceMock);
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
@@ -109,6 +115,7 @@ app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
 app.use('/api', CarRoutes(carController, fuelController));
 app.use('/api', AgdRoutes(agdController));
+app.use('/api', MediaStorageRoutes(mediaStorageController));
 
 
 // health check
@@ -118,5 +125,5 @@ app.get('/api/health', (_, res) => {
 
 // start server
 app.listen(PORT, '0.0.0.0', () => {
-    console.log('?? Jamnik Henryk uruchomi system');
+    console.log('Jamnik Henryk uruchomi system');
 });
