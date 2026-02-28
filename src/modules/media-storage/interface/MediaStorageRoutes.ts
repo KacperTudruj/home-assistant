@@ -1,8 +1,16 @@
 import { Router } from 'express';
+import multer from 'multer';
 import { MediaStorageController } from './MediaStorageController';
 
 export const MediaStorageRoutes = (controller: MediaStorageController) => {
     const router = Router();
+
+    const upload = multer({
+        storage: multer.memoryStorage(),
+        limits: {
+            fileSize: 50 * 1024 * 1024, // 50MB
+        },
+    });
 
     router.get('/media-storage/status', (req, res) =>
         controller.getStatus(req, res)
@@ -22,6 +30,7 @@ export const MediaStorageRoutes = (controller: MediaStorageController) => {
 
     router.post(
         '/media-storage/import',
+        upload.single('file'),
         controller.uploadToImport.bind(controller)
     );
 

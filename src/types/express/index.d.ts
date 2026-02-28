@@ -3,8 +3,8 @@ import 'express';
 declare global {
     namespace Express {
         interface Request {
-            file?: import('multer').File;
-            files?: import('multer').File[];
+            file?: Express.Multer.File;
+            files?: Express.Multer.File[] | { [fieldname: string]: Express.Multer.File[] };
         }
     }
 }
