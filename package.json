@@ -6,7 +6,10 @@
     "dev": "ts-node -r tsconfig-paths/register src/index.ts",
     "prisma:generate": "prisma generate",
     "migrate:deploy": "prisma migrate deploy",
-    "start": "npm run prisma:generate && node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts"
+    "start": "npm run prisma:generate && node node_modules/ts-node/dist/bin.js -r tsconfig-paths/register src/index.ts",
+    "docker:up": "docker compose up -d --build",
+    "docker:rebuild": "docker compose down -v && docker compose build --no-cache && docker compose up -d",
+    "docker:clean": "docker compose down -v --rmi all --remove-orphans"
   },
   "keywords": [],
   "author": "",
