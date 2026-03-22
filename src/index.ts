@@ -65,6 +65,10 @@ app.get('/smart-agd', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
 });
 
+app.get('/media-storage', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'media-storage.html'));
+});
+
 // ===== COMPOSITION ROOT =====
 const prisma = new PrismaClient();
 

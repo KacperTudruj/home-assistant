@@ -7,13 +7,20 @@ export class StorageHttpMapper {
         };
     }
 
-    static toBrowseDto(files: any[]) {
-        return files.map(f => ({
-            name: f.name,
-            path: f.path,
-            type: f.type,
-            size: f.size,
-        }));
+    static toBrowseDto(response: any) {
+        return {
+            items: response.items.map((f: any) => ({
+                name: f.name,
+                path: f.path,
+                type: f.type,
+                size: f.size,
+                mimeType: f.mimeType,
+                modifiedAt: f.modifiedAt,
+            })),
+            total: response.total,
+            page: response.page,
+            limit: response.limit,
+        };
     }
 
     static toImportUsageDto(usage: any) {

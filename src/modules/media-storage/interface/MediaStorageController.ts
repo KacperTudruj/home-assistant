@@ -46,15 +46,50 @@ export class MediaStorageController {
      *         name: path
      *         schema:
      *           type: string
+     *       - in: query
+     *         name: sortBy
+     *         schema:
+     *           type: string
+     *           enum: [name, size, modifiedAt]
+     *       - in: query
+     *         name: sortOrder
+     *         schema:
+     *           type: string
+     *           enum: [asc, desc]
+     *       - in: query
+     *         name: filter
+     *         schema:
+     *           type: string
+     *       - in: query
+     *         name: type
+     *         schema:
+     *           type: string
+     *           enum: [file, directory]
+     *       - in: query
+     *         name: page
+     *         schema:
+     *           type: integer
+     *       - in: query
+     *         name: limit
+     *         schema:
+     *           type: integer
      *     responses:
      *       200:
-     *         description: Lista plików
+     *         description: Lista plików z paginacją
      */
     async browse(req: Request, res: Response): Promise<void> {
         const path = String(req.query.path || '/');
+        const options = {
+            sortBy: req.query.sortBy as any,
+            sortOrder: req.query.sortOrder as any,
+            filter: req.query.filter as string,
+            type: req.query.type as any,
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        };
 
-        const files = await this.storageService.browse(path);
-        res.json(StorageHttpMapper.toBrowseDto(files));
+        const result = await this.storageService.browse(path, options);
+        res.json(StorageHttpMapper.toBrowseDto(result));
     }
 
     /**

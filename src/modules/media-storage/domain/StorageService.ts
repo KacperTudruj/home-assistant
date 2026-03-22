@@ -1,5 +1,6 @@
 import {UploadFileInput} from "./dto/UploadFileInput";
 import {BrowseItem} from "./dto/BrowseItem";
+import {BrowseOptions, BrowseResponse} from "./dto/BrowseOptions";
 
 export interface StorageService {
     getStatus(): Promise<{
@@ -7,7 +8,7 @@ export interface StorageService {
         mountPath: string;
     }>;
 
-    browse(path: string): Promise<BrowseItem[]>;
+    browse(path: string, options?: BrowseOptions): Promise<BrowseResponse>;
 
     getFileStream(path: string): Promise<{
         stream: NodeJS.ReadableStream;

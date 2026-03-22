@@ -6,6 +6,7 @@ import { promisify } from 'util';
 import { createReadStream, createWriteStream } from 'fs';
 import { StorageService } from "../domain/StorageService";
 import { BrowseItem } from "../domain/dto/BrowseItem";
+import { BrowseOptions, BrowseResponse } from "../domain/dto/BrowseOptions";
 import { UploadFileInput } from "../domain/dto/UploadFileInput";
 
 export class DiskStorageService implements StorageService {
@@ -30,38 +31,79 @@ export class DiskStorageService implements StorageService {
         }
     }
 
-    async browse(relativeSubPath: string): Promise<BrowseItem[]> {
+    async browse(relativeSubPath: string, options?: BrowseOptions): Promise<BrowseResponse> {
         const absolutePath = this.getSafePath(relativeSubPath);
         
         try {
             const entries = await fs.readdir(absolutePath, { withFileTypes: true });
             
-            const items = await Promise.all(entries.map(async (entry) => {
+            let items: BrowseItem[] = await Promise.all(entries.map(async (entry) => {
                 const entryPath = path.join(absolutePath, entry.name);
                 const relativeEntryPath = path.relative(this.mountPath, entryPath).replace(/\\/g, '/');
                 const prefixedPath = relativeEntryPath.startsWith('/') ? relativeEntryPath : '/' + relativeEntryPath;
+                const stats = await fs.stat(entryPath);
 
                 if (entry.isDirectory()) {
                     return {
                         name: entry.name,
                         path: prefixedPath,
                         type: 'directory' as const,
+                        modifiedAt: stats.mtime,
                     };
                 } else {
-                    const stats = await fs.stat(entryPath);
                     return {
                         name: entry.name,
                         path: prefixedPath,
                         type: 'file' as const,
                         size: stats.size,
+                        mimeType: mime.getType(entryPath) || 'application/octet-stream',
+                        modifiedAt: stats.mtime,
                     };
                 }
             }));
 
-            return items;
+            // Filtering
+            if (options?.filter) {
+                const filter = options.filter.toLowerCase();
+                items = items.filter(i => i.name.toLowerCase().includes(filter));
+            }
+            if (options?.type) {
+                items = items.filter(i => i.type === options.type);
+            }
+
+            // Sorting
+            if (options?.sortBy) {
+                const sortBy = options.sortBy;
+                const sortOrder = options.sortOrder === 'desc' ? -1 : 1;
+                items.sort((a, b) => {
+                    if (sortBy === 'name') {
+                        return a.name.localeCompare(b.name) * sortOrder;
+                    }
+                    if (sortBy === 'size') {
+                        return ((a.size || 0) - (b.size || 0)) * sortOrder;
+                    }
+                    if (sortBy === 'modifiedAt') {
+                        return ((a.modifiedAt?.getTime() || 0) - (b.modifiedAt?.getTime() || 0)) * sortOrder;
+                    }
+                    return 0;
+                });
+            }
+
+            const total = items.length;
+            const page = options?.page || 1;
+            const limit = options?.limit || total || 100;
+            const startIndex = (page - 1) * limit;
+            const paginatedItems = items.slice(startIndex, startIndex + limit);
+
+            return {
+                items: paginatedItems,
+                total,
+                page,
+                limit,
+            };
         } catch (error) {
             if ((error as any).code === 'ENOENT') {
-                return [];
+                return { items: [], total: 0, page: 1, limit: 10 };
             }
             throw error;
         }

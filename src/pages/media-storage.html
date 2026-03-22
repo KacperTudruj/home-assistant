@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+    <meta charset="UTF-8">
+    <title>Media Storage - Tudruj HA</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" href="/style.css">
+    <style>
+        .storage-container { display: flex; flex-direction: column; gap: 20px; }
+        .toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+        .file-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 15px; }
+        .file-item { border: 1px solid #ccc; padding: 10px; border-radius: 8px; display: flex; flex-direction: column; align-items: center; text-align: center; cursor: pointer; position: relative; }
+        .file-item:hover { background: #f0f0f0; }
+        .file-icon { font-size: 3rem; margin-bottom: 5px; }
+        .file-name { font-size: 0.9rem; word-break: break-all; }
+        .file-size { font-size: 0.8rem; color: #666; }
+        .preview-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .preview-content { max-width: 90%; max-height: 90%; position: relative; }
+        .preview-content img, .preview-content video { max-width: 100%; max-height: 100%; }
+        .close-preview { position: absolute; top: -30px; right: 0; color: white; cursor: pointer; font-size: 1.5rem; }
+        .drop-zone { border: 2px dashed #007bff; padding: 20px; text-align: center; border-radius: 10px; background: #e9ecef; }
+        .drop-zone.drag-over { background: #d1ecf1; border-color: #0c5460; }
+        .quota-bar { width: 100%; background: #eee; height: 10px; border-radius: 5px; overflow: hidden; }
+        .quota-progress { height: 100%; background: #28a745; }
+        .delete-btn { position: absolute; top: 5px; right: 5px; color: red; cursor: pointer; background: white; border-radius: 50%; padding: 2px 5px; font-weight: bold; font-size: 0.7rem; border: 1px solid red;}
+        @media (max-width: 600px) {
+            .file-list { grid-template-columns: 1fr 1fr; }
+        }
+    </style>
+</head>
+<body class="container">
+    <header>
+        <h1>📁 Media Storage</h1>
+        <div id="storage-status">Checking...</div>
+        <div class="quota-container" style="margin-top: 10px; display: none;" id="import-usage">
+            <small>Import quota (100GB): <span id="usage-text">0 / 100 GB</span></small>
+            <div class="quota-bar"><div class="quota-progress" id="usage-bar" style="width: 0%"></div></div>
+        </div>
+    </header>
+
+    <main class="storage-container">
+        <div class="toolbar">
+            <button onclick="goBack()">⬅ Back</button>
+            <span id="current-path">/</span>
+            <input type="text" id="filter" placeholder="Filter..." oninput="refresh()">
+            <select id="sort" onchange="refresh()">
+                <option value="name:asc">Name (A-Z)</option>
+                <option value="name:desc">Name (Z-A)</option>
+                <option value="size:asc">Size (min)</option>
+                <option value="size:desc">Size (max)</option>
+                <option value="modifiedAt:desc">Newest</option>
+                <option value="modifiedAt:asc">Oldest</option>
+            </select>
+        </div>
+
+        <div id="drop-zone" class="drop-zone">
+            Drag & Drop files here to upload to <b>/import</b>
+        </div>
+
+        <div id="file-list" class="file-list">
+            <!-- Files will be rendered here -->
+        </div>
+    </main>
+
+    <div id="preview-overlay" class="preview-overlay">
+        <div class="preview-content">
+            <span class="close-preview" onclick="closePreview()">✖</span>
+            <div id="preview-body"></div>
+        </div>
+    </div>
+
+    <script>
+        let currentPath = '/';
+        
+        async function loadStatus() {
+            const res = await fetch('/api/media-storage/status');
+            const data = await res.json();
+            const statusEl = document.getElementById('storage-status');
+            if (data.isAvailable) {
+                statusEl.innerHTML = `✅ Storage connected: ${data.mountPath}`;
+            } else {
+                statusEl.innerHTML = `❌ Storage unavailable`;
+            }
+        }
+
+        async function loadUsage() {
+            const res = await fetch('/api/media-storage/import');
+            const data = await res.json();
+            const usageEl = document.getElementById('import-usage');
+            usageEl.style.display = 'block';
+            
+            const usedGB = (data.usedBytes / (1024**3)).toFixed(2);
+            const maxGB = (data.maxBytes / (1024**3)).toFixed(2);
+            document.getElementById('usage-text').innerText = `${usedGB} / ${maxGB} GB`;
+            const percent = (data.usedBytes / data.maxBytes) * 100;
+            document.getElementById('usage-bar').style.width = `${percent}%`;
+        }
+
+        async function refresh() {
+            const filter = document.getElementById('filter').value;
+            const sortVal = document.getElementById('sort').value;
+            const [sortBy, sortOrder] = sortVal.split(':');
+            
+            const params = new URLSearchParams({
+                path: currentPath,
+                filter,
+                sortBy,
+                sortOrder
+            });
+            
+            const res = await fetch(`/api/media-storage/browse?${params}`);
+            const data = await res.json();
+            renderFiles(data.items);
+            document.getElementById('current-path').innerText = currentPath;
+        }
+
+        function renderFiles(items) {
+            const listEl = document.getElementById('file-list');
+            listEl.innerHTML = '';
+            
+            items.forEach(item => {
+                const div = document.createElement('div');
+                div.className = 'file-item';
+                
+                let icon = '📄';
+                if (item.type === 'directory') icon = '📁';
+                else if (item.mimeType?.startsWith('image/')) icon = '🖼️';
+                else if (item.mimeType?.startsWith('video/')) icon = '🎬';
+                else if (item.mimeType === 'application/pdf') icon = '📕';
+
+                div.innerHTML = `
+                    <div class="file-icon">${icon}</div>
+                    <div class="file-name">${item.name}</div>
+                    <div class="file-size">${item.type === 'file' ? formatSize(item.size) : ''}</div>
+                `;
+                
+                if (item.path.startsWith('/import/') || item.path === '/import') {
+                    if (item.type === 'file') {
+                        const delBtn = document.createElement('div');
+                        delBtn.className = 'delete-btn';
+                        delBtn.innerText = 'X';
+                        delBtn.onclick = (e) => {
+                            e.stopPropagation();
+                            deleteFile(item.path);
+                        };
+                        div.appendChild(delBtn);
+                    }
+                }
+
+                div.onclick = () => {
+                    if (item.type === 'directory') {
+                        currentPath = item.path;
+                        refresh();
+                    } else {
+                        previewFile(item);
+                    }
+                };
+                
+                listEl.appendChild(div);
+            });
+        }
+
+        function formatSize(bytes) {
+            if (bytes === 0) return '0 B';
+            const k = 1024;
+            const sizes = ['B', 'KB', 'MB', 'GB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+        }
+
+        function goBack() {
+            if (currentPath === '/') return;
+            const parts = currentPath.split('/').filter(p => p);
+            parts.pop();
+            currentPath = '/' + parts.join('/');
+            refresh();
+        }
+
+        function previewFile(item) {
+            const overlay = document.getElementById('preview-overlay');
+            const body = document.getElementById('preview-body');
+            body.innerHTML = '';
+            
+            const fileUrl = `/api/media-storage/file?path=${encodeURIComponent(item.path)}`;
+            
+            if (item.mimeType?.startsWith('image/')) {
+                body.innerHTML = `<img src="${fileUrl}">`;
+            } else if (item.mimeType?.startsWith('video/')) {
+                body.innerHTML = `<video src="${fileUrl}" controls autoplay></video>`;
+            } else {
+                window.open(fileUrl, '_blank');
+                return;
+            }
+            
+            overlay.style.display = 'flex';
+        }
+
+        function closePreview() {
+            document.getElementById('preview-overlay').style.display = 'none';
+            document.getElementById('preview-body').innerHTML = '';
+        }
+
+        async function deleteFile(path) {
+            if (!confirm(`Delete ${path}?`)) return;
+            await fetch('/api/media-storage/import', {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ path })
+            });
+            refresh();
+            loadUsage();
+        }
+
+        // Drag & Drop
+        const dropZone = document.getElementById('drop-zone');
+        dropZone.ondragover = (e) => { e.preventDefault(); dropZone.classList.add('drag-over'); };
+        dropZone.ondragleave = () => dropZone.classList.remove('drag-over');
+        dropZone.ondrop = async (e) => {
+            e.preventDefault();
+            dropZone.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            for (const file of files) {
+                await uploadFile(file);
+            }
+            refresh();
+            loadUsage();
+        };
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+            await fetch('/api/media-storage/import', {
+                method: 'POST',
+                body: formData
+            });
+        }
+
+        loadStatus();
+        loadUsage();
+        refresh();
+    </script>
+</body>
+</html>
