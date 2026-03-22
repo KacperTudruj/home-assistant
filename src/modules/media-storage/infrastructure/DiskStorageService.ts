@@ -41,21 +41,25 @@ export class DiskStorageService implements StorageService {
             
             let items: BrowseItem[] = await Promise.all(entries.map(async (entry) => {
                 const entryPath = path.join(absolutePath, entry.name);
-                const relativeEntryPath = path.relative(this.mountPath, entryPath).replace(/\\/g, '/');
-                const prefixedPath = relativeEntryPath.startsWith('/') ? relativeEntryPath : '/' + relativeEntryPath;
+                
+                let relativeEntryPath = path.relative(this.mountPath, entryPath).replace(/\\/g, '/');
+                if (!relativeEntryPath.startsWith('/')) {
+                    relativeEntryPath = '/' + relativeEntryPath;
+                }
+                
                 const stats = await fs.stat(entryPath);
 
                 if (entry.isDirectory()) {
                     return {
                         name: entry.name,
-                        path: prefixedPath,
+                        path: relativeEntryPath,
                         type: 'directory' as const,
                         modifiedAt: stats.mtime,
                     };
                 } else {
                     return {
                         name: entry.name,
-                        path: prefixedPath,
+                        path: relativeEntryPath,
                         type: 'file' as const,
                         size: stats.size,
                         mimeType: mime.getType(entryPath) || 'application/octet-stream',
@@ -63,6 +67,15 @@ export class DiskStorageService implements StorageService {
                     };
                 }
             }));
+
+            // Filter system/hidden files/folders and temporary storage
+            items = items.filter(i => {
+                const itemAbsPath = path.resolve(absolutePath, i.name);
+                const isTemporary = itemAbsPath === this.temporaryPath;
+
+                const isSystem = i.name.startsWith('$') || i.name.startsWith('.');
+                return !isSystem && !isTemporary;
+            });
 
             // Filtering
             if (options?.filter) {
@@ -220,13 +233,15 @@ export class DiskStorageService implements StorageService {
             throw new Error(`Directory traversal attempt detected: path contains ".."`);
         }
 
-        const normalizedSubPath = path.normalize(relativeSubPath);
-        const trimmedPath = (normalizedSubPath.startsWith(path.sep) || normalizedSubPath.startsWith('/')) 
-            ? normalizedSubPath.substring(1) 
-            : normalizedSubPath;
-            
+        // 2. Normalizacja ścieżki i usuwanie początkowych separatorów (obu rodzajów)
+        let trimmedPath = relativeSubPath;
+        while (trimmedPath.startsWith('/') || trimmedPath.startsWith('\\')) {
+            trimmedPath = trimmedPath.substring(1);
+        }
+
         const absolutePath = path.resolve(this.mountPath, trimmedPath);
 
+        // 3. Sprawdzenie czy wynikowa ścieżka nadal znajduje się wewnątrz mountPath
         const mountPathWithSep = this.mountPath.endsWith(path.sep) ? this.mountPath : this.mountPath + path.sep;
 
         if (!absolutePath.startsWith(mountPathWithSep) && absolutePath !== this.mountPath) {
