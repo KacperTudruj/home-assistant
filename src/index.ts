@@ -35,8 +35,7 @@ import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
 import {MediaStorageController} from "@modules/media-storage/interface/MediaStorageController";
-import {StorageService} from "@modules/media-storage/domain/StorageService";
-import {StorageServiceMock} from "@modules/media-storage/infrastructure/StorageServiceMock";
+import {DiskStorageService} from "@modules/media-storage/infrastructure/DiskStorageService";
 import {MediaStorageRoutes} from "@modules/media-storage/interface/MediaStorageRoutes";
 
 const app = express();
@@ -105,8 +104,9 @@ const agdProvider = new SmartThingsAgdAdapter(stClient);
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 
-const storageServiceMock = new StorageServiceMock();
-const mediaStorageController = new MediaStorageController(storageServiceMock);
+const mountPath = process.env.MEDIA_STORAGE_MOUNT_PATH || './storage';
+const storageService = new DiskStorageService(mountPath);
+const mediaStorageController = new MediaStorageController(storageService);
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
