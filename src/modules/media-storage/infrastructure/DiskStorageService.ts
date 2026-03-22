@@ -71,9 +71,12 @@ export class DiskStorageService implements StorageService {
             // Filter system/hidden files/folders and temporary storage
             items = items.filter(i => {
                 const itemAbsPath = path.resolve(absolutePath, i.name);
-                const isTemporary = itemAbsPath === this.temporaryPath;
+                
 
                 const isSystem = i.name.startsWith('$') || i.name.startsWith('.');
+
+                const isTemporary = itemAbsPath === this.temporaryPath;
+                
                 return !isSystem && !isTemporary;
             });
 

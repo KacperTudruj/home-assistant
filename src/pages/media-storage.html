@@ -53,7 +53,7 @@
             </select>
         </div>
 
-        <div id="drop-zone" class="drop-zone">
+        <div id="drop-zone" class="drop-zone" style="display: none;">
             Drag & Drop files here to upload to <b>/import</b>
         </div>
 
@@ -112,6 +112,14 @@
             const data = await res.json();
             renderFiles(data.items);
             document.getElementById('current-path').innerText = currentPath;
+
+            // Show/Hide upload zone only in /import folder
+            const dropZone = document.getElementById('drop-zone');
+            if (currentPath === '/import' || currentPath.startsWith('/import/')) {
+                dropZone.style.display = 'block';
+            } else {
+                dropZone.style.display = 'none';
+            }
         }
 
         function renderFiles(items) {
