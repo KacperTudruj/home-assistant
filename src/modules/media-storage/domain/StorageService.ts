@@ -24,4 +24,7 @@ export interface StorageService {
     uploadToImport(file: UploadFileInput): Promise<void>;
 
     deleteFromImport(path: string): Promise<void>;
+    moveToTemporary(path: string): Promise<void>;
+    browseTemporary(options?: BrowseOptions): Promise<BrowseResponse>;
+    clearTemporary(): Promise<void>;
 }

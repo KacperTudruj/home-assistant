@@ -108,8 +108,9 @@ const agdProvider = new SmartThingsAgdAdapter(stClient);
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 
-const mountPath = process.env.MEDIA_STORAGE_MOUNT_PATH || './storage';
-const storageService = new DiskStorageService(mountPath);
+const mountPath = process.env.MEDIA_STORAGE_MOUNT_PATH || './storage/media-library';
+const temporaryPath = process.env.MEDIA_STORAGE_TEMPORARY_PATH || './storage/temporary-storage';
+const storageService = new DiskStorageService(mountPath, temporaryPath);
 const mediaStorageController = new MediaStorageController(storageService);
 // ===== END COMPOSITION ROOT =====
 

@@ -48,4 +48,16 @@ export class StorageServiceMock implements StorageService {
     async deleteFromImport(): Promise<void> {
         return;
     }
+
+    async moveToTemporary(): Promise<void> {
+        return;
+    }
+
+    async browseTemporary(options?: BrowseOptions): Promise<BrowseResponse> {
+        return { items: [], total: 0, page: options?.page || 1, limit: options?.limit || 10 };
+    }
+
+    async clearTemporary(): Promise<void> {
+        return;
+    }
 }

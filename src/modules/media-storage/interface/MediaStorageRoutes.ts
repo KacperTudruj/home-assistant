@@ -35,7 +35,19 @@ export const MediaStorageRoutes = (controller: MediaStorageController) => {
     );
 
     router.delete('/media-storage/import', (req, res) =>
-        controller.deleteFromImport(req, res)
+        controller.moveToTemporary(req, res)
+    );
+
+    router.get('/media-storage/temporary', (req, res) =>
+        controller.browseTemporary(req, res)
+    );
+
+    router.delete('/media-storage/temporary', (req, res) =>
+        controller.clearTemporary(req, res)
+    );
+
+    router.post('/media-storage/move-to-temporary', (req, res) =>
+        controller.moveToTemporary(req, res)
     );
 
     return router;

@@ -11,9 +11,11 @@ import { UploadFileInput } from "../domain/dto/UploadFileInput";
 
 export class DiskStorageService implements StorageService {
     private readonly mountPath: string;
+    private readonly temporaryPath: string;
 
-    constructor(mountPath: string) {
+    constructor(mountPath: string, temporaryPath: string) {
         this.mountPath = path.resolve(mountPath);
+        this.temporaryPath = path.resolve(temporaryPath);
     }
 
     async getStatus() {
@@ -157,19 +159,45 @@ export class DiskStorageService implements StorageService {
     }
 
     async deleteFromImport(relativeSubPath: string): Promise<void> {
+        await this.moveToTemporary(relativeSubPath);
+    }
+
+    async moveToTemporary(relativeSubPath: string): Promise<void> {
         const absolutePath = this.getSafePath(relativeSubPath);
-        const importPath = path.resolve(this.mountPath, 'import');
+        
+        await fs.mkdir(this.temporaryPath, { recursive: true });
 
-        if (!absolutePath.startsWith(importPath)) {
-            throw new Error('Can only delete from import folder');
+        const filename = path.basename(absolutePath);
+        const timestamp = new Date().getTime();
+        const trashFilename = `${timestamp}_${filename}`;
+        const targetPath = path.join(this.temporaryPath, trashFilename);
+
+        await fs.rename(absolutePath, targetPath);
+    }
+
+    async browseTemporary(options?: BrowseOptions): Promise<BrowseResponse> {
+        await fs.mkdir(this.temporaryPath, { recursive: true });
+        
+        // Temporarily change mountPath to temporaryPath to use browseInternal
+        const originalMountPath = (this as any).mountPath;
+        (this as any).mountPath = this.temporaryPath;
+        try {
+            return await this.browse('/', options);
+        } finally {
+            (this as any).mountPath = originalMountPath;
         }
+    }
 
-        const stats = await fs.stat(absolutePath);
-        if (stats.isDirectory()) {
-            throw new Error('Cannot delete directory');
+    async clearTemporary(): Promise<void> {
+        const entries = await fs.readdir(this.temporaryPath, { withFileTypes: true });
+        for (const entry of entries) {
+            const entryPath = path.join(this.temporaryPath, entry.name);
+            if (entry.isDirectory()) {
+                await fs.rm(entryPath, { recursive: true, force: true });
+            } else {
+                await fs.unlink(entryPath);
+            }
         }
-
-        await fs.unlink(absolutePath);
     }
 
     private async getDirSize(directory: string): Promise<number> {

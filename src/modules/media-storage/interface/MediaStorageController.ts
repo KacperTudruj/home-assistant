@@ -177,15 +177,55 @@ export class MediaStorageController {
      *     tags:
      *       - MediaStorage
      */
-    async deleteFromImport(req: Request, res: Response): Promise<void> {
-        const {path} = req.body;
+    /**
+     * @openapi
+     * /api/media-storage/temporary:
+     *   get:
+     *     summary: Przeglądanie folderu tymczasowego
+     *     tags:
+     *       - MediaStorage
+     */
+    async browseTemporary(req: Request, res: Response): Promise<void> {
+        const options = {
+            sortBy: req.query.sortBy as any,
+            sortOrder: req.query.sortOrder as any,
+            filter: req.query.filter as string,
+            page: req.query.page ? parseInt(req.query.page as string) : undefined,
+            limit: req.query.limit ? parseInt(req.query.limit as string) : undefined,
+        };
 
+        const result = await this.storageService.browseTemporary(options);
+        res.json(StorageHttpMapper.toBrowseDto(result));
+    }
+
+    /**
+     * @openapi
+     * /api/media-storage/temporary:
+     *   delete:
+     *     summary: Czyści folder tymczasowy
+     *     tags:
+     *       - MediaStorage
+     */
+    async clearTemporary(req: Request, res: Response): Promise<void> {
+        await this.storageService.clearTemporary();
+        res.status(204).send();
+    }
+
+    /**
+     * @openapi
+     * /api/media-storage/move-to-temporary:
+     *   post:
+     *     summary: Przenosi dowolny plik do folderu tymczasowego
+     *     tags:
+     *       - MediaStorage
+     */
+    async moveToTemporary(req: Request, res: Response): Promise<void> {
+        const {path} = req.body;
         if (!path) {
             res.status(400).json({error: 'PATH_REQUIRED'});
             return;
         }
-
-        await this.storageService.deleteFromImport(path);
+        await this.storageService.moveToTemporary(path);
         res.status(204).send();
     }
 }
