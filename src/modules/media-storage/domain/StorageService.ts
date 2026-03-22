@@ -9,7 +9,11 @@ export interface StorageService {
 
     browse(path: string): Promise<BrowseItem[]>;
 
-    getFileStream(path: string): Promise<NodeJS.ReadableStream>;
+    getFileStream(path: string): Promise<{
+        stream: NodeJS.ReadableStream;
+        mimeType: string;
+        size: number;
+    }>;
 
     getImportUsage(): Promise<{
         used: number;

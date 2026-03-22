@@ -79,8 +79,23 @@ export class MediaStorageController {
             return;
         }
 
-        const stream = await this.storageService.getFileStream(path);
-        stream.pipe(res);
+        try {
+            const {stream, mimeType, size} = await this.storageService.getFileStream(path);
+            
+            res.setHeader('Content-Type', mimeType);
+            res.setHeader('Content-Length', size);
+
+            const isPreviewable = mimeType.startsWith('image/') || mimeType.startsWith('video/') || mimeType === 'application/pdf';
+            if (!isPreviewable) {
+                res.setHeader('Content-Disposition', `attachment; filename="${path.split('/').pop()}"`);
+            } else {
+                res.setHeader('Content-Disposition', `inline; filename="${path.split('/').pop()}"`);
+            }
+
+            stream.pipe(res);
+        } catch (error) {
+            res.status(404).json({error: 'FILE_NOT_FOUND'});
+        }
     }
 
     /**

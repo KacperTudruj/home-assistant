@@ -19,8 +19,12 @@ export class StorageServiceMock implements StorageService {
         ];
     }
 
-    async getFileStream() {
-        return Readable.from('mock file content');
+    async getFileStream(path: string) {
+        return {
+            stream: Readable.from('mock file content'),
+            mimeType: 'text/plain',
+            size: 17,
+        };
     }
 
     async getImportUsage() {

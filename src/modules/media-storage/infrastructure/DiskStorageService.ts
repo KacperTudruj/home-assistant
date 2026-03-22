@@ -1,7 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
-import { Readable } from 'stream';
-import { createReadStream } from 'fs';
+import mime from 'mime';
+import { Readable, pipeline } from 'stream';
+import { promisify } from 'util';
+import { createReadStream, createWriteStream } from 'fs';
 import { StorageService } from "../domain/StorageService";
 import { BrowseItem } from "../domain/dto/BrowseItem";
 import { UploadFileInput } from "../domain/dto/UploadFileInput";
@@ -65,7 +67,7 @@ export class DiskStorageService implements StorageService {
         }
     }
 
-    async getFileStream(relativeSubPath: string): Promise<NodeJS.ReadableStream> {
+    async getFileStream(relativeSubPath: string) {
         const absolutePath = this.getSafePath(relativeSubPath);
         const stats = await fs.stat(absolutePath);
         
@@ -73,25 +75,73 @@ export class DiskStorageService implements StorageService {
             throw new Error('Cannot stream a directory');
         }
 
-        return createReadStream(absolutePath);
-    }
+        const mimeType = mime.getType(absolutePath) || 'application/octet-stream';
 
-    async getImportUsage() {
-        // Placeholder for Etap 3
         return {
-            used: 0,
-            max: 100 * 1024 * 1024 * 1024,
+            stream: createReadStream(absolutePath),
+            mimeType,
+            size: stats.size,
         };
     }
 
+    async getImportUsage() {
+        const importPath = path.join(this.mountPath, 'import');
+        try {
+            await fs.mkdir(importPath, { recursive: true });
+            const usage = await this.getDirSize(importPath);
+            return {
+                used: usage,
+                max: 100 * 1024 * 1024 * 1024, // 100 GB
+            };
+        } catch (error) {
+            return {
+                used: 0,
+                max: 100 * 1024 * 1024 * 1024,
+            };
+        }
+    }
+
     async uploadToImport(file: UploadFileInput): Promise<void> {
-        // Placeholder for Etap 3
-        throw new Error('Not implemented yet');
+        const importPath = path.join(this.mountPath, 'import');
+        await fs.mkdir(importPath, { recursive: true });
+
+        const safeFilename = path.basename(file.filename).replace(/[^\w.-]/g, '_');
+        const targetPath = path.join(importPath, safeFilename);
+
+        const writeStream = createWriteStream(targetPath);
+        const streamPipeline = promisify(pipeline);
+
+        await streamPipeline(file.stream, writeStream);
     }
 
     async deleteFromImport(relativeSubPath: string): Promise<void> {
-        // Placeholder for Etap 3
-        throw new Error('Not implemented yet');
+        const absolutePath = this.getSafePath(relativeSubPath);
+        const importPath = path.resolve(this.mountPath, 'import');
+
+        if (!absolutePath.startsWith(importPath)) {
+            throw new Error('Can only delete from import folder');
+        }
+
+        const stats = await fs.stat(absolutePath);
+        if (stats.isDirectory()) {
+            throw new Error('Cannot delete directory');
+        }
+
+        await fs.unlink(absolutePath);
+    }
+
+    private async getDirSize(directory: string): Promise<number> {
+        const entries = await fs.readdir(directory, { withFileTypes: true });
+        const sizes = await Promise.all(entries.map(async (entry) => {
+            const entryPath = path.join(directory, entry.name);
+            if (entry.isDirectory()) {
+                return await this.getDirSize(entryPath);
+            } else {
+                const stats = await fs.stat(entryPath);
+                return stats.size;
+            }
+        }));
+        return sizes.reduce((acc, size) => acc + size, 0);
     }
 
     private getSafePath(relativeSubPath: string): string {

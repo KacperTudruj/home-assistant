@@ -16,12 +16,14 @@
     "@prisma/client": "6.9.0",
     "axios": "^1.13.4",
     "express": "^5.2.1",
+    "mime": "^4.1.0",
     "multer": "^2.0.2",
     "swagger-jsdoc": "^6.2.8",
     "swagger-ui-express": "^5.0.1"
   },
   "devDependencies": {
     "@types/express": "^5.0.6",
+    "@types/mime": "^3.0.4",
     "@types/multer": "^2.0.0",
     "@types/swagger-jsdoc": "^6.0.4",
     "@types/swagger-ui-express": "^4.1.8",
