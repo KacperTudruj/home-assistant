@@ -37,12 +37,14 @@ import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThin
 import {MediaStorageController} from "@modules/media-storage/interface/MediaStorageController";
 import {DiskStorageService} from "@modules/media-storage/infrastructure/DiskStorageService";
 import {MediaStorageRoutes} from "@modules/media-storage/interface/MediaStorageRoutes";
+import {basicAuth} from './shared/middleware/basicAuth';
 
 const app = express();
 const PORT = 3000;
 const PAGES_DIR = path.join(__dirname, '..', 'src', 'pages');
 
 app.use(express.json());
+app.use(basicAuth);
 
 // swagger
 app.use(
