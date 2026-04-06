@@ -34,6 +34,14 @@ export class StorageServiceMock implements StorageService {
         };
     }
 
+    async getThumbnailStream(path: string) {
+        return {
+            stream: Readable.from('mock thumbnail content'),
+            mimeType: 'image/jpeg',
+            size: 22,
+        };
+    }
+
     async getImportUsage() {
         return {
             used: 12 * 1024 * 1024 * 1024,

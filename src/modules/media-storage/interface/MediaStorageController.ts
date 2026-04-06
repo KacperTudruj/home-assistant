@@ -118,7 +118,9 @@ export class MediaStorageController {
             const {stream, mimeType, size} = await this.storageService.getFileStream(path);
             
             res.setHeader('Content-Type', mimeType);
-            res.setHeader('Content-Length', size);
+            if (size > 0) {
+                res.setHeader('Content-Length', size);
+            }
 
             const isPreviewable = mimeType.startsWith('image/') || mimeType.startsWith('video/') || mimeType === 'application/pdf';
             if (!isPreviewable) {
@@ -126,6 +128,43 @@ export class MediaStorageController {
             } else {
                 res.setHeader('Content-Disposition', `inline; filename="${path.split('/').pop()}"`);
             }
+
+            stream.pipe(res);
+        } catch (error) {
+            res.status(404).json({error: 'FILE_NOT_FOUND'});
+        }
+    }
+
+    /**
+     * @openapi
+     * /api/media-storage/thumbnail:
+     *   get:
+     *     summary: Miniatura pliku (image/video)
+     *     tags:
+     *       - MediaStorage
+     *     parameters:
+     *       - in: query
+     *         name: path
+     *         required: true
+     *         schema:
+     *           type: string
+     */
+    async getThumbnail(req: Request, res: Response): Promise<void> {
+        const path = req.query.path as string;
+
+        if (!path) {
+            res.status(400).json({error: 'PATH_REQUIRED'});
+            return;
+        }
+
+        try {
+            const {stream, mimeType, size} = await this.storageService.getThumbnailStream(path);
+            
+            res.setHeader('Content-Type', mimeType);
+            if (size > 0) {
+                res.setHeader('Content-Length', size);
+            }
+            res.setHeader('Content-Disposition', `inline; filename="thumb-${path.split('/').pop()}"`);
 
             stream.pipe(res);
         } catch (error) {

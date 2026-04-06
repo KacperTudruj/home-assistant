@@ -1,7 +1,9 @@
 import fs from 'fs/promises';
 import path from 'path';
 import mime from 'mime';
-import { Readable, pipeline } from 'stream';
+import sharp from 'sharp';
+import ffmpeg from 'fluent-ffmpeg';
+import { Readable, pipeline, PassThrough } from 'stream';
 import { promisify } from 'util';
 import { createReadStream, createWriteStream } from 'fs';
 import { StorageService } from "../domain/StorageService";
@@ -68,16 +70,10 @@ export class DiskStorageService implements StorageService {
                 }
             }));
 
-            // Filter system/hidden files/folders and temporary storage
+            // Filter system/hidden files/folders
             items = items.filter(i => {
-                const itemAbsPath = path.resolve(absolutePath, i.name);
-                
-
                 const isSystem = i.name.startsWith('$') || i.name.startsWith('.');
-
-                const isTemporary = itemAbsPath === this.temporaryPath;
-                
-                return !isSystem && !isTemporary;
+                return !isSystem;
             });
 
             // Filtering
@@ -142,6 +138,52 @@ export class DiskStorageService implements StorageService {
             mimeType,
             size: stats.size,
         };
+    }
+
+    async getThumbnailStream(relativeSubPath: string) {
+        const absolutePath = this.getSafePath(relativeSubPath);
+        const stats = await fs.stat(absolutePath);
+
+        if (stats.isDirectory()) {
+            throw new Error('Cannot create thumbnail for a directory');
+        }
+
+        const mimeType = mime.getType(absolutePath) || 'application/octet-stream';
+
+        if (mimeType.startsWith('image/')) {
+            const transform = sharp()
+                .resize(200, 200, { fit: 'inside', withoutEnlargement: true })
+                .jpeg({ quality: 80 });
+
+            const readStream = createReadStream(absolutePath);
+            const stream = readStream.pipe(transform);
+
+            return {
+                stream,
+                mimeType: 'image/jpeg',
+                size: 0, // Size is unknown for transformed stream
+            };
+        }
+
+        if (mimeType.startsWith('video/')) {
+            const passThrough = new PassThrough();
+            
+            const stream = ffmpeg(absolutePath)
+                .seekInput(1)
+                .frames(1)
+                .outputOptions('-f', 'image2')
+                .outputOptions('-vcodec', 'mjpeg')
+                .pipe(passThrough, { end: true }) as Readable;
+
+            return {
+                stream: stream,
+                mimeType: 'image/jpeg',
+                size: 0,
+            };
+        }
+
+        // Fallback for non-media files: return the original or a generic icon (not implemented here)
+        return this.getFileStream(relativeSubPath);
     }
 
     async getImportUsage() {

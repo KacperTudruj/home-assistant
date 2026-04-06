@@ -24,6 +24,10 @@ export const MediaStorageRoutes = (controller: MediaStorageController) => {
         controller.streamFile(req, res)
     );
 
+    router.get('/media-storage/thumbnail', (req, res) =>
+        controller.getThumbnail(req, res)
+    );
+
     router.get('/media-storage/import', (req, res) =>
         controller.getImportUsage(req, res)
     );

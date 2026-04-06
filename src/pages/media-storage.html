@@ -132,12 +132,14 @@
                 
                 let icon = '📄';
                 if (item.type === 'directory') icon = '📁';
-                else if (item.mimeType?.startsWith('image/')) icon = '🖼️';
-                else if (item.mimeType?.startsWith('video/')) icon = '🎬';
+                else if (item.mimeType?.startsWith('image/') || item.mimeType?.startsWith('video/')) {
+                    const thumbUrl = `/api/media-storage/thumbnail?path=${encodeURIComponent(item.path)}`;
+                    icon = `<img src="${thumbUrl}" style="width: 100%; height: 100%; object-fit: cover; border-radius: 4px;">`;
+                }
                 else if (item.mimeType === 'application/pdf') icon = '📕';
 
                 div.innerHTML = `
-                    <div class="file-icon">${icon}</div>
+                    <div class="file-icon" style="display: flex; align-items: center; justify-content: center; overflow: hidden;">${icon}</div>
                     <div class="file-name">${item.name}</div>
                     <div class="file-size">${item.type === 'file' ? formatSize(item.size) : ''}</div>
                 `;
@@ -192,9 +194,9 @@
             const fileUrl = `/api/media-storage/file?path=${encodeURIComponent(item.path)}`;
             
             if (item.mimeType?.startsWith('image/')) {
-                body.innerHTML = `<img src="${fileUrl}">`;
+                body.innerHTML = `<img src="${fileUrl}" style="max-width: 100%; max-height: 80vh;">`;
             } else if (item.mimeType?.startsWith('video/')) {
-                body.innerHTML = `<video src="${fileUrl}" controls autoplay></video>`;
+                body.innerHTML = `<video src="${fileUrl}" controls autoplay style="max-width: 100%; max-height: 80vh;"></video>`;
             } else {
                 window.open(fileUrl, '_blank');
                 return;

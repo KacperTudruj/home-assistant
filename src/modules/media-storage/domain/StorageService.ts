@@ -16,6 +16,12 @@ export interface StorageService {
         size: number;
     }>;
 
+    getThumbnailStream(path: string): Promise<{
+        stream: NodeJS.ReadableStream;
+        mimeType: string;
+        size: number;
+    }>;
+
     getImportUsage(): Promise<{
         used: number;
         max: number;
