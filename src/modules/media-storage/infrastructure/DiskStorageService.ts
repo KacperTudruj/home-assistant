@@ -41,37 +41,49 @@ export class DiskStorageService implements StorageService {
         try {
             const entries = await fs.readdir(absolutePath, { withFileTypes: true });
             
-            let items: BrowseItem[] = await Promise.all(entries.map(async (entry) => {
+            const itemsPromises = entries.map(async (entry) => {
                 const entryPath = path.join(absolutePath, entry.name);
                 
-                let relativeEntryPath = path.relative(this.mountPath, entryPath).replace(/\\/g, '/');
-                if (!relativeEntryPath.startsWith('/')) {
-                    relativeEntryPath = '/' + relativeEntryPath;
-                }
-                
-                const stats = await fs.stat(entryPath);
+                try {
+                    let relativeEntryPath = path.relative(this.mountPath, entryPath).replace(/\\/g, '/');
+                    if (!relativeEntryPath.startsWith('/')) {
+                        relativeEntryPath = '/' + relativeEntryPath;
+                    }
+                    
+                    const stats = await fs.stat(entryPath);
 
-                if (entry.isDirectory()) {
-                    return {
-                        name: entry.name,
-                        path: relativeEntryPath,
-                        type: 'directory' as const,
-                        modifiedAt: stats.mtime,
-                    };
-                } else {
-                    return {
-                        name: entry.name,
-                        path: relativeEntryPath,
-                        type: 'file' as const,
-                        size: stats.size,
-                        mimeType: mime.getType(entryPath) || 'application/octet-stream',
-                        modifiedAt: stats.mtime,
-                    };
+                    if (entry.isDirectory()) {
+                        return {
+                            name: entry.name,
+                            path: relativeEntryPath,
+                            type: 'directory' as const,
+                            modifiedAt: stats.mtime,
+                        };
+                    } else {
+                        return {
+                            name: entry.name,
+                            path: relativeEntryPath,
+                            type: 'file' as const,
+                            size: stats.size,
+                            mimeType: mime.getType(entryPath) || 'application/octet-stream',
+                            modifiedAt: stats.mtime,
+                        };
+                    }
+                } catch (error) {
+                    console.error(`Error reading stats for ${entryPath}:`, error);
+                    return null;
                 }
-            }));
+            });
+
+            let filteredItems: BrowseItem[] = [];
+            for (const item of await Promise.all(itemsPromises)) {
+                if (item !== null) {
+                    filteredItems.push(item);
+                }
+            }
 
             // Filter system/hidden files/folders
-            items = items.filter(i => {
+            filteredItems = filteredItems.filter(i => {
                 const isSystem = i.name.startsWith('$') || i.name.startsWith('.');
                 return !isSystem;
             });
@@ -79,17 +91,17 @@ export class DiskStorageService implements StorageService {
             // Filtering
             if (options?.filter) {
                 const filter = options.filter.toLowerCase();
-                items = items.filter(i => i.name.toLowerCase().includes(filter));
+                filteredItems = filteredItems.filter(i => i.name.toLowerCase().includes(filter));
             }
             if (options?.type) {
-                items = items.filter(i => i.type === options.type);
+                filteredItems = filteredItems.filter(i => i.type === options.type);
             }
 
             // Sorting
             if (options?.sortBy) {
                 const sortBy = options.sortBy;
                 const sortOrder = options.sortOrder === 'desc' ? -1 : 1;
-                items.sort((a, b) => {
+                filteredItems.sort((a, b) => {
                     if (sortBy === 'name') {
                         return a.name.localeCompare(b.name) * sortOrder;
                     }
@@ -103,11 +115,11 @@ export class DiskStorageService implements StorageService {
                 });
             }
 
-            const total = items.length;
+            const total = filteredItems.length;
             const page = options?.page || 1;
             const limit = options?.limit || total || 100;
             const startIndex = (page - 1) * limit;
-            const paginatedItems = items.slice(startIndex, startIndex + limit);
+            const paginatedItems = filteredItems.slice(startIndex, startIndex + limit);
 
             return {
                 items: paginatedItems,

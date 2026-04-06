@@ -16,6 +16,7 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
+      - /mnt/dysk:/mnt/dysk
 
   postgres:
     image: postgres:16
