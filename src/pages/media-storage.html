@@ -28,7 +28,12 @@
         }
     </style>
 </head>
-<body class="container">
+<body class="container" data-page="media-storage" data-app-title="Media Storage">
+    <div id="app-nav-root"></div>
+    <script>window.FEATURE_KEY = "media-storage";</script>
+
+    <script type="module" src="/app.js"></script>
+
     <header>
         <h1>📁 Media Storage</h1>
         <div id="storage-status">Checking...</div>

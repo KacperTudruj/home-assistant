@@ -65,6 +65,32 @@ async function main() {
     },
   });
 
+  await prisma.app.upsert({
+    where: { key: "smart-agd" },
+    update: {},
+    create: {
+      key: "smart-agd",
+      name: "Smart AGD",
+      description: "Zarządzanie inteligentnym AGD",
+      icon: "🔌",
+      route: "/smart-agd",
+      order: 3,
+    },
+  });
+
+  await prisma.app.upsert({
+    where: { key: "media-storage" },
+    update: {},
+    create: {
+      key: "media-storage",
+      name: "Media Storage",
+      description: "Chmura plików i nagrania z kamer",
+      icon: "📁",
+      route: "/media-storage",
+      order: 4,
+    },
+  });
+
   // =====================
   // COMMENTARIES – APP
   // =====================
@@ -159,6 +185,32 @@ async function main() {
   await seedComments(healthCommentsGandalf, gandalf.id, ["health"]);
   await seedComments(healthCommentsBluzgator, bluzgator.id, ["health"]);
 
+  // =====================
+  // COMMENTARIES – MEDIA STORAGE
+  // =====================
+  const mediaCommentsHenryk = [
+    "Henryk pilnuje Twoich plików! 🐶",
+    "Wszystkie filmy są bezpieczne, hau!",
+    "Znalazłeś to, czego szukałeś?",
+    "Twoje wspomnienia są w dobrych łapach.",
+  ];
+
+  const mediaCommentsGandalf = [
+    "To, co zapisane, nie zginie w mrokach czasu.",
+    "Wiele plików tu spoczywa, niektóre cenniejsze niż złoto.",
+    "Używaj tej przestrzeni mądrze, mój przyjacielu.",
+  ];
+
+  const mediaCommentsBluzgator = [
+    "Co tam znowu kitrasz na tym dysku? 🔞",
+    "Zawalasz serwer śmieciami, a potem płacz, że wolno chodzi.",
+    "Pliki wgrane, zadowolony kurwa?",
+  ];
+
+  await seedComments(mediaCommentsHenryk, henryk.id, ["media-storage"]);
+  await seedComments(mediaCommentsGandalf, gandalf.id, ["media-storage"]);
+  await seedComments(mediaCommentsBluzgator, bluzgator.id, ["media-storage"]);
+
   console.log("✅ Seed completed");
 }
 
@@ -168,6 +220,15 @@ async function seedComments(
   featureKeys: string[]
 ) {
   for (const text of texts) {
+    const exists = await prisma.commentary.findFirst({
+      where: {
+        text,
+        commentatorId,
+        featureKeys: { hasSome: featureKeys }
+      }
+    });
+    if (exists) continue;
+
     await prisma.commentary.create({
       data: {
         text,
