@@ -35,7 +35,7 @@ import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
 import {MediaStorageController} from "@modules/media-storage/interface/MediaStorageController";
-import {DiskStorageService} from "@modules/media-storage/infrastructure/DiskStorageService";
+import {NextcloudStorageService} from "@modules/media-storage/infrastructure/NextcloudStorageService";
 import {MediaStorageRoutes} from "@modules/media-storage/interface/MediaStorageRoutes";
 import {basicAuth} from './shared/middleware/basicAuth';
 
@@ -110,9 +110,17 @@ const agdProvider = new SmartThingsAgdAdapter(stClient);
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 
-const mountPath = process.env.MEDIA_STORAGE_MOUNT_PATH || './storage/media-library';
-const temporaryPath = process.env.MEDIA_STORAGE_TEMPORARY_PATH || './storage/temporary-storage';
-const storageService = new DiskStorageService(mountPath, temporaryPath);
+const nextcloudUrl = process.env.NEXTCLOUD_URL || 'http://nextcloud:80';
+const nextcloudUser = process.env.NEXTCLOUD_USER || 'admin';
+const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD || 'admin';
+const nextcloudRemoteRoot = process.env.NEXTCLOUD_REMOTE_ROOT || '/remote.php/dav/files/admin/';
+
+const storageService = new NextcloudStorageService(
+    nextcloudUrl,
+    nextcloudUser,
+    nextcloudPassword,
+    nextcloudRemoteRoot
+);
 const mediaStorageController = new MediaStorageController(storageService);
 // ===== END COMPOSITION ROOT =====
 
