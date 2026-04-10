@@ -27,13 +27,19 @@ export class NextcloudStorageService implements StorageService {
     async getStatus() {
         try {
             // Check if we can list the root
-            await this.client.getDirectoryContents(this.remoteRoot);
+            const contents = await this.client.getDirectoryContents(this.remoteRoot);
+            console.log(`Nextcloud WebDAV root check success: ${Array.isArray(contents) ? contents.length : 'ok'} items`);
             return {
                 isAvailable: true,
                 mountPath: "Nextcloud: " + this.remoteRoot,
             };
-        } catch (error) {
-            console.error("Nextcloud status error:", error);
+        } catch (error: any) {
+            console.error("Nextcloud status error:", {
+                message: error.message,
+                status: error.status,
+                statusText: error.statusText,
+                url: this.remoteRoot
+            });
             return {
                 isAvailable: false,
                 mountPath: "Nextcloud: " + this.remoteRoot,

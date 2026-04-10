@@ -34,9 +34,6 @@ import {GetAgdDevicesUseCase} from '@modules/smart-agd/application/GetAgdDevices
 import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
-import {MediaStorageController} from "@modules/media-storage/interface/MediaStorageController";
-import {NextcloudStorageService} from "@modules/media-storage/infrastructure/NextcloudStorageService";
-import {MediaStorageRoutes} from "@modules/media-storage/interface/MediaStorageRoutes";
 import {basicAuth} from './shared/middleware/basicAuth';
 
 const app = express();
@@ -65,10 +62,6 @@ app.get('/car-log', (_, res) => {
 });
 app.get('/smart-agd', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
-});
-
-app.get('/media-storage', (_, res) => {
-    res.sendFile(path.join(PAGES_DIR, 'media-storage.html'));
 });
 
 // ===== COMPOSITION ROOT =====
@@ -109,19 +102,6 @@ const stClient = new SmartThingsHttpClient(stConfigRepo, () => {
 const agdProvider = new SmartThingsAgdAdapter(stClient);
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
-
-const nextcloudUrl = process.env.NEXTCLOUD_URL || 'http://nextcloud:80';
-const nextcloudUser = process.env.NEXTCLOUD_USER || 'admin';
-const nextcloudPassword = process.env.NEXTCLOUD_PASSWORD || 'admin';
-const nextcloudRemoteRoot = process.env.NEXTCLOUD_REMOTE_ROOT || '/remote.php/dav/files/admin/';
-
-const storageService = new NextcloudStorageService(
-    nextcloudUrl,
-    nextcloudUser,
-    nextcloudPassword,
-    nextcloudRemoteRoot
-);
-const mediaStorageController = new MediaStorageController(storageService);
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
@@ -130,7 +110,6 @@ app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
 app.use('/api', CarRoutes(carController, fuelController));
 app.use('/api', AgdRoutes(agdController));
-app.use('/api', MediaStorageRoutes(mediaStorageController));
 
 
 // health check

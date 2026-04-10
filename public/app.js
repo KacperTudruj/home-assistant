@@ -19,7 +19,5 @@ document.addEventListener("DOMContentLoaded", () => {
         initFullFuelHistory();
     } else if (pageType === "smart-agd") {
         initAgd();
-    } else if (pageType === "media-storage") {
-        // initMediaStorage(); // If there was a separate JS file, but for now it's in HTML
     }
 });
