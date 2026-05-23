@@ -136,6 +136,14 @@ model SystemConfigurationSmartAgd {
 
   // Samsung SmartThings
   samsungSmartThingsToken String? @map("samsung_smart_things_token")
+
+  // Aqara
+  aqaraAppId        String? @map("aqara_app_id")
+  aqaraAppKey       String? @map("aqara_app_key")
+  aqaraKeyId        String? @map("aqara_key_id")
+  aqaraAccessToken  String? @map("aqara_access_token")
+  aqaraRefreshToken String? @map("aqara_refresh_token")
+  aqaraRegion       String? @map("aqara_region")
   
   @@map("SystemConfigurationSmartAgd")
 }

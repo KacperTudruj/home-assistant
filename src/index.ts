@@ -35,6 +35,10 @@ import {GetAgdDevicesUseCase} from '@modules/smart-agd/application/GetAgdDevices
 import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
+import {AqaraConfigRepositoryPrisma} from './shared/connectors/aqara/infrastructure/AqaraConfigRepositoryPrisma';
+import {AqaraHttpClient} from './shared/connectors/aqara/infrastructure/AqaraHttpClient';
+import {AqaraAgdAdapter} from '@modules/smart-agd/infrastructure/AqaraAgdAdapter';
+import {CompositeAgdProvider} from '@modules/smart-agd/domain/CompositeAgdProvider';
 import {basicAuth} from './shared/middleware/basicAuth';
 
 const app = express();
@@ -100,9 +104,16 @@ const stClient = new SmartThingsHttpClient(stConfigRepo, () => {
     console.log('ALARM: SmartThings token expired! Update it in SystemConfiguration table.');
 });
 
+// --- Aqara Connector (Shared Kernel) ---
+const aqaraConfigRepo = new AqaraConfigRepositoryPrisma(prisma);
+const aqaraClient = new AqaraHttpClient(aqaraConfigRepo);
+
 // --- AGD Module ---
-const agdProvider = new SmartThingsAgdAdapter(stClient);
-const getAgdDevicesUseCase = new GetAgdDevicesUseCase(agdProvider);
+const stAgdProvider = new SmartThingsAgdAdapter(stClient);
+const aqaraAgdProvider = new AqaraAgdAdapter(aqaraClient);
+const compositeAgdProvider = new CompositeAgdProvider([stAgdProvider, aqaraAgdProvider]);
+
+const getAgdDevicesUseCase = new GetAgdDevicesUseCase(compositeAgdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 // ===== END COMPOSITION ROOT =====
 
