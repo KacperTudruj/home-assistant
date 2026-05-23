@@ -16,20 +16,23 @@ body {
 :root {
   --content-width: 700px;
 
-  --accent: #38bdf8;
-  --accent-soft: #7dd3fc;
-  --muted: #94a3b8;
+  --accent: #00ff41;
+  --accent-soft: #00ff41;
+  --muted: #008f11;
 
-  --bg-main-top: #020617;
-  --bg-main-bottom: #0f172a;
-  --bg-card: rgba(15, 23, 42, 0.6);
-  --glass-border: rgba(255, 255, 255, 0.08);
+  --bg-main-top: #000000;
+  --bg-main-bottom: #000000;
+  --bg-card: rgba(0, 0, 0, 0.85);
+  --glass-border: rgba(0, 255, 65, 0.2);
+  
+  --matrix-glow: 0 0 10px rgba(0, 255, 65, 0.5);
+  --matrix-text-glow: 0 0 5px rgba(0, 255, 65, 0.8);
 }
 
 body {
-  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-  background: #020617;
-  color: #e5e7eb;
+  font-family: 'Courier New', Courier, monospace;
+  background: #000000;
+  color: #00ff41;
   line-height: 1.5;
   overflow-x: hidden;
   position: relative;
@@ -44,16 +47,35 @@ body::before {
   height: 100%;
   z-index: -1;
   background: 
-    radial-gradient(circle at 10% 20%, rgba(56, 189, 248, 0.15) 0%, transparent 40%),
-    radial-gradient(circle at 90% 80%, rgba(125, 211, 252, 0.1) 0%, transparent 40%),
-    radial-gradient(circle at 50% 50%, rgba(15, 23, 42, 1) 0%, #020617 100%);
-  filter: blur(60px);
-  animation: bgPulse 20s infinite alternate;
+    linear-gradient(rgba(0, 59, 0, 0.15) 50%, transparent 50%),
+    linear-gradient(90deg, rgba(0, 255, 65, 0.05) 50%, transparent 50%),
+    radial-gradient(circle at 50% 50%, #003b00 0%, #000000 100%);
+  background-size: 100% 4px, 4px 100%, 100% 100%;
+  animation: scanline 10s linear infinite;
 }
 
-@keyframes bgPulse {
-  0% { transform: scale(1); }
-  100% { transform: scale(1.1); }
+@keyframes scanline {
+  0% { transform: translateY(0); }
+  100% { transform: translateY(4px); }
+}
+
+@keyframes matrixRain {
+  0% { background-position: 0 0; }
+  100% { background-position: 0 1000px; }
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -2;
+  background: linear-gradient(rgba(0, 0, 0, 0.9), rgba(0, 0, 0, 0.9)), 
+              url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><text x="10" y="20" fill="rgba(0, 255, 65, 0.2)" font-family="monospace" font-size="12">1010101</text><text x="50" y="40" fill="rgba(0, 255, 65, 0.2)" font-family="monospace" font-size="12">0110</text><text x="30" y="60" fill="rgba(0, 255, 65, 0.2)" font-family="monospace" font-size="12">11011</text><text x="70" y="80" fill="rgba(0, 255, 65, 0.2)" font-family="monospace" font-size="12">0010</text></svg>');
+  animation: matrixRain 60s linear infinite;
+  opacity: 0.3;
 }
 
 /* =========================
@@ -108,6 +130,9 @@ h1 {
   font-size: 42px;
   font-weight: 700;
   margin-bottom: 10px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  text-shadow: var(--matrix-text-glow);
 }
 
 .page-title {
@@ -219,10 +244,11 @@ h1 {
 
 .app-tile:hover {
   transform: translateY(-8px) scale(1.03);
-  background: rgba(56, 189, 248, 0.08);
-  border-color: rgba(56, 189, 248, 0.3);
-  box-shadow: 0 20px 40px rgba(0, 0, 0, .4);
+  background: rgba(0, 255, 65, 0.12);
+  border-color: rgba(0, 255, 65, 0.6);
+  box-shadow: 0 0 30px rgba(0, 255, 65, 0.4);
   color: var(--accent-soft);
+  text-shadow: var(--matrix-text-glow);
 }
 
 .app-tile.disabled {
@@ -299,36 +325,43 @@ h1 {
 ========================= */
 
 .btn-primary {
-  background: linear-gradient(135deg, var(--accent), var(--accent-soft));
-  color: #020617;
-  border: none;
+  background: transparent;
+  color: var(--accent);
+  border: 1px solid var(--accent);
   padding: 10px 18px;
-  border-radius: 14px;
+  border-radius: 4px;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(56, 189, 248, 0.25);
+  box-shadow: var(--matrix-glow);
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn-primary:hover {
+  background: var(--accent);
+  color: #000;
+  box-shadow: 0 0 20px var(--accent);
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(56, 189, 248, 0.4);
 }
 
 .btn-secondary {
-  background: rgba(255, 255, 255, 0.05);
-  border: 1px solid var(--glass-border);
-  color: #e5e7eb;
+  background: rgba(0, 255, 65, 0.05);
+  border: 1px solid var(--muted);
+  color: var(--accent);
   padding: 10px 18px;
-  border-radius: 14px;
+  border-radius: 4px;
   font-weight: 500;
   cursor: pointer;
   transition: all 0.2s ease;
+  text-transform: uppercase;
+  letter-spacing: 1px;
 }
 
 .btn-secondary:hover {
-  background: rgba(255, 255, 255, 0.1);
-  border-color: rgba(255, 255, 255, 0.2);
+  background: rgba(0, 255, 65, 0.1);
+  border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
 }
 
 .btn-link {
@@ -580,9 +613,9 @@ h1 {
 .car-selection-item {
   padding: 16px;
   margin-bottom: 12px;
-  background: rgba(255,255,255,0.03);
-  border: 1px solid rgba(255,255,255,0.06);
-  border-radius: 12px;
+  background: rgba(0, 255, 65, 0.03);
+  border: 1px solid rgba(0, 255, 65, 0.1);
+  border-radius: 4px;
   cursor: pointer;
   display: flex;
   justify-content: space-between;
@@ -591,8 +624,9 @@ h1 {
 }
 
 .car-selection-item:hover {
-  background: rgba(56, 189, 248, 0.1);
+  background: rgba(0, 255, 65, 0.1);
   border-color: var(--accent);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.2);
 }
 
 .car-selection-item .car-name {
@@ -613,11 +647,18 @@ h1 {
 }
 
 .form-row input {
-  background: rgba(255,255,255,0.05);
-  border: 1px solid rgba(255,255,255,0.1);
+  background: #000;
+  border: 1px solid var(--muted);
   padding: 10px;
-  border-radius: 8px;
-  color: #fff;
+  border-radius: 4px;
+  color: var(--accent);
+  font-family: 'Courier New', Courier, monospace;
+}
+
+.form-row input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
 }
 
 .form-actions {
