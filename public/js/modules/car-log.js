@@ -4,6 +4,8 @@ export async function initCarLog() {
     const changeCarBtn = document.getElementById("change-car-btn");
     const addFuelBtn = document.getElementById("add-fuel-btn");
     const addFuelForm = document.getElementById("add-fuel-form");
+    const addServiceBtn = document.getElementById("add-service-btn");
+    const addServiceForm = document.getElementById("add-service-form");
 
     const savedCarId = localStorage.getItem("selectedCarId");
     if (savedCarId) {
@@ -18,10 +20,18 @@ export async function initCarLog() {
     if (addFuelBtn) {
         addFuelBtn.addEventListener("click", openAddFuelModal);
     }
+    if (addServiceBtn) {
+        addServiceBtn.addEventListener("click", openAddServiceModal);
+    }
     if (addFuelForm) {
         addFuelForm.addEventListener("submit", submitAddFuelForm);
         const cancelBtn = document.getElementById("cancel-add-fuel");
         if (cancelBtn) cancelBtn.addEventListener("click", closeAddFuelModal);
+    }
+    if (addServiceForm) {
+        addServiceForm.addEventListener("submit", submitAddServiceForm);
+        const cancelBtn = document.getElementById("cancel-add-service");
+        if (cancelBtn) cancelBtn.addEventListener("click", closeAddServiceModal);
     }
 }
 
@@ -76,10 +86,16 @@ async function loadCarData(carId) {
         }
 
         const addFuelBtn = document.getElementById("add-fuel-btn");
+        const addServiceBtn = document.getElementById("add-service-btn");
         if (addFuelBtn) {
             addFuelBtn.disabled = !car.isActive;
             addFuelBtn.title = car.isActive ? "" : "To auto jest nieaktywne";
             addFuelBtn.classList.toggle("disabled", !car.isActive);
+        }
+        if (addServiceBtn) {
+            addServiceBtn.disabled = !car.isActive;
+            addServiceBtn.title = car.isActive ? "" : "To auto jest nieaktywne";
+            addServiceBtn.classList.toggle("disabled", !car.isActive);
         }
 
         if (car.mileage) {
@@ -91,6 +107,8 @@ async function loadCarData(carId) {
 
         // Load fuel history for this car
         loadFuelHistory(carId);
+        // Load service history
+        loadServiceHistory(carId);
         // Load statistics
         loadCarStatistics(carId);
 
@@ -157,16 +175,24 @@ async function loadCarStatistics(carId) {
     if (!avgPriceEl) return;
 
     try {
-        const res = await fetch(`/api/cars/${carId}/fuel/statistics`);
-        if (!res.ok) throw new Error("Failed to fetch statistics");
-        const stats = await res.json();
+        // We need both fuel statistics and general car stats (oil change)
+        const [fuelStatsRes, carStatsRes] = await Promise.all([
+            fetch(`/api/cars/${carId}/fuel/statistics`),
+            fetch(`/api/cars/${carId}/stats`)
+        ]);
 
-        avgPriceEl.textContent = `${stats.overallAvgPricePerLiter.toFixed(2)} zł/L`;
+        if (!fuelStatsRes.ok || !carStatsRes.ok) throw new Error("Failed to fetch statistics");
+        
+        const fuelStats = await fuelStatsRes.json();
+        const carStats = await carStatsRes.json();
+
+        // Fuel stats
+        avgPriceEl.textContent = `${fuelStats.overallAvgPricePerLiter.toFixed(2)} zł/L`;
         
         const setModeValue = (id, modeKey) => {
             const el = document.getElementById(id);
             if (!el) return;
-            const m = stats.avgConsumptionPerDrivingMode?.find(x => x.drivingMode === modeKey);
+            const m = fuelStats.avgConsumptionPerDrivingMode?.find(x => x.drivingMode === modeKey);
             if (m && m.avgConsumption) {
                 el.innerHTML = `
                     <div>${m.avgConsumption.toFixed(2)} <small>l/100km</small></div>
@@ -181,18 +207,44 @@ async function loadCarStatistics(carId) {
         setModeValue('stats-highway', 'HIGHWAY');
         setModeValue('stats-mixed', 'MIXED');
 
-        setText("stats-avg-cost", stats.overallAvgCostPer100Km ? `${stats.overallAvgCostPer100Km.toFixed(2)} zł/100km` : "---");
-        setText("stats-avg-liters", `${stats.overallAvgLitersPerRefuel.toFixed(2)} L`);
-        setText("stats-total-liters", `${stats.overallTotalLiters.toLocaleString()} L`);
-        setText("stats-total-cost", `${stats.overallTotalSpent.toLocaleString()} zł`);
+        setText("stats-avg-cost", fuelStats.overallAvgCostPer100Km ? `${fuelStats.overallAvgCostPer100Km.toFixed(2)} zł/100km` : "---");
+        setText("stats-avg-liters", `${fuelStats.overallAvgLitersPerRefuel.toFixed(2)} L`);
+        setText("stats-total-liters", `${fuelStats.overallTotalLiters.toLocaleString()} L`);
+        setText("stats-total-cost", `${fuelStats.overallTotalSpent.toLocaleString()} zł`);
+
+        // Oil change info from carStats
+        const oilRemainingEl = document.getElementById("stats-oil-remaining");
+        const oilCard = document.getElementById("oil-change-card");
+        const progressBar = document.getElementById("oil-progress-bar");
+
+        if (carStats.oilChange && carStats.oilChange.intervalKm) {
+            oilCard.classList.remove("hidden");
+            const remaining = carStats.oilChange.remainingKm;
+            const interval = carStats.oilChange.intervalKm;
+            
+            if (remaining !== null) {
+                oilRemainingEl.textContent = `${remaining.toLocaleString()} km`;
+                const percent = Math.max(0, Math.min(100, (remaining / interval) * 100));
+                progressBar.style.width = `${percent}%`;
+                
+                if (percent < 10) progressBar.style.background = "#f44336";
+                else if (percent < 25) progressBar.style.background = "#ff9800";
+                else progressBar.style.background = "#ffc107";
+            } else {
+                oilRemainingEl.textContent = "brak danych";
+                progressBar.style.width = "0%";
+            }
+        } else {
+            oilCard.classList.add("hidden");
+        }
 
         const yearlyListEl = document.getElementById("stats-yearly");
         if (yearlyListEl) {
             yearlyListEl.innerHTML = "";
-            const years = stats.avgPricePerLiterPerYear.map(y => y.year).reverse();
+            const years = fuelStats.avgPricePerLiterPerYear.map(y => y.year).reverse();
             years.forEach(year => {
-                const avgPrice = stats.avgPricePerLiterPerYear.find(y => y.year === year)?.avgPricePerLiter;
-                const totalSpent = stats.totalSpentPerYear.find(y => y.year === year)?.totalSpent;
+                const avgPrice = fuelStats.avgPricePerLiterPerYear.find(y => y.year === year)?.avgPricePerLiter;
+                const totalSpent = fuelStats.totalSpentPerYear.find(y => y.year === year)?.totalSpent;
                 const li = document.createElement("li");
                 li.className = "stats-yearly-item";
                 li.innerHTML = `
@@ -205,6 +257,87 @@ async function loadCarStatistics(carId) {
         }
     } catch (err) {
         console.error("Błąd ładowania statystyk", err);
+    }
+}
+
+async function loadServiceHistory(carId) {
+    const container = document.getElementById("service-list-container");
+    if (!container) return;
+
+    container.innerHTML = '<li class="loading">Ładowanie napraw...</li>';
+
+    try {
+        const res = await fetch(`/api/cars/${carId}/services`);
+        if (!res.ok) throw new Error("Failed to fetch service history");
+        const services = await res.json();
+
+        container.innerHTML = "";
+        if (services.length === 0) {
+            container.innerHTML = "<li>Brak zarejestrowanych napraw</li>";
+            return;
+        }
+
+        services.forEach(service => {
+            const li = document.createElement("li");
+            const date = new Date(service.date).toLocaleDateString('pl-PL');
+            
+            li.innerHTML = `
+                <div class="service-main-info">
+                  <span class="service-description">
+                    ${service.description}
+                    ${service.isOilChange ? '<span class="oil-change-badge">OLEJ</span>' : ''}
+                  </span>
+                  <span class="service-cost">${service.cost.toFixed(2)} zł</span>
+                </div>
+                <div class="service-sub-info">
+                  ${date} · ${service.mileageKm.toLocaleString()} km
+                </div>
+            `;
+            container.appendChild(li);
+        });
+    } catch (err) {
+        console.error(err);
+        container.innerHTML = '<li style="color:red">Błąd ładowania napraw</li>';
+    }
+}
+
+function openAddServiceModal() {
+    document.getElementById("add-service-overlay")?.classList.remove("hidden");
+    const dateInput = document.getElementById("service-date");
+    if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
+}
+
+function closeAddServiceModal() {
+    document.getElementById("add-service-overlay")?.classList.add("hidden");
+}
+
+async function submitAddServiceForm(e) {
+    e.preventDefault();
+    const carId = localStorage.getItem("selectedCarId");
+    if (!carId) return;
+
+    const getValue = (id) => document.getElementById(id).value.replace(',', '.');
+    
+    const payload = {
+        date: document.getElementById("service-date").value,
+        description: document.getElementById("service-description").value,
+        cost: parseFloat(getValue("service-cost")),
+        mileageKm: parseInt(getValue("service-meter")),
+        isOilChange: document.getElementById("service-is-oil-change").checked
+    };
+
+    try {
+        const res = await fetch(`/api/cars/${carId}/services`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(payload)
+        });
+        if (!res.ok) throw new Error("Błąd zapisu");
+        closeAddServiceModal();
+        await loadCarData(carId);
+        e.target.reset();
+    } catch (err) {
+        alert("Błąd: " + err.message);
     }
 }
 

@@ -18,6 +18,10 @@ export function CarRoutes(
       carController.getById(req, res)
   );
 
+  router.get("/cars/:id/stats", (req, res) =>
+      carController.getStats(req, res)
+  );
+
   router.get("/cars", (req, res) =>
       carController.listCars(req, res)
   );

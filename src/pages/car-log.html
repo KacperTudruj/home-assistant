@@ -36,6 +36,7 @@
 
     <div class="car-actions">
       <button class="btn-secondary" id="change-car-btn">Zmień auto</button>
+      <button class="btn-primary" id="add-service-btn">Dodaj naprawę</button>
       <button class="btn-primary" id="add-fuel-btn">Dodaj tankowanie</button>
     </div>
   </section>
@@ -87,6 +88,13 @@
         <span class="label">💰 Łączny koszt</span>
         <span class="value" id="stats-total-cost">—</span>
       </div>
+      <div id="oil-change-card" class="oil-change-info">
+        <span class="label">🛢️ Kolejna wymiana oleju za</span>
+        <span class="value" id="stats-oil-remaining">—</span>
+        <div class="progress-bar-container">
+          <div id="oil-progress-bar" class="progress-bar"></div>
+        </div>
+      </div>
     </div>
 
     <h3>Rocznie</h3>
@@ -128,6 +136,15 @@
     </div>
   </section>
 
+  <!-- KARTA: OSTATNIE NAPRAWY -->
+  <section class="card">
+    <h2>🛠️ Ostatnie naprawy</h2>
+
+    <ul class="service-list" id="service-list-container">
+      <li class="loading">Ładowanie napraw...</li>
+    </ul>
+  </section>
+
   <!-- MODAL: DODAJ TANKOWANIE -->
   <div id="add-fuel-overlay" class="overlay hidden">
     <div class="overlay-content">
@@ -167,6 +184,39 @@
         </div>
         <div class="form-actions">
           <button type="button" class="btn-secondary" id="cancel-add-fuel">Anuluj</button>
+          <button type="submit" class="btn-primary">Zapisz</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- MODAL: DODAJ NAPRAWĘ -->
+  <div id="add-service-overlay" class="overlay hidden">
+    <div class="overlay-content">
+      <h2>Dodaj naprawę / serwis</h2>
+      <form id="add-service-form">
+        <div class="form-row">
+          <label>Data</label>
+          <input type="date" id="service-date" required />
+        </div>
+        <div class="form-row">
+          <label>Opis</label>
+          <input type="text" id="service-description" placeholder="np. Wymiana oleju i filtrów" required />
+        </div>
+        <div class="form-row">
+          <label>Przebieg (km)</label>
+          <input type="number" id="service-meter" step="1" min="0" required />
+        </div>
+        <div class="form-row">
+          <label>Koszt (zł)</label>
+          <input type="number" id="service-cost" step="0.01" min="0" required />
+        </div>
+        <div class="form-row checkbox-row">
+          <input type="checkbox" id="service-is-oil-change" />
+          <label for="service-is-oil-change">Czy to była wymiana oleju?</label>
+        </div>
+        <div class="form-actions">
+          <button type="button" class="btn-secondary" id="cancel-add-service">Anuluj</button>
           <button type="submit" class="btn-primary">Zapisz</button>
         </div>
       </form>
