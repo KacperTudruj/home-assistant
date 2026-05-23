@@ -30,7 +30,7 @@ export class CarController {
      *         description: Nieprawidłowe dane wejściowe
      */
     async create(req: Request, res: Response): Promise<void> {
-        const { name, year, mileageAtPurchase } = req.body;
+        const { name, year, mileageAtPurchase, oilChangeIntervalKm } = req.body;
 
         if (!name || typeof name !== 'string') {
             res.status(400).json({ error: 'Invalid car name' });
@@ -48,6 +48,7 @@ export class CarController {
             year: new Date(year).getFullYear(),
             isActive: true,
             mileageAtPurchase: mileageAtPurchase ? Number(mileageAtPurchase) : 0,
+            oilChangeIntervalKm: oilChangeIntervalKm ? Number(oilChangeIntervalKm) : undefined,
         });
 
         await carRepository.save(car);
@@ -146,13 +147,23 @@ export class CarController {
             return;
         }
         const stats = car.getStatistics();
-        res.json(stats || {
+        const remainingOilKm = car.getRemainingKmToOilChange();
+
+        const result = stats || {
             totalCost: 0,
             totalLiters: 0,
             avgPricePerLiter: 0,
             avgLitersPerRefuel: 0,
             avgConsumption: null,
             yearlyStats: []
+        };
+
+        res.json({
+            ...result,
+            oilChange: {
+                intervalKm: car.oilChangeIntervalKm,
+                remainingKm: remainingOilKm
+            }
         });
     }
 

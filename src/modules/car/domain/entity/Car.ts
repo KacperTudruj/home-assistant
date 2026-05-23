@@ -11,6 +11,7 @@ export class Car {
     readonly engine?: string;
     readonly vin?: string;
     readonly mileageAtPurchase?: number;
+    readonly oilChangeIntervalKm?: number;
 
     private mileageRecords: MileageRecord[] = [];
     private fuelRecords: FuelRecord[] = [];
@@ -25,6 +26,7 @@ export class Car {
         engine?: string;
         vin?: string;
         mileageAtPurchase?: number;
+        oilChangeIntervalKm?: number;
     }) {
         this.id = params.id;
         this.name = params.name;
@@ -34,6 +36,7 @@ export class Car {
         this.engine = params.engine;
         this.vin = params.vin;
         this.mileageAtPurchase = params.mileageAtPurchase;
+        this.oilChangeIntervalKm = params.oilChangeIntervalKm;
     }
 
     // ===== MILEAGE =====
@@ -81,6 +84,31 @@ export class Car {
 
     addServiceRecord(record: ServiceRecord): void {
         this.serviceRecords.push(record);
+    }
+
+    getRemainingKmToOilChange(): number | null {
+        if (!this.oilChangeIntervalKm) {
+            return null;
+        }
+
+        const oilChanges = this.serviceRecords
+            .filter(r => r.isOilChange)
+            .sort((a, b) => b.mileageKm - a.mileageKm);
+
+        const lastOilChangeMileage = oilChanges.length > 0 
+            ? oilChanges[0].mileageKm 
+            : (this.mileageAtPurchase ?? 0);
+
+        const currentMileage = this.getLatestMileage()?.mileageKm ?? (this.mileageAtPurchase ?? 0);
+        
+        const kmSinceLastChange = currentMileage - lastOilChangeMileage;
+        const remaining = this.oilChangeIntervalKm - kmSinceLastChange;
+
+        return remaining;
+    }
+
+    getServiceRecords(): ServiceRecord[] {
+        return [...this.serviceRecords];
     }
 
     // ===== ANALYSIS =====

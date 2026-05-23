@@ -21,6 +21,7 @@ import {CommentaryRoutes} from '@modules/commentary/interface/CommentaryRoutes';
 import {CarRoutes} from '@modules/car/interface/CarRoutes';
 import {CarController} from '@modules/car/interface/CarController';
 import {FuelController} from '@modules/car/interface/FuelController';
+import {ServiceController} from '@modules/car/interface/ServiceController';
 import {GetFuelStatisticsUseCase} from '@modules/car/application/GetFuelStatisticsUseCase';
 
 // Shared Connectors
@@ -91,6 +92,7 @@ const featureController = new FeatureController(listFeaturesUseCase);
 const carController = new CarController();
 const fuelStatisticsUseCase = new GetFuelStatisticsUseCase(prisma);
 const fuelController = new FuelController(fuelStatisticsUseCase);
+const serviceController = new ServiceController();
 
 // --- SmartThings Connector (Shared Kernel) ---
 const stConfigRepo = new SmartThingsConfigRepositoryPrisma(prisma);
@@ -108,7 +110,7 @@ const agdController = new AgdController(getAgdDevicesUseCase);
 // commentary
 app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
-app.use('/api', CarRoutes(carController, fuelController));
+app.use('/api', CarRoutes(carController, fuelController, serviceController));
 app.use('/api', AgdRoutes(agdController));
 
 

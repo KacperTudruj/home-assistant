@@ -1,10 +1,12 @@
 import { Router } from "express";
 import { CarController } from "./CarController";
 import { FuelController } from "./FuelController";
+import { ServiceController } from "./ServiceController";
 
 export function CarRoutes(
     carController: CarController,
-    fuelController: FuelController
+    fuelController: FuelController,
+    serviceController: ServiceController
 ): Router {
   const router = Router();
 
@@ -34,6 +36,14 @@ export function CarRoutes(
 
   router.get("/cars/:id/fuels", (req, res) =>
       fuelController.listFuels(req, res)
+  );
+
+  router.post("/cars/:id/services", (req, res) =>
+      serviceController.create(req, res)
+  );
+
+  router.get("/cars/:id/services", (req, res) =>
+      serviceController.list(req, res)
   );
 
   return router;
