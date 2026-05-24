@@ -41,6 +41,12 @@ import {AqaraAgdAdapter} from '@modules/smart-agd/infrastructure/AqaraAgdAdapter
 import {CompositeAgdProvider} from '@modules/smart-agd/domain/CompositeAgdProvider';
 import {basicAuth} from './shared/middleware/basicAuth';
 
+// Smart Home Module
+import {GetSmartHomeDevicesUseCase} from '@modules/smart-home/application/GetSmartHomeDevicesUseCase';
+import {AqaraSmartHomeAdapter} from '@modules/smart-home/infrastructure/AqaraSmartHomeAdapter';
+import {SmartHomeController} from '@modules/smart-home/interface/SmartHomeController';
+import {SmartHomeRoutes} from '@modules/smart-home/interface/SmartHomeRoutes';
+
 const app = express();
 const PORT = 3000;
 const PAGES_DIR = path.join(__dirname, '..', 'src', 'pages');
@@ -67,6 +73,9 @@ app.get('/car-log', (_, res) => {
 });
 app.get('/smart-agd', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
+});
+app.get('/camera', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'camera.html'));
 });
 
 // ===== COMPOSITION ROOT =====
@@ -115,6 +124,11 @@ const compositeAgdProvider = new CompositeAgdProvider([stAgdProvider, aqaraAgdPr
 
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(compositeAgdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
+
+// --- Smart Home Module ---
+const aqaraSmartHomeProvider = new AqaraSmartHomeAdapter(aqaraClient);
+const getSmartHomeDevicesUseCase = new GetSmartHomeDevicesUseCase(aqaraSmartHomeProvider);
+const smartHomeController = new SmartHomeController(getSmartHomeDevicesUseCase);
 // ===== END COMPOSITION ROOT =====
 
 // ===== ROUTES =====
@@ -123,6 +137,7 @@ app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
 app.use('/api', CarRoutes(carController, fuelController, serviceController));
 app.use('/api', AgdRoutes(agdController));
+app.use('/api', SmartHomeRoutes(smartHomeController));
 
 
 // health check
