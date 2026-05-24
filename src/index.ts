@@ -49,6 +49,8 @@ import {basicAuth} from './shared/middleware/basicAuth';
 // Smart Home Module
 import {GetSmartHomeDevicesUseCase} from '@modules/smart-home/application/GetSmartHomeDevicesUseCase';
 import {AqaraSmartHomeAdapter} from '@modules/smart-home/infrastructure/AqaraSmartHomeAdapter';
+import {Go2RtcSmartHomeAdapter} from '@modules/smart-home/infrastructure/Go2RtcSmartHomeAdapter';
+import {CompositeSmartHomeProvider} from '@modules/smart-home/domain/CompositeSmartHomeProvider';
 import {SmartHomeController} from '@modules/smart-home/interface/SmartHomeController';
 import {SmartHomeRoutes} from '@modules/smart-home/interface/SmartHomeRoutes';
 
@@ -132,7 +134,12 @@ const agdController = new AgdController(getAgdDevicesUseCase);
 
 // --- Smart Home Module ---
 const aqaraSmartHomeProvider = new AqaraSmartHomeAdapter(aqaraClient);
-const getSmartHomeDevicesUseCase = new GetSmartHomeDevicesUseCase(aqaraSmartHomeProvider);
+const go2rtcSmartHomeProvider = new Go2RtcSmartHomeAdapter();
+const compositeSmartHomeProvider = new CompositeSmartHomeProvider([
+    go2rtcSmartHomeProvider,
+    aqaraSmartHomeProvider
+]);
+const getSmartHomeDevicesUseCase = new GetSmartHomeDevicesUseCase(compositeSmartHomeProvider);
 const smartHomeController = new SmartHomeController(getSmartHomeDevicesUseCase);
 // ===== END COMPOSITION ROOT =====
 
