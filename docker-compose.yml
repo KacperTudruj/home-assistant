@@ -12,6 +12,7 @@ services:
       - postgres
     env_file:
       - .env
+      - .env.local
     restart: unless-stopped
     volumes:
       - .:/app
@@ -50,6 +51,9 @@ services:
     container_name: go2rtc
     network_mode: host # Ważne dla RTSP/HomeKit w sieci lokalnej
     restart: always
+    env_file:
+      - .env
+      - .env.local
     volumes:
       - ./go2rtc.yaml:/config/go2rtc.yaml
 

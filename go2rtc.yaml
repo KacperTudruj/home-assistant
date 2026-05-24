@@ -1,2 +1,2 @@
 streams:
-  kamera_salon: hap://192.162.1.47:554?pin=123-45-678
+  kamera_salon: ${GO2RTC_KAMERA_SALON}
