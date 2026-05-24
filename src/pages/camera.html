@@ -119,6 +119,7 @@
                     // Zakładamy go2rtc na porcie 1984 na tym samym host'cie co API (192.168.1.46)
                     // src=kamera_salon - nazwa z go2rtc.yaml
                     const streamName = cam.name.toLowerCase().includes('salon') ? 'kamera_salon' : 'kamera_salon'; 
+                    const host = window.location.hostname;
                     
                     card.innerHTML = `
                         <div class="camera-header">
@@ -126,7 +127,7 @@
                             <span class="status-online" style="color: #00ff00;">● Live</span>
                         </div>
                         <div class="video-wrapper">
-                            <video src="http://192.168.1.46:1984/api/stream.mp4?src=${streamName}" autoplay muted controls playsinline></video>
+                            <video src="http://${host}:1984/api/stream.mp4?src=${streamName}" autoplay muted controls playsinline></video>
                         </div>
                     `;
                     cameraList.appendChild(card);
