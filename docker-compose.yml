@@ -17,7 +17,6 @@ services:
     volumes:
       - .:/app
       - /app/node_modules
-      - /app/package-lock.json
       - /mnt/dysk:/mnt/dysk
 
   postgres:
