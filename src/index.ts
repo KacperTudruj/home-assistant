@@ -4,8 +4,8 @@ import {PrismaClient} from '@prisma/client';
 import dotenv from 'dotenv';
 
 // Load environment variables
-dotenv.config({ path: '.env' });
-dotenv.config({ path: '.env.local', override: true });
+dotenv.config(); // Load .env
+dotenv.config({ path: path.resolve(process.cwd(), '.env.local'), override: true }); // Load .env.local if exists
 
 import swaggerUi from 'swagger-ui-express';
 import {swaggerSpec} from './docs/openapi';
