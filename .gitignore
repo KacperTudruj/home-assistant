@@ -2,3 +2,7 @@ node_modules
 .env
 .idea
 .notes.md
+
+# Ignorujemy pliki z realnymi, lokalnymi sekretami
+.env.local
+.env.*.local
