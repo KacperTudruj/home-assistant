@@ -40,9 +40,6 @@ import {GetAgdDevicesUseCase} from '@modules/smart-agd/application/GetAgdDevices
 import {AgdController} from '@modules/smart-agd/interface/AgdController';
 import {AgdRoutes} from '@modules/smart-agd/interface/AgdRoutes';
 import {SmartThingsAgdAdapter} from '@modules/smart-agd/infrastructure/SmartThingsAgdAdapter';
-import {AqaraConfigRepositoryPrisma} from './shared/connectors/aqara/infrastructure/AqaraConfigRepositoryPrisma';
-import {AqaraHttpClient} from './shared/connectors/aqara/infrastructure/AqaraHttpClient';
-import {AqaraAgdAdapter} from '@modules/smart-agd/infrastructure/AqaraAgdAdapter';
 import {CompositeAgdProvider} from '@modules/smart-agd/domain/CompositeAgdProvider';
 import {basicAuth} from './shared/middleware/basicAuth';
 
@@ -50,7 +47,6 @@ import {basicAuth} from './shared/middleware/basicAuth';
 import {GetSmartHomeDevicesUseCase} from '@modules/smart-home/application/GetSmartHomeDevicesUseCase';
 import {UpdateCameraLabelUseCase} from '@modules/smart-home/application/UpdateCameraLabelUseCase';
 import {Go2RtcSmartHomeAdapter} from '@modules/smart-home/infrastructure/Go2RtcSmartHomeAdapter';
-import {AqaraSmartHomeAdapter} from '@modules/smart-home/infrastructure/AqaraSmartHomeAdapter';
 // import {ZigbeeMqttSmartHomeAdapter} from '@modules/smart-home/infrastructure/ZigbeeMqttSmartHomeAdapter';
 import {CompositeSmartHomeProvider} from '@modules/smart-home/domain/CompositeSmartHomeProvider';
 import {MqttConfigRepositoryPrisma} from './shared/connectors/mqtt/infrastructure/MqttConfigRepositoryPrisma';
@@ -124,30 +120,23 @@ const stClient = new SmartThingsHttpClient(stConfigRepo, () => {
     console.log('ALARM: SmartThings token expired! Update it in SystemConfiguration table.');
 });
 
-// --- Aqara Connector (Shared Kernel) ---
-const aqaraConfigRepo = new AqaraConfigRepositoryPrisma(prisma);
-const aqaraClient = new AqaraHttpClient(aqaraConfigRepo);
-
 // --- MQTT Connector (Shared Kernel) ---
 const mqttConfigRepo = new MqttConfigRepositoryPrisma(prisma);
 // const mqttClient = new MqttJsClient(mqttConfigRepo);
 
-// --- AGD Module ---
+// AGD Module ---
 const stAgdProvider = new SmartThingsAgdAdapter(stClient);
-const aqaraAgdProvider = new AqaraAgdAdapter(aqaraClient);
-const compositeAgdProvider = new CompositeAgdProvider([stAgdProvider, aqaraAgdProvider]);
+const compositeAgdProvider = new CompositeAgdProvider([stAgdProvider]);
 
 const getAgdDevicesUseCase = new GetAgdDevicesUseCase(compositeAgdProvider);
 const agdController = new AgdController(getAgdDevicesUseCase);
 
 // --- Smart Home Module ---
 const go2rtcSmartHomeProvider = new Go2RtcSmartHomeAdapter(prisma);
-const aqaraSmartHomeProvider = new AqaraSmartHomeAdapter(aqaraClient);
 // const zigbeeMqttSmartHomeProvider = new ZigbeeMqttSmartHomeAdapter(mqttClient);
 
 const compositeSmartHomeProvider = new CompositeSmartHomeProvider([
     go2rtcSmartHomeProvider,
-    aqaraSmartHomeProvider,
     // zigbeeMqttSmartHomeProvider
 ]);
 
