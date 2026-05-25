@@ -8,19 +8,20 @@ export class MqttJsClient implements MqttClient {
 
     constructor(private readonly configRepository: MqttConfigRepository) {}
 
-    private async getClient(): Promise<mqtt.MqttClient> {
+    private async getClient(): Promise<mqtt.MqttClient | null> {
         if (this.client) {
             return this.client;
         }
 
         const config = await this.configRepository.getMqttConfig();
         if (!config) {
-            throw new Error("MQTT configuration not found");
+            console.warn("MQTT configuration not found. MQTT features will be disabled.");
+            return null;
         }
 
         this.client = mqtt.connect(config.brokerUrl, {
-            username: config.username,
-            password: config.password,
+            username: config.username || undefined,
+            password: config.password || undefined,
         });
 
         this.client.on("message", (topic: string, payload: Buffer) => {
@@ -55,13 +56,15 @@ export class MqttJsClient implements MqttClient {
                 resolve(this.client!);
             });
             this.client!.on("error", (err: Error) => {
-                reject(err);
+                console.error("MQTT connection error:", err.message);
+                resolve(null); // Resolve with null instead of rejecting to keep the app running
             });
         });
     }
 
     async subscribe(topic: string, handler: MqttMessageHandler): Promise<void> {
         const client = await this.getClient();
+        if (!client) return;
         
         if (!this.handlers.has(topic)) {
             this.handlers.set(topic, []);
@@ -79,6 +82,7 @@ export class MqttJsClient implements MqttClient {
 
     async publish(topic: string, payload: string | Buffer): Promise<void> {
         const client = await this.getClient();
+        if (!client) return;
         await client.publishAsync(topic, payload);
     }
 
