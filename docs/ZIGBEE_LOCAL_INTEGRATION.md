@@ -36,12 +36,27 @@ services:
     environment:
       - TZ=Europe/Warsaw
     devices:
-      # Mapowanie koordynatora USB (np. Sonoff ZBDongle-E)
-      # Sprawdź port poleceniem: ls /dev/ttyACM* lub ls /dev/ttyUSB*
-      - /dev/ttyACM0:/dev/ttyACM0 
+      # Mapowanie koordynatora USB z hosta do stałego portu w kontenerze
+      # Ścieżka na hoście jest brana ze zmiennej ZIGBEE_DEVICE w .env
+      - ${ZIGBEE_DEVICE:-/dev/ttyACM0}:/dev/ttyACM0 
+    profiles:
+      - zigbee # Pozwala na opcjonalne uruchomienie usługi
 ```
 
-**Uwaga:** Jeśli Twój adapter jest widoczny w systemie jako `/dev/ttyUSB0`, zmień odpowiednio wpis w `devices`.
+### Konfiguracja Środowiskowa (.env)
+
+Aby system wiedział, gdzie szukać koordynatora i czy w ogóle ma uruchamiać moduł Zigbee, dodaj w pliku `.env` lub `.env.local`:
+
+```env
+# Domyślne profile (usuń 'zigbee' na środowiskach bez podłączonego USB, np. Beta/CI)
+COMPOSE_PROFILES=zigbee
+
+# Ścieżka do urządzenia na hoście (sprawdź przez: ls /dev/ttyACM* lub ls /dev/ttyUSB*)
+ZIGBEE_DEVICE=/dev/ttyACM0
+```
+
+Jeśli na Twoim środowisku beta nie ma koordynatora i chcesz, aby deploy nie kończył się błędem `no such file or directory`, ustaw w `.env.local`:
+`COMPOSE_PROFILES=` (pusty lub bez 'zigbee')
 
 ---
 

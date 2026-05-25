@@ -73,6 +73,7 @@ services:
     container_name: zigbee2mqtt
     image: koenkk/zigbee2mqtt:latest
     restart: unless-stopped
+    profiles: ["zigbee"]
     volumes:
       - ./zigbee2mqtt-data:/app/data
       - /run/udev:/run/udev:ro
@@ -82,7 +83,7 @@ services:
     environment:
       - TZ=Europe/Warsaw
     devices:
-      - /dev/ttyACM0:/dev/ttyACM0 # Typowy port dla Sonoff ZBDongle-P/E. Sprawdź ls /dev/ttyACM* lub /dev/ttyUSB*
+      - ${ZIGBEE_DEVICE:-/dev/ttyACM0}:/dev/ttyACM0 # Mapujemy hostowy port do stałego portu w kontenerze
 
 volumes:
   pgdata:

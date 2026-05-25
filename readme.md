@@ -37,6 +37,12 @@ Projekt jest rozwijany **bez presji**, bez „enterprise overengineering”.
 
 ---
 
+## 📚 Dokumentacja
+
+- [Integracja Zigbee (Lokalna)](docs/ZIGBEE_LOCAL_INTEGRATION.md) — Przewodnik konfiguracji Zigbee2MQTT oraz integracji z backendem.
+
+---
+
 ## 🧩 Architektura backendu
 
 Backend jest podzielony modułowo, inspirowany Clean / Hexagonal Architecture,
