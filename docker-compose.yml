@@ -81,8 +81,8 @@ services:
       - 8099:8099
     environment:
       - TZ=Europe/Warsaw
-    # devices:
-    #   - /dev/ttyACM0:/dev/ttyACM0 # Odkomentuj i ustaw poprawny port Twojego adaptera Zigbee
+    devices:
+      - /dev/ttyACM0:/dev/ttyACM0 # Typowy port dla Sonoff ZBDongle-P/E. Sprawdź ls /dev/ttyACM* lub /dev/ttyUSB*
 
 volumes:
   pgdata:

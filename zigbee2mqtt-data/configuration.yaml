@@ -1,8 +1,9 @@
 version: 5
 mqtt:
   base_topic: zigbee2mqtt
-  server: mqtt://localhost:1883
-serial: {}
+  server: mqtt://mosquitto:1883
+serial:
+  port: /dev/ttyACM0
 advanced:
   log_level: info
   channel: 11
@@ -10,8 +11,8 @@ advanced:
   pan_id: GENERATE
   ext_pan_id: GENERATE
 frontend:
-  enabled: false
-  port: 8080
+  enabled: true
+  port: 8099
 homeassistant:
   enabled: false
 onboarding: true
