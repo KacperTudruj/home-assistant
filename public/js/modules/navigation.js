@@ -39,7 +39,8 @@ export function renderAppNav() {
     if (!root) return;
 
     const pageType = document.body.dataset.page;
-    if (pageType === "app" || pageType === "car-fuel-history" || pageType === "smart-agd") {
+    const isAppPage = pageType === "app" || pageType === "car-fuel-history" || pageType === "smart-agd" || pageType === "camera";
+    if (isAppPage) {
         const title = document.body.dataset.appTitle || "";
         root.innerHTML = `
             <nav class="app-nav">

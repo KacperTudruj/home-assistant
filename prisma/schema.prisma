@@ -148,4 +148,12 @@ model SystemConfigurationSmartAgd {
   @@map("SystemConfigurationSmartAgd")
 }
 
+model SmartHomeCamera {
+  id    String @id
+  name  String
+  label String
+
+  @@map("SmartHomeCamera")
+}
+
 

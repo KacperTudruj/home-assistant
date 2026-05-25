@@ -70,26 +70,17 @@
     </style>
 </head>
 
-<body data-page="camera">
+<body data-page="app" data-app-title="📷 Smart Home - Kamery">
+<div id="app-nav-root"></div>
 <script>window.FEATURE_KEY = "camera";</script>
 
 <main class="container">
-    <header style="display: flex; justify-content: space-between; align-items: center;">
-        <h1>🏠 Smart Home</h1>
-        <a href="/" class="btn-secondary" style="text-decoration: none; padding: 5px 10px; background: #444; border-radius: 4px; color: white;">Powrót</a>
-    </header>
-
     <div id="devices-loading" style="text-align: center; padding: 50px;">
         Pobieranie danych z urządzeń...
     </div>
 
     <div class="camera-container" id="camera-list">
         <!-- Kamery zostaną dodane dynamicznie -->
-    </div>
-
-    <h2 style="margin-top: 40px;">Sensory</h2>
-    <div class="camera-container" id="sensor-list">
-        <!-- Sensory zostaną dodane dynamicznie -->
     </div>
 </main>
 
@@ -100,18 +91,21 @@
             const devices = await response.json();
             
             const cameraList = document.getElementById('camera-list');
-            const sensorList = document.getElementById('sensor-list');
             const loading = document.getElementById('devices-loading');
             
             loading.style.display = 'none';
             cameraList.innerHTML = '';
-            sensorList.innerHTML = '';
 
             const cameras = devices.filter(d => d.type === 'CAMERA');
-            const sensors = devices.filter(d => d.type === 'SENSOR');
 
             if (cameras.length === 0) {
-                cameraList.innerHTML = '<p>Brak dostępnych kamer.</p>';
+                cameraList.innerHTML = `
+                    <div style="grid-column: 1/-1; text-align: center; padding: 40px; background: #2a2a2a; border-radius: 8px; border: 1px dashed #444;">
+                        <div style="font-size: 3rem; margin-bottom: 10px;">📷</div>
+                        <h3 style="margin: 0; color: #ccc;">Brak dostępnych kamer</h3>
+                        <p style="color: #888; margin: 10px 0 0;">Wygląda na to, że żadna kamera nie jest obecnie skonfigurowana lub dostępna.</p>
+                    </div>
+                `;
             } else {
                 cameras.forEach(cam => {
                     const card = document.createElement('div');
@@ -123,7 +117,12 @@
                     
                     card.innerHTML = `
                         <div class="camera-header">
-                            <span>${cam.name}</span>
+                            <div>
+                                <span style="font-weight: bold; font-size: 1.1rem;" id="label-${cam.id}">${cam.label}</span>
+                                <button onclick="editLabel('${cam.id}', '${cam.label}')" style="background: none; border: none; color: #888; cursor: pointer; margin-left: 5px;">✎</button>
+                                <br>
+                                <small style="color: #aaa;">${cam.name}</small>
+                            </div>
                             <span class="status-online" style="color: #00ff00;">● Live</span>
                         </div>
                         <div class="video-wrapper">
@@ -133,29 +132,43 @@
                     cameraList.appendChild(card);
                 });
             }
-
-            if (sensors.length === 0) {
-                sensorList.innerHTML = '<p>Brak dostępnych sensorów.</p>';
-            } else {
-                sensors.forEach(sensor => {
-                    const item = document.createElement('div');
-                    item.className = 'camera-card';
-                    item.style.padding = '15px';
-                    item.innerHTML = `
-                        <div class="sensor-label">${sensor.name}</div>
-                        <div class="sensor-value">${sensor.value} ${sensor.unit || ''}</div>
-                    `;
-                    sensorList.appendChild(item);
-                });
-            }
         } catch (error) {
             console.error('Error loading devices:', error);
             document.getElementById('devices-loading').innerText = 'Błąd podczas ładowania urządzeń.';
         }
     }
 
+    async function editLabel(id, currentLabel) {
+        const newLabel = prompt('Podaj nową nazwę (label) dla kamery:', currentLabel);
+        if (newLabel === null || newLabel === currentLabel) return;
+
+        try {
+            const response = await fetch(`/api/smart-home/cameras/${id}/label`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ label: newLabel })
+            });
+
+            if (response.ok) {
+                document.getElementById(`label-${id}`).innerText = newLabel;
+                // Odświeżamy atrybut onclick by zawierał nową wartość
+                const btn = document.querySelector(`#label-${id} + button`);
+                if (btn) btn.setAttribute('onclick', `editLabel('${id}', '${newLabel}')`);
+            } else {
+                alert('Błąd podczas aktualizacji nazwy.');
+            }
+        } catch (error) {
+            console.error('Error updating label:', error);
+            alert('Błąd połączenia z serwerem.');
+        }
+    }
+
+    window.editLabel = editLabel;
     loadDevices();
 </script>
+<script type="module" src="/app.js"></script>
 </body>
 
 </html>

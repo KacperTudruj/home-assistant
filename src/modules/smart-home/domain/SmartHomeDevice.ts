@@ -1,20 +1,28 @@
+export enum SmartHomeDeviceType {
+    CAMERA = 'CAMERA',
+    SENSOR = 'SENSOR',
+    OTHER = 'OTHER'
+}
+
 export interface SmartHomeDevice {
     id: string;
     name: string;
-    type: 'CAMERA' | 'SENSOR' | 'OTHER';
+    label: string;
+    type: SmartHomeDeviceType;
 }
 
 export interface CameraDevice extends SmartHomeDevice {
-    type: 'CAMERA';
+    type: SmartHomeDeviceType.CAMERA;
     streamUrl: string;
 }
 
 export interface SensorDevice extends SmartHomeDevice {
-    type: 'SENSOR';
+    type: SmartHomeDeviceType.SENSOR;
     value: string | number;
     unit?: string;
 }
 
 export interface SmartHomeProvider {
     getDevices(): Promise<SmartHomeDevice[]>;
+    updateCameraLabel?(id: string, label: string): Promise<void>;
 }
