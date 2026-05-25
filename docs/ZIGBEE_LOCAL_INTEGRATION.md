@@ -45,18 +45,17 @@ services:
 
 ### Konfiguracja Środowiskowa (.env)
 
-Aby system wiedział, gdzie szukać koordynatora i czy w ogóle ma uruchamiać moduł Zigbee, dodaj w pliku `.env` lub `.env.local`:
+Domyślnie moduł Zigbee jest **wyłączony**, aby uniknąć błędów startu systemu, gdy koordynator USB nie jest podłączony. Aby go aktywować, dodaj lub edytuj poniższe linie w pliku `.env` lub `.env.local`:
 
 ```env
-# Domyślne profile (usuń 'zigbee' na środowiskach bez podłączonego USB, np. Beta/CI)
+# Aktywacja profilu Zigbee
 COMPOSE_PROFILES=zigbee
 
 # Ścieżka do urządzenia na hoście (sprawdź przez: ls /dev/ttyACM* lub ls /dev/ttyUSB*)
 ZIGBEE_DEVICE=/dev/ttyACM0
 ```
 
-Jeśli na Twoim środowisku beta nie ma koordynatora i chcesz, aby deploy nie kończył się błędem `no such file or directory`, ustaw w `.env.local`:
-`COMPOSE_PROFILES=` (pusty lub bez 'zigbee')
+Jeśli na Twoim środowisku (np. beta) nie ma koordynatora, pozostaw `COMPOSE_PROFILES=` pusty. Zapobiegnie to błędowi `no such file or directory` podczas deployu.
 
 ---
 
