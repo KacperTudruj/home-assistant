@@ -51,10 +51,10 @@ import {GetSmartHomeDevicesUseCase} from '@modules/smart-home/application/GetSma
 import {UpdateCameraLabelUseCase} from '@modules/smart-home/application/UpdateCameraLabelUseCase';
 import {Go2RtcSmartHomeAdapter} from '@modules/smart-home/infrastructure/Go2RtcSmartHomeAdapter';
 import {AqaraSmartHomeAdapter} from '@modules/smart-home/infrastructure/AqaraSmartHomeAdapter';
-import {ZigbeeMqttSmartHomeAdapter} from '@modules/smart-home/infrastructure/ZigbeeMqttSmartHomeAdapter';
+// import {ZigbeeMqttSmartHomeAdapter} from '@modules/smart-home/infrastructure/ZigbeeMqttSmartHomeAdapter';
 import {CompositeSmartHomeProvider} from '@modules/smart-home/domain/CompositeSmartHomeProvider';
 import {MqttConfigRepositoryPrisma} from './shared/connectors/mqtt/infrastructure/MqttConfigRepositoryPrisma';
-import {MqttJsClient} from './shared/connectors/mqtt/infrastructure/MqttJsClient';
+// import {MqttJsClient} from './shared/connectors/mqtt/infrastructure/MqttJsClient';
 import {SmartHomeController} from '@modules/smart-home/interface/SmartHomeController';
 import {SmartHomeRoutes} from '@modules/smart-home/interface/SmartHomeRoutes';
 
@@ -130,7 +130,7 @@ const aqaraClient = new AqaraHttpClient(aqaraConfigRepo);
 
 // --- MQTT Connector (Shared Kernel) ---
 const mqttConfigRepo = new MqttConfigRepositoryPrisma(prisma);
-const mqttClient = new MqttJsClient(mqttConfigRepo);
+// const mqttClient = new MqttJsClient(mqttConfigRepo);
 
 // --- AGD Module ---
 const stAgdProvider = new SmartThingsAgdAdapter(stClient);
@@ -143,12 +143,12 @@ const agdController = new AgdController(getAgdDevicesUseCase);
 // --- Smart Home Module ---
 const go2rtcSmartHomeProvider = new Go2RtcSmartHomeAdapter(prisma);
 const aqaraSmartHomeProvider = new AqaraSmartHomeAdapter(aqaraClient);
-const zigbeeMqttSmartHomeProvider = new ZigbeeMqttSmartHomeAdapter(mqttClient);
+// const zigbeeMqttSmartHomeProvider = new ZigbeeMqttSmartHomeAdapter(mqttClient);
 
 const compositeSmartHomeProvider = new CompositeSmartHomeProvider([
     go2rtcSmartHomeProvider,
     aqaraSmartHomeProvider,
-    zigbeeMqttSmartHomeProvider
+    // zigbeeMqttSmartHomeProvider
 ]);
 
 const getSmartHomeDevicesUseCase = new GetSmartHomeDevicesUseCase(compositeSmartHomeProvider);
