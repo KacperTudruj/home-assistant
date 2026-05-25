@@ -89,6 +89,14 @@ export class AqaraHttpClient implements AqaraClient {
     }
 
     async getResourceValue(deviceId: string, resourceId: string): Promise<AqaraResource> {
+        const results = await this.getResourcesValues(deviceId, [resourceId]);
+        if (results.length === 0) {
+            throw new Error(`Resource ${resourceId} not found for device ${deviceId}`);
+        }
+        return results[0];
+    }
+
+    async getResourcesValues(deviceId: string, resourceIds: string[]): Promise<AqaraResource[]> {
         const axiosInstance = await this.getAxiosInstance();
         // Aqara API: query.resource.value
         const response = await axiosInstance.post("/v3.0/open/api", {
@@ -96,7 +104,7 @@ export class AqaraHttpClient implements AqaraClient {
             data: {
                 resources: [{
                     did: deviceId,
-                    resourceIds: [resourceId]
+                    resourceIds: resourceIds
                 }]
             }
         });
@@ -105,11 +113,10 @@ export class AqaraHttpClient implements AqaraClient {
             throw new Error(`Aqara API error: ${response.data.message}`);
         }
 
-        const res = response.data.result[0];
-        return {
+        return response.data.result.map((res: any) => ({
             resourceId: res.resourceId,
             value: res.value,
             timeStamp: res.timeStamp
-        };
+        }));
     }
 }

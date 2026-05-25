@@ -57,6 +57,33 @@ services:
     volumes:
       - ./go2rtc.yaml:/config/go2rtc.yaml
 
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    ports:
+      - "1883:1883"
+      - "9001:9001"
+    volumes:
+      - ./mosquitto/config:/mosquitto/config
+      - ./mosquitto/data:/mosquitto/data
+      - ./mosquitto/log:/mosquitto/log
+    restart: unless-stopped
+
+  zigbee2mqtt:
+    container_name: zigbee2mqtt
+    image: koenkk/zigbee2mqtt:latest
+    restart: unless-stopped
+    volumes:
+      - ./zigbee2mqtt-data:/app/data
+      - /run/udev:/run/udev:ro
+    ports:
+      # Roam free and access the frontend
+      - 8099:8099
+    environment:
+      - TZ=Europe/Warsaw
+    # devices:
+    #   - /dev/ttyACM0:/dev/ttyACM0 # Odkomentuj i ustaw poprawny port Twojego adaptera Zigbee
+
 volumes:
   pgdata:
   nextcloud_data:

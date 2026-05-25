@@ -1,0 +1,12 @@
+1779699325: mosquitto version 2.1.2 starting
+1779699325: Config loaded from /mosquitto/config/mosquitto.conf.
+1779699325: Bridge support available.
+1779699325: Persistence support available.
+1779699325: TLS support available.
+1779699325: TLS-PSK support available.
+1779699325: Websockets support available.
+1779699325: Opening ipv4 listen socket on port 1883.
+1779699325: Opening ipv6 listen socket on port 1883.
+1779699325: mosquitto version 2.1.2 running
+1779699574: mosquitto version 2.1.2 terminating
+1779699574: Saving in-memory database to /mosquitto/data//mosquitto.db.

@@ -15,6 +15,7 @@ export interface AqaraResource {
 export interface AqaraClient {
     getDevices(): Promise<AqaraDevice[]>;
     getResourceValue(deviceId: string, resourceId: string): Promise<AqaraResource>;
+    getResourcesValues(deviceId: string, resourceIds: string[]): Promise<AqaraResource[]>;
 }
 
 export interface AqaraConfigRepository {

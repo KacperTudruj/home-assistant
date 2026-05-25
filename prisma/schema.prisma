@@ -144,6 +144,12 @@ model SystemConfigurationSmartAgd {
   aqaraAccessToken  String? @map("aqara_access_token")
   aqaraRefreshToken String? @map("aqara_refresh_token")
   aqaraRegion       String? @map("aqara_region")
+
+  // MQTT
+  mqttBrokerUrl    String? @map("mqtt_broker_url")
+  mqttUsername     String? @map("mqtt_username")
+  mqttPassword     String? @map("mqtt_password")
+  mqttTopicPrefix  String? @map("mqtt_topic_prefix") @default("zigbee2mqtt")
   
   @@map("SystemConfigurationSmartAgd")
 }
