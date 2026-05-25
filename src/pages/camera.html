@@ -9,24 +9,32 @@
     <style>
         .camera-container {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
             gap: 20px;
             margin-top: 20px;
         }
 
         .camera-card {
-            background: #2a2a2a;
+            background: var(--bg-card);
             border-radius: 8px;
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--glass-border);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5);
+            transition: transform 0.2s ease;
+        }
+
+        .camera-card:hover {
+            transform: scale(1.02);
+            border-color: var(--accent);
         }
 
         .camera-header {
             padding: 10px 15px;
-            background: #333;
+            background: rgba(255, 255, 255, 0.05);
             display: flex;
             justify-content: space-between;
             align-items: center;
+            border-bottom: 1px solid var(--glass-border);
         }
 
         .video-wrapper {
@@ -41,42 +49,16 @@
             height: 100%;
             object-fit: contain;
         }
-
-        .sensor-panel {
-            padding: 15px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-        }
-
-        .sensor-item {
-            background: #3d3d3d;
-            padding: 10px;
-            border-radius: 6px;
-            text-align: center;
-        }
-
-        .sensor-label {
-            font-size: 0.8rem;
-            color: #aaa;
-            display: block;
-        }
-
-        .sensor-value {
-            font-size: 1.2rem;
-            font-weight: bold;
-            color: #00ffcc;
-        }
     </style>
 </head>
 
-<body data-page="app" data-app-title="📷 Smart Home - Kamery">
+<body data-page="camera" data-app-title="📷 Smart Home - Kamery">
 <div id="app-nav-root"></div>
 <script>window.FEATURE_KEY = "camera";</script>
 
 <main class="container">
-    <div id="devices-loading" style="text-align: center; padding: 50px;">
-        Pobieranie danych z urządzeń...
+    <div id="devices-loading" style="text-align: center; padding: 50px; color: var(--accent);">
+        [Pobieranie danych z urządzeń...]
     </div>
 
     <div class="camera-container" id="camera-list">
