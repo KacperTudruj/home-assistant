@@ -3,7 +3,7 @@ mqtt:
   base_topic: zigbee2mqtt
   server: mqtt://mosquitto:1883
 serial:
-  port: /dev/ttyACM0
+  port: /dev/ttyUSB0
 advanced:
   log_level: info
   channel: 11
@@ -12,7 +12,7 @@ advanced:
   ext_pan_id: GENERATE
 frontend:
   enabled: true
-  port: 8099
+  port: 8080
 homeassistant:
   enabled: false
 onboarding: true

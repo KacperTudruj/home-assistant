@@ -32,13 +32,11 @@ services:
       - ./zigbee2mqtt-data:/app/data
       - /run/udev:/run/udev:ro
     ports:
-      - "8099:8099" # Panel WWW Zigbee2MQTT
+      - "8099:8080" # Panel WWW Zigbee2MQTT (mapujemy port 8080 kontenera na 8099 hosta)
     environment:
       - TZ=Europe/Warsaw
     devices:
-      # Mapowanie koordynatora USB z hosta do stałego portu w kontenerze
-      # Ścieżka na hoście jest brana ze zmiennej ZIGBEE_DEVICE w .env
-      - ${ZIGBEE_DEVICE:-/dev/ttyACM0}:/dev/ttyACM0 
+      - ${ZIGBEE_DEVICE}
     profiles:
       - zigbee # Pozwala na opcjonalne uruchomienie usługi
 ```
@@ -73,11 +71,11 @@ mqtt:
   server: mqtt://mosquitto:1883 # Adres kontenera Mosquitto
 
 serial:
-  port: /dev/ttyACM0 # Musi odpowiadać mapowaniu w docker-compose
+  port: /dev/ttyUSB0 # Musi odpowiadać mapowaniu w docker-compose (np. /dev/ttyUSB0 lub /dev/ttyACM0)
 
 frontend:
   enabled: true
-  port: 8099
+  port: 8080
 
 advanced:
   network_key: GENERATE # Zigbee2MQTT wygeneruje bezpieczny klucz przy pierwszym starcie
