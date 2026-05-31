@@ -2,6 +2,7 @@ node_modules
 .env
 .idea
 .notes.md
+mosquitto/
 
 # Ignorujemy pliki z realnymi, lokalnymi sekretami
 .env.local
