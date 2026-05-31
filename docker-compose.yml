@@ -81,7 +81,7 @@ services:
     environment:
       - TZ=Europe/Warsaw
     devices:
-      - ${ZIGBEE_DEVICE:-/dev/ttyACM0}:/dev/ttyACM0 # Mapujemy hostowy port do stałego portu w kontenerze
+      - ${ZIGBEE_DEVICE}
 
 volumes:
   pgdata:
