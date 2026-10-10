@@ -27,6 +27,10 @@ import {CarRoutes} from '@modules/car/interface/CarRoutes';
 import {CarController} from '@modules/car/interface/CarController';
 import {FuelController} from '@modules/car/interface/FuelController';
 import {ServiceController} from '@modules/car/interface/ServiceController';
+import {CarRepositoryPrisma} from '@modules/car/infrastructure/CarRepositoryPrisma';
+import {ServiceRecordRepositoryPrisma} from '@modules/car/infrastructure/ServiceRecordRepositoryPrisma';
+import {CreateServiceRecordUseCase} from '@modules/car/application/CreateServiceRecordUseCase';
+import {ListServiceRecordsUseCase} from '@modules/car/application/ListServiceRecordsUseCase';
 import {GetFuelStatisticsUseCase} from '@modules/car/application/GetFuelStatisticsUseCase';
 
 // Shared Connectors
@@ -112,7 +116,11 @@ const featureController = new FeatureController(listFeaturesUseCase);
 const carController = new CarController();
 const fuelStatisticsUseCase = new GetFuelStatisticsUseCase(prisma);
 const fuelController = new FuelController(fuelStatisticsUseCase);
-const serviceController = new ServiceController();
+const carRepository = new CarRepositoryPrisma(prisma);
+const serviceRecordRepository = new ServiceRecordRepositoryPrisma(prisma);
+const createServiceRecordUseCase = new CreateServiceRecordUseCase(carRepository, serviceRecordRepository);
+const listServiceRecordsUseCase = new ListServiceRecordsUseCase(serviceRecordRepository);
+const serviceController = new ServiceController(createServiceRecordUseCase, listServiceRecordsUseCase);
 
 // --- SmartThings Connector (Shared Kernel) ---
 const stConfigRepo = new SmartThingsConfigRepositoryPrisma(prisma);

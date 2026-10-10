@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: etap 1 zaimplementowany, do review; kolejne etapy nierozpoczęte.
+Data: 2026-10-10. Status: etap 1 zaakceptowany; etap 2 zaimplementowany, do review; kolejne etapy nierozpoczęte.
 
 ## Cel i sposób pracy
 
@@ -175,12 +175,17 @@ lub „przekroczono o 500 km / 2 dni”. Nie zna specjalnej reguły dla oleju.
 Zakres: obecny HTML i JS strony auta. DONE oznacza zakończenie implementacji;
 odbiór w działającej aplikacji i akceptacja pozostają do wykonania.
 
-### 2. Lokalny refaktor zapisu i odczytu serwisów
+### DONE 2. Lokalny refaktor zapisu i odczytu serwisów
 
-- [ ] Wprowadzić kontrakt repozytorium serwisów i use case'y dodawania/listowania.
-- [ ] Przenieść Prisma z kontrolera do adaptera, wstrzyknąć zależności w composition root.
-- [ ] Zachować obecne DTO, odpowiedzi i obsługę `isOilChange`; bez refaktoru paliwa i całego `CarController`.
-- [ ] Uruchomić `npx tsc --noEmit` oraz sprawdzić dodawanie/listę, 404 i zachowanie starego licznika.
+- [x] Wprowadzić kontrakt repozytorium serwisów i use case'y dodawania/listowania.
+- [x] Przenieść Prisma z kontrolera do adaptera, wstrzyknąć zależności w composition root.
+- [x] Zachować obecne DTO, odpowiedzi i obsługę `isOilChange`; bez refaktoru paliwa i całego `CarController`.
+- [x] Uruchomić `npx.cmd tsc --noEmit` — OK (PowerShell blokuje wrapper `npx.ps1`).
+- [x] Uruchomić `node -r ts-node/register --test tests/car-service.test.cjs` — 3/3 testy OK:
+  dodawanie/lista, 404 bez zapisu, pusta lista dla brakującego auta, flaga oleju, ujemny koszt i licznik oleju.
+- [x] Przejrzeć diff i uruchomić `git diff --check` — OK.
+- [ ] Odbiór na serwerze użytkownika: rzeczywisty zapis i odczyt Prisma. Testy lokalne korzystają
+  z atrap repozytoriów; nie uruchamiano aplikacji ani połączenia z bazą. Schemat bazy nie zmienia się.
 
 **Gotowe, gdy:** kontroler nie zawiera zapisu Prisma, a publiczne zachowanie pozostaje zgodne.
 
@@ -194,8 +199,8 @@ odbiór w działającej aplikacji i akceptacja pozostają do wykonania.
 - [ ] Uruchomić testy, `npx tsc --noEmit`, `npx prisma validate`; obejrzeć SQL migracji.
 
 **Gotowe, gdy:** reguły działają niezależnie od HTTP, migracja niczego nie usuwa.
-Nie ma obecnie skryptu testowego w projekcie; preferujemy istniejące narzędzia i `node:test`,
-bez dokładania frameworka, jeżeli nie jest potrzebny. Sposób uruchomienia zapisujemy w raporcie.
+Testy serwisu korzystają z `node:test` i istniejącego `ts-node`; nie dodano zależności ani
+skryptu npm. Kolejne testy mogą używać tej samej konwencji. Sposób uruchomienia zapisujemy w raporcie.
 
 ### 4. API samodzielnych przypomnień
 
@@ -296,7 +301,7 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | --- | --- | --- | --- | --- |
 | Plan | Do review | Ten dokument | Sprawdzenie zgodności z obecnym kodem i linków lokalnych | Po uwagach użytkownika: kontekst dowolnego modułu, dodatkowe informacje jako tekst, ręczne terminy i niezależny opis wizyty; bez odnawiania |
 | 1 | DONE / Do review | [Widok auta](../src/pages/car-log.html), [JS auta](../public/js/modules/car-log.js): nagłówki, przycisk, komunikaty ładowania, pustej listy i błędów; aktualizacja tego planu | `node --check public/js/modules/car-log.js` i `git diff --check` — OK; przegląd diffu | Test ręczny na działającej aplikacji pozostaje użytkownikowi; bez zmian API/bazy/licznika oleju |
-| 2 | Do zrobienia | — | — | — |
+| 2 | DONE / Do review | [Kontrakt](../src/modules/car/domain/repository/ServiceRecordRepository.ts), [dodawanie](../src/modules/car/application/CreateServiceRecordUseCase.ts), [listowanie](../src/modules/car/application/ListServiceRecordsUseCase.ts), [adapter Prisma](../src/modules/car/infrastructure/ServiceRecordRepositoryPrisma.ts), [kontroler](../src/modules/car/interface/ServiceController.ts), [composition root](../src/index.ts), [testy](../tests/car-service.test.cjs), ten plan | TypeScript — OK; 3/3 testy bez bazy — OK; diff check — OK | Zachowane API i zapytania Prisma; rzeczywisty zapis/odczyt do sprawdzenia na serwerze |
 | 3 | Do zrobienia | — | — | — |
 | 4 | Do zrobienia | — | — | — |
 | 5 | Do zrobienia | — | — | — |

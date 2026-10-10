@@ -1,14 +1,13 @@
 import { Request, Response } from 'express';
-import { PrismaClient } from '@prisma/client';
-
-import { CarRepositoryPrisma } from '../infrastructure/CarRepositoryPrisma';
-import { ServiceRecord } from '../domain/entity/ServiceRecord';
+import { CreateServiceRecordUseCase } from '../application/CreateServiceRecordUseCase';
+import { ListServiceRecordsUseCase } from '../application/ListServiceRecordsUseCase';
 import { CreateServiceRecordRequest } from './dto/CreateServiceRecordRequest';
 
-const prisma = new PrismaClient();
-const carRepository = new CarRepositoryPrisma(prisma);
-
 export class ServiceController {
+    constructor(
+        private readonly createServiceRecordUseCase: CreateServiceRecordUseCase,
+        private readonly listServiceRecordsUseCase: ListServiceRecordsUseCase
+    ) {}
 
     /**
      * @openapi
@@ -51,30 +50,11 @@ export class ServiceController {
         const { id } = req.params;
         const body = req.body as CreateServiceRecordRequest;
 
-        const car = await carRepository.findById(id);
-        if (!car) {
+        const created = await this.createServiceRecordUseCase.execute(id, body);
+        if (!created) {
             res.status(404).json({ error: 'Car not found' });
             return;
         }
-
-        const record = new ServiceRecord({
-            description: body.description,
-            cost: Number(body.cost),
-            mileageKm: Number(body.mileageKm),
-            date: new Date(body.date),
-            isOilChange: body.isOilChange
-        });
-
-        await prisma.serviceRecord.create({
-            data: {
-                carId: id,
-                description: record.description,
-                cost: record.cost,
-                mileageKm: record.mileageKm,
-                date: record.date,
-                isOilChange: record.isOilChange
-            }
-        });
 
         res.status(204).send();
     }
@@ -99,10 +79,7 @@ export class ServiceController {
     async list(req: Request, res: Response): Promise<void> {
         const { id } = req.params;
 
-        const services = await prisma.serviceRecord.findMany({
-            where: { carId: id },
-            orderBy: { date: 'desc' }
-        });
+        const services = await this.listServiceRecordsUseCase.execute(id);
 
         res.json(services);
     }
