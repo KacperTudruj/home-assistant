@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: propozycja do review; implementacja nie rozpoczęta.
+Data: 2026-10-10. Status: etap 1 zaimplementowany, do review; kolejne etapy nierozpoczęte.
 
 ## Cel i sposób pracy
 
@@ -13,6 +13,10 @@ agent aktualizuje ten dokument, zapisuje wyniki weryfikacji i zatrzymuje się.
 Użytkownik robi review oraz samodzielnie stage/commit/push. Kolejny etap zaczynamy
 po sygnale użytkownika. Jeżeli etap okaże się większy, dzielimy go przed rozszerzeniem zmian.
 Nie zmieniamy istniejącej historii Git ani nie usuwamy danych.
+
+Baza działa na serwerze użytkownika. W etapach dotyczących danych przygotowujemy
+prosty skrypt i instrukcję do samodzielnego uruchomienia na serwerze; nie wykonujemy
+lokalnie operacji na bazie ani nie zakładamy dostępu do bazy serwerowej.
 
 ## Co jest teraz w kodzie
 
@@ -158,14 +162,18 @@ lub „przekroczono o 500 km / 2 dni”. Nie zna specjalnej reguły dla oleju.
 
 ## Etapy do realizacji i review
 
-### 1. Nazwy w interfejsie
+### DONE 1. Nazwy w interfejsie
 
-- [ ] Zamienić teksty „naprawy” na „historię/wpisy serwisowe”, także komunikaty formularza i błędów.
-- [ ] Zachować obecne API, bazę i zachowanie licznika oleju.
-- [ ] Sprawdzić ręcznie widok pusty, listę i formularz; sprawdzić składnię zmienionego JS.
+- [x] Zamienić teksty „naprawy” na „historię/wpisy serwisowe”, także komunikaty formularza i błędów.
+- [x] Zachować obecne API, bazę i zachowanie licznika oleju (zmieniono wyłącznie teksty i komentarze).
+- [x] Sprawdzić składnię zmienionego JS: `node --check public/js/modules/car-log.js` — OK.
+- [x] Przejrzeć diff i uruchomić `git diff --check` — bez błędów whitespace.
+- [ ] Odbiór ręczny na działającej aplikacji: widok pusty, lista i formularz — do review użytkownika;
+  nie uruchamiano aplikacji ani nie wykonywano zapisu na serwerze.
 
 **Gotowe, gdy:** użytkownik widzi spójne nazwy, dodawanie działa jak wcześniej.
-Zakres: obecny HTML i JS strony auta. To rekomendowana pierwsza partia implementacji.
+Zakres: obecny HTML i JS strony auta. DONE oznacza zakończenie implementacji;
+odbiór w działającej aplikacji i akceptacja pozostają do wykonania.
 
 ### 2. Lokalny refaktor zapisu i odczytu serwisów
 
@@ -287,7 +295,7 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | Etap | Status | Zmiany / pliki | Walidacja i wynik | Review / uwagi |
 | --- | --- | --- | --- | --- |
 | Plan | Do review | Ten dokument | Sprawdzenie zgodności z obecnym kodem i linków lokalnych | Po uwagach użytkownika: kontekst dowolnego modułu, dodatkowe informacje jako tekst, ręczne terminy i niezależny opis wizyty; bez odnawiania |
-| 1 | Do zrobienia | — | — | — |
+| 1 | DONE / Do review | [Widok auta](../src/pages/car-log.html), [JS auta](../public/js/modules/car-log.js): nagłówki, przycisk, komunikaty ładowania, pustej listy i błędów; aktualizacja tego planu | `node --check public/js/modules/car-log.js` i `git diff --check` — OK; przegląd diffu | Test ręczny na działającej aplikacji pozostaje użytkownikowi; bez zmian API/bazy/licznika oleju |
 | 2 | Do zrobienia | — | — | — |
 | 3 | Do zrobienia | — | — | — |
 | 4 | Do zrobienia | — | — | — |

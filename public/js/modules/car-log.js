@@ -264,7 +264,7 @@ async function loadServiceHistory(carId) {
     const container = document.getElementById("service-list-container");
     if (!container) return;
 
-    container.innerHTML = '<li class="loading">Ładowanie napraw...</li>';
+    container.innerHTML = '<li class="loading">Ładowanie historii serwisowej...</li>';
 
     try {
         const res = await fetch(`/api/cars/${carId}/services`);
@@ -273,7 +273,7 @@ async function loadServiceHistory(carId) {
 
         container.innerHTML = "";
         if (services.length === 0) {
-            container.innerHTML = "<li>Brak zarejestrowanych napraw</li>";
+            container.innerHTML = "<li>Brak wpisów serwisowych</li>";
             return;
         }
 
@@ -297,7 +297,7 @@ async function loadServiceHistory(carId) {
         });
     } catch (err) {
         console.error(err);
-        container.innerHTML = '<li style="color:red">Błąd ładowania napraw</li>';
+        container.innerHTML = '<li style="color:red">Błąd ładowania historii serwisowej</li>';
     }
 }
 
@@ -332,7 +332,7 @@ async function submitAddServiceForm(e) {
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify(payload)
         });
-        if (!res.ok) throw new Error("Błąd zapisu");
+        if (!res.ok) throw new Error("Nie udało się zapisać wpisu serwisowego");
         closeAddServiceModal();
         await loadCarData(carId);
         e.target.reset();
