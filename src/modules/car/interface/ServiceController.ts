@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import { CreateServiceRecordUseCase } from '../application/CreateServiceRecordUseCase';
 import { ListServiceRecordsUseCase } from '../application/ListServiceRecordsUseCase';
 import { CreateServiceRecordRequest } from './dto/CreateServiceRecordRequest';
+import { InvalidServiceLocationError } from '../domain/entity/ServiceRecord';
 
 export class ServiceController {
     constructor(
@@ -31,6 +32,15 @@ export class ServiceController {
      *             properties:
      *               description:
      *                 type: string
+     *                 description: Swobodny, wielowierszowy opis całej wizyty.
+     *               workshopName:
+     *                 type: string
+     *                 nullable: true
+     *                 maxLength: 200
+     *               workshopAddress:
+     *                 type: string
+     *                 nullable: true
+     *                 maxLength: 500
      *               cost:
      *                 type: number
      *               mileageKm:
@@ -43,6 +53,8 @@ export class ServiceController {
      *     responses:
      *       204:
      *         description: Rekord dodany
+     *       400:
+     *         description: Niepoprawna nazwa lub adres warsztatu
      *       404:
      *         description: Samochód nie istnieje
      */
@@ -50,7 +62,14 @@ export class ServiceController {
         const { id } = req.params;
         const body = req.body as CreateServiceRecordRequest;
 
-        const created = await this.createServiceRecordUseCase.execute(id, body);
+        let created: boolean;
+        try {
+            created = await this.createServiceRecordUseCase.execute(id, body);
+        } catch (error) {
+            if (!(error instanceof InvalidServiceLocationError)) throw error;
+            res.status(400).json({ error: error.message });
+            return;
+        }
         if (!created) {
             res.status(404).json({ error: 'Car not found' });
             return;
@@ -75,6 +94,22 @@ export class ServiceController {
      *     responses:
      *       200:
      *         description: Lista rekordów serwisowych
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 type: object
+     *                 properties:
+     *                   id: { type: string }
+     *                   carId: { type: string }
+     *                   description: { type: string }
+     *                   cost: { type: number }
+     *                   mileageKm: { type: integer }
+     *                   date: { type: string, format: date-time }
+     *                   isOilChange: { type: boolean }
+     *                   workshopName: { type: string, nullable: true, maxLength: 200 }
+     *                   workshopAddress: { type: string, nullable: true, maxLength: 500 }
      */
     async list(req: Request, res: Response): Promise<void> {
         const { id } = req.params;

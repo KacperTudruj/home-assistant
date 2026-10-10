@@ -8,6 +8,8 @@ export interface StoredServiceRecord {
     mileageKm: number;
     date: Date;
     isOilChange: boolean;
+    workshopName: string | null;
+    workshopAddress: string | null;
 }
 
 export interface ServiceRecordRepository {

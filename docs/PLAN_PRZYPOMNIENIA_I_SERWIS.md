@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: etapy 1–3 zakończone; etap 4 zaimplementowany, do review; kolejne etapy nierozpoczęte.
+Data: 2026-10-10. Status: etapy 1–4 zakończone; etap 5 zaimplementowany, do review; kolejne etapy nierozpoczęte.
 
 ## Cel i sposób pracy
 
@@ -298,15 +298,37 @@ nie łączą się z bazą i nie uruchamiają serwera. Lokalnie wygenerowano klie
 (`npx.cmd prisma generate`, poza sandboxem ze względu na blokadę katalogu tymczasowego).
 Nie zastosowano migracji. Po standardowym deployu testy: `docker compose exec api npm test`.
 
-### 5. Opis wizyty i miejsce serwisu
+### DONE 5. Opis wizyty i miejsce serwisu
 
-- [ ] Dodać opcjonalny warsztat/adres do serwisu (model, migracja, DTO, odczyt i zapis).
-- [ ] Zmienić pole opisu na wielowierszowe; wyświetlać dłuższy tekst i nowe linie bez HTML użytkownika.
-- [ ] Zachować prosty zapis opisu, ceny, daty i przebiegu; dodać pola miejsca w formularzu i historii.
-- [ ] Zweryfikować zapis dłuższego opisu, brak miejsca i podane miejsce; zapis nie tworzy przypomnienia.
-- [ ] Uruchomić `npx tsc --noEmit`, `npx prisma validate` i odpowiednie testy integracyjne.
+- [x] Dodać opcjonalny warsztat/adres do serwisu (model, migracja, DTO, odczyt i zapis).
+- [x] Zmienić pole opisu na wielowierszowe; wyświetlać dłuższy tekst i nowe linie bez HTML użytkownika.
+- [x] Zachować prosty zapis opisu, ceny, daty i przebiegu; dodać pola miejsca w formularzu i historii.
+- [x] Zweryfikować dłuższy opis i opcjonalne miejsce na atrapach repozytorium/Prisma; zapis nie wywołuje modułu przypomnień.
+- [x] `npx.cmd tsc --noEmit`, `npx.cmd prisma validate`, `node --check public/js/modules/car-log.js` — OK.
+- [x] `npm.cmd test` — 100/100 OK (11 nowych); parsowanie OpenAPI i `git diff --check` — OK.
+- [ ] Rzeczywisty test integracyjny z bazą oraz wizualny odbiór formularza i historii po deployu na serwerze.
 
 **Gotowe, gdy:** można zapisać opis całej wizyty, cenę i opcjonalne miejsce, niezależnie od przypomnień.
+
+**Zmiany:** `workshopName` (do 200 znaków) i `workshopAddress` (do 500 znaków)
+przechodzą przez encję, DTO, use case, repozytorium i mapper odczytu auta. Pola są niezależnie
+opcjonalne. Brak, `null`, pusty tekst i same spacje zapisują się jako `null`;
+niepoprawny typ lub przekroczony limit daje 400. Dotychczasowe dane i ceny pozostają zachowane.
+Opis nie jest dzielony na czynności. Formularz ma wielowierszowy opis i adres, a historia
+wyświetla opis/nazwę/adres przez `textContent` z zachowaniem nowych linii. Formularz przewija się
+przy ograniczonej wysokości ekranu. Dawne API bez pól warsztatu nadal działa, lista zwraca dwa nowe pola.
+
+**Migracja:** [add_service_location](../prisma/migrations/20261010190000_add_service_location/migration.sql)
+dodaje dwie nullable kolumny w istniejącej tabeli. Zastosuje ją standardowy
+[deploy](../scripts/deploy.sh); osobny skrypt nie jest potrzebny. Lokalnie wykonano wyłącznie
+generowanie klienta i walidację Prisma (poza sandboxem z powodu ograniczeń katalogu tymczasowego).
+Nie uruchomiono migracji ani aplikacji z bazą serwerową.
+
+**Do ręcznego review:** wpisać kilka linii opisu, cenę i miejsce; sprawdzić zapis i ponowne
+załadowanie historii. Powtórzyć bez miejsca oraz sprawdzić stary wpis. Tekst `<b>Garage</b>`
+powinien wyświetlić się dosłownie. Sprawdzić dostępność przycisku zapisu na wąskim ekranie.
+Testy jednostkowe są po angielsku, z Given / When / Then; test kontrolera sprawdza przepływ
+zapisu/odczytu na atrapach. Nie jest to test rzeczywistego połączenia z PostgreSQL.
 
 ### 6. Przeniesienie istniejących ustawień oleju
 
@@ -388,7 +410,7 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | 2 | DONE / Do review | [Kontrakt](../src/modules/car/domain/repository/ServiceRecordRepository.ts), [dodawanie](../src/modules/car/application/CreateServiceRecordUseCase.ts), [listowanie](../src/modules/car/application/ListServiceRecordsUseCase.ts), [adapter Prisma](../src/modules/car/infrastructure/ServiceRecordRepositoryPrisma.ts), [kontroler](../src/modules/car/interface/ServiceController.ts), [composition root](../src/index.ts), [testy](../tests/modules/car/interface/ServiceController.test.cjs), ten plan | TypeScript — OK; 3/3 testy bez bazy — OK; diff check — OK | Zachowane API i zapytania Prisma; rzeczywisty zapis/odczyt do sprawdzenia na serwerze |
 | 3 | DONE / Do review | [Domena](../src/modules/reminders/domain/Reminder.ts), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010180000_add_reminders/migration.sql), [skrypt](../scripts/migrate-reminders.sh), [testy jednostkowe](../tests/modules/reminders/domain/Reminder.test.cjs), ten plan | 49/49 nowych testów i 3/3 regresji OK; TypeScript, Prisma validate i diff check OK | Baza nietknięta; migracja i skrypt do uruchomienia na serwerze; API w etapie 4 |
 | 4 | DONE / Do review | [Operacje](../src/modules/reminders/application/ReminderUseCases.ts), kontrakty domeny, adapter Prisma, kontroler/trasy/OpenAPI w module reminders; adapter auta, composition root i testy odpowiadające klasom | TypeScript OK; 89/89 testów OK; parsowanie OpenAPI i diff check OK | Rzeczywiste HTTP i baza do sprawdzenia po deployu; bez nowej migracji i UI |
-| 5 | Do zrobienia | — | — | — |
+| 5 | DONE / Do review | [Moduł car](../src/modules/car/), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010190000_add_service_location/migration.sql), [formularz](../src/pages/car-log.html), [JS](../public/js/modules/car-log.js), [CSS](../public/style.css), [testy](../tests/modules/car/), ten plan | 100/100 testów OK; TypeScript, Prisma validate, składnia JS, OpenAPI i diff check OK | Migracja, test rzeczywistej bazy i wizualny odbiór po deployu; zapis wizyty niezależny od przypomnień |
 | 6 | Do zrobienia | — | — | — |
 | 7 | Do zrobienia | — | — | — |
 | 8 | Do zrobienia | — | — | — |

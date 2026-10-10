@@ -50,7 +50,38 @@ test('creation preserves 204, list fields and the oil change baseline', async ()
 
     const listed = response();
     await controller.list({ params: { id: car.id } }, listed);
-    assert.deepEqual(listed.body, [{ ...input, id: '1', carId: car.id, date: '2026-10-10T00:00:00.000Z' }]);
+    assert.deepEqual(listed.body, [{ ...input, id: '1', carId: car.id, date: '2026-10-10T00:00:00.000Z', workshopName: null, workshopAddress: null }]);
+});
+
+test('preserves a multiline visit, price and optional workshop through creation and listing', async () => {
+    //Given
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
+    const { controller, records } = setup(car);
+    const body = { ...input, description: 'Oil and filters\nBushings and ball joint\n' + 'Detailed notes. '.repeat(100), workshopName: ' Local garage ', workshopAddress: ' Main Street 12\nCity ' };
+    const created = response();
+    const listed = response();
+    //When
+    await controller.create({ params: { id: car.id }, body }, created);
+    await controller.list({ params: { id: car.id } }, listed);
+    //Then
+    assert.equal(created.statusCode, 204);
+    assert.equal(records.length, 1);
+    assert.equal(listed.body[0].description, body.description);
+    assert.equal(listed.body[0].cost, body.cost);
+    assert.equal(listed.body[0].workshopName, 'Local garage');
+    assert.equal(listed.body[0].workshopAddress, 'Main Street 12\nCity');
+});
+
+test('invalid workshop data returns 400 without saving', async () => {
+    //Given
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
+    const { controller, records } = setup(car);
+    const res = response();
+    //When
+    await controller.create({ params: { id: car.id }, body: { ...input, workshopName: {} } }, res);
+    //Then
+    assert.equal(res.statusCode, 400);
+    assert.equal(records.length, 0);
 });
 
 test('missing car: POST returns 404 without saving and GET returns an empty list', async () => {

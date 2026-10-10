@@ -284,7 +284,7 @@ async function loadServiceHistory(carId) {
             li.innerHTML = `
                 <div class="service-main-info">
                   <span class="service-description">
-                    ${service.description}
+                    <span class="service-description-text"></span>
                     ${service.isOilChange ? '<span class="oil-change-badge">OLEJ</span>' : ''}
                   </span>
                   <span class="service-cost">${service.cost.toFixed(2)} zł</span>
@@ -293,6 +293,13 @@ async function loadServiceHistory(carId) {
                   ${date} · ${service.mileageKm.toLocaleString()} km
                 </div>
             `;
+            li.querySelector('.service-description-text').textContent = service.description;
+            if (service.workshopName || service.workshopAddress) {
+                const location = document.createElement('div');
+                location.className = 'service-sub-info service-location';
+                location.textContent = [service.workshopName, service.workshopAddress].filter(Boolean).join('\n');
+                li.appendChild(location);
+            }
             container.appendChild(li);
         });
     } catch (err) {
@@ -323,7 +330,9 @@ async function submitAddServiceForm(e) {
         description: document.getElementById("service-description").value,
         cost: parseFloat(getValue("service-cost")),
         mileageKm: parseInt(getValue("service-meter")),
-        isOilChange: document.getElementById("service-is-oil-change").checked
+        isOilChange: document.getElementById("service-is-oil-change").checked,
+        workshopName: document.getElementById("service-workshop-name").value.trim() || null,
+        workshopAddress: document.getElementById("service-workshop-address").value.trim() || null
     };
 
     try {

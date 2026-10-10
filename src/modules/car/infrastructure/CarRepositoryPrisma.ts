@@ -77,6 +77,8 @@ export class CarRepositoryPrisma implements CarRepository {
                     mileageKm: record.mileageKm,
                     date: record.date,
                     isOilChange: record.isOilChange,
+                    workshopName: record.workshopName,
+                    workshopAddress: record.workshopAddress,
                 }),
             );
         }

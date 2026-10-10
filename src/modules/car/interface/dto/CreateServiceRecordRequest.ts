@@ -4,4 +4,6 @@ export interface CreateServiceRecordRequest {
     mileageKm: number;
     date: string;
     isOilChange?: boolean;
+    workshopName?: string | null;
+    workshopAddress?: string | null;
 }

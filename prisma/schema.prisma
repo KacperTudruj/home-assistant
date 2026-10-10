@@ -123,6 +123,8 @@ model ServiceRecord {
   mileageKm   Int
   date        DateTime
   isOilChange Boolean  @default(false)
+  workshopName String? @db.VarChar(200)
+  workshopAddress String? @db.VarChar(500)
 
   car Car @relation(fields: [carId], references: [id], onDelete: Cascade)
 

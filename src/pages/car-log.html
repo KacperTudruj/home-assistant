@@ -201,7 +201,15 @@
         </div>
         <div class="form-row">
           <label>Opis</label>
-          <input type="text" id="service-description" placeholder="np. Wymiana oleju i filtrów" required />
+          <textarea id="service-description" rows="4" placeholder="np. Wymiana oleju i filtrów, tulei oraz sworznia" required></textarea>
+        </div>
+        <div class="form-row">
+          <label for="service-workshop-name">Warsztat (opcjonalnie)</label>
+          <input type="text" id="service-workshop-name" maxlength="200" />
+        </div>
+        <div class="form-row">
+          <label for="service-workshop-address">Adres warsztatu (opcjonalnie)</label>
+          <textarea id="service-workshop-address" rows="2" maxlength="500"></textarea>
         </div>
         <div class="form-row">
           <label>Przebieg (km)</label>

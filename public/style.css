@@ -646,7 +646,8 @@ h1 {
   color: var(--muted);
 }
 
-.form-row input {
+.form-row input,
+#add-service-form textarea {
   background: #000;
   border: 1px solid var(--muted);
   padding: 10px;
@@ -655,7 +656,8 @@ h1 {
   font-family: 'Courier New', Courier, monospace;
 }
 
-.form-row input:focus {
+.form-row input:focus,
+#add-service-form textarea:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 8px rgba(0, 255, 65, 0.4);
@@ -766,6 +768,22 @@ h1 {
 
 .service-description {
   flex: 1;
+  min-width: 0;
+}
+
+.service-description-text,
+.service-location {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+#add-service-form textarea {
+  resize: vertical;
+}
+
+#add-service-overlay .overlay-content {
+  max-height: 90vh;
+  overflow-y: auto;
 }
 
 .service-cost {

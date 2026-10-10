@@ -8,6 +8,8 @@ export interface CreateServiceRecordInput {
     mileageKm: number;
     date: string;
     isOilChange?: boolean;
+    workshopName?: string | null;
+    workshopAddress?: string | null;
 }
 
 export class CreateServiceRecordUseCase {
@@ -25,7 +27,9 @@ export class CreateServiceRecordUseCase {
             cost: Number(input.cost),
             mileageKm: Number(input.mileageKm),
             date: new Date(input.date),
-            isOilChange: input.isOilChange
+            isOilChange: input.isOilChange,
+            workshopName: input.workshopName,
+            workshopAddress: input.workshopAddress
         });
 
         await this.serviceRecordRepository.create(carId, record);
