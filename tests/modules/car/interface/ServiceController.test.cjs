@@ -1,9 +1,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
-const { ServiceController } = require('../src/modules/car/interface/ServiceController');
-const { CreateServiceRecordUseCase } = require('../src/modules/car/application/CreateServiceRecordUseCase');
-const { ListServiceRecordsUseCase } = require('../src/modules/car/application/ListServiceRecordsUseCase');
-const { Car } = require('../src/modules/car/domain/entity/Car');
+const { ServiceController } = require('../../../../src/modules/car/interface/ServiceController');
+const { CreateServiceRecordUseCase } = require('../../../../src/modules/car/application/CreateServiceRecordUseCase');
+const { ListServiceRecordsUseCase } = require('../../../../src/modules/car/application/ListServiceRecordsUseCase');
+const { Car } = require('../../../../src/modules/car/domain/entity/Car');
 
 function setup(car) {
     const records = [];

@@ -130,6 +130,33 @@ model ServiceRecord {
   @@map("CarServiceRecord")
 }
 
+enum ReminderKind {
+  DATE
+  MILEAGE
+}
+
+enum ReminderLifecycle {
+  ACTIVE
+  COMPLETED
+  ARCHIVED
+}
+
+model Reminder {
+  id             String            @id @default(uuid())
+  title          String            @db.VarChar(200)
+  moduleKey      String            @db.VarChar(64)
+  resourceId     String?           @db.VarChar(200)
+  additionalInfo String?           @db.VarChar(5000)
+  kind           ReminderKind
+  dueDate        DateTime?          @db.Date
+  dueMileageKm   Int?
+  lifecycle      ReminderLifecycle @default(ACTIVE)
+  createdAt      DateTime          @default(now())
+  updatedAt      DateTime          @updatedAt
+
+  @@index([moduleKey, resourceId, lifecycle])
+}
+
 model SystemConfigurationSmartAgd {
   id    String @id @default(uuid())
   key   String @unique

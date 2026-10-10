@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: etap 1 zaakceptowany; etap 2 zaimplementowany, do review; kolejne etapy nierozpoczęte.
+Data: 2026-10-10. Status: etapy 1–2 zakończone; etap 3 zaimplementowany, do review; kolejne etapy nierozpoczęte.
 
 ## Cel i sposób pracy
 
@@ -181,7 +181,7 @@ odbiór w działającej aplikacji i akceptacja pozostają do wykonania.
 - [x] Przenieść Prisma z kontrolera do adaptera, wstrzyknąć zależności w composition root.
 - [x] Zachować obecne DTO, odpowiedzi i obsługę `isOilChange`; bez refaktoru paliwa i całego `CarController`.
 - [x] Uruchomić `npx.cmd tsc --noEmit` — OK (PowerShell blokuje wrapper `npx.ps1`).
-- [x] Uruchomić `node -r ts-node/register --test tests/car-service.test.cjs` — 3/3 testy OK:
+- [x] Uruchomić `node -r ts-node/register --test tests/modules/car/interface/ServiceController.test.cjs` — 3/3 testy OK:
   dodawanie/lista, 404 bez zapisu, pusta lista dla brakującego auta, flaga oleju, ujemny koszt i licznik oleju.
 - [x] Przejrzeć diff i uruchomić `git diff --check` — OK.
 - [ ] Odbiór na serwerze użytkownika: rzeczywisty zapis i odczyt Prisma. Testy lokalne korzystają
@@ -189,18 +189,57 @@ odbiór w działającej aplikacji i akceptacja pozostają do wykonania.
 
 **Gotowe, gdy:** kontroler nie zawiera zapisu Prisma, a publiczne zachowanie pozostaje zgodne.
 
-### 3. Model przypomnień i obliczenia
+### DONE 3. Model przypomnień i obliczenia
 
-- [ ] Dodać minimalny moduł `reminders`, model Prisma i addytywną migrację.
-- [ ] Uwzględnić `moduleKey`, `resourceId`, `additionalInfo` i ręcznie podany termin.
-- [ ] Zaimplementować obliczenia km/dni, bez cykliczności.
-- [ ] Przygotować testy reguł: dodatnie/zero/ujemne, brak przebiegu, DST, 29 lutego,
+- [x] Dodać minimalny moduł `reminders`, model Prisma i addytywną migrację.
+- [x] Uwzględnić `moduleKey`, `resourceId`, `additionalInfo` i ręcznie podany termin.
+- [x] Zaimplementować obliczenia km/dni, bez cykliczności.
+- [x] Przygotować testy reguł: dodatnie/zero/ujemne, brak przebiegu, DST, 29 lutego,
   koniec miesiąca i niepoprawne rodzaje warunków.
-- [ ] Uruchomić testy, `npx tsc --noEmit`, `npx prisma validate`; obejrzeć SQL migracji.
+- [x] Uruchomić testy, `npx.cmd tsc --noEmit`, `npx.cmd prisma validate`; obejrzeć SQL migracji — OK.
+- [x] Przygotować [skrypt serwerowy](../scripts/migrate-reminders.sh) i instrukcję poniżej.
+- [ ] Uruchomienie migracji na serwerze i sprawdzenie bazy — pozostaje użytkownikowi.
 
 **Gotowe, gdy:** reguły działają niezależnie od HTTP, migracja niczego nie usuwa.
-Testy serwisu korzystają z `node:test` i istniejącego `ts-node`; nie dodano zależności ani
-skryptu npm. Kolejne testy mogą używać tej samej konwencji. Sposób uruchomienia zapisujemy w raporcie.
+Testy korzystają z `node:test` i istniejącego `ts-node`; nie dodano zależności.
+Po review dodano `npm test`, automatycznie wykrywające testy w podkatalogach.
+Katalog `tests/modules/...` odwzorowuje `src/modules/...`, a nazwa pliku wskazuje
+testowaną klasę. Instrukcja lokalna i Docker znajduje się w [README](../readme.md).
+Po przeniesieniu plików `npm.cmd test` — 52/52 OK.
+
+**Wyniki:** `node -r ts-node/register --test tests/modules/reminders/domain/Reminder.test.cjs tests/modules/car/interface/ServiceController.test.cjs`
+— 52/52 OK (49 nowych jednostkowych + 3 regresji serwisu). Nowe testy mają sekcje
+`//Given`, `//When`, `//Then`, w tym asercje wyjątków. Testują wyłącznie domenę:
+bez mockowania bazy, HTTP, sieci i rzeczywistego zegara. Czas jest argumentem obliczenia.
+TypeScript i Prisma validate — OK; walidacja Prisma wymagała uruchomienia poza sandboxem
+z powodu blokady dostępu do katalogu tymczasowego, bez wykonywania migracji.
+
+**Ustalone szczegóły modelu:** tytuł do 200 znaków, dodatkowe informacje do 5000 znaków,
+identyfikator modułu do 64 znaków i obiektu do 200. Docelowy przebieg jest nieujemną
+liczbą całkowitą mieszczącą się w Prisma `Int`; odczyt może być ułamkowy (jak obecne tankowania).
+Data w domenie to `YYYY-MM-DD`, w PostgreSQL `DATE` (`DateTime @db.Date` w Prisma).
+Przyszły adapter zamieni ją na/z daty UTC o północy, nie lokalnej północy serwera.
+Różnicę dni liczymy z numerów dni kalendarzowych po ustaleniu dzisiejszej daty w Warszawie,
+a nie z czasu trwania między lokalnymi północami. Wykonane/archiwalne przypomnienia
+zwracają swój status i `remaining: null`. Rejestr obsługiwanych modułów, sprawdzanie
+istnienia obiektu oraz źródło przebiegu należą do etapu 4; domena sprawdza format kontekstu.
+Formularz względnego terminu „za...” pozostaje do obsłużenia w późniejszych etapach;
+obecny model przyjmuje konkretny termin, zgodnie z założeniem przechowywania daty/przebiegu docelowego.
+
+**Standardowy deploy:** użytkownik uruchamia [deploy.sh](../scripts/deploy.sh), który
+już wykonuje `npm run migrate:deploy` przed startem kontenerów. Nie trzeba po nim
+wykonywać dodatkowego skryptu migracji. Testy uruchamiamy osobno:
+`docker compose exec api npm test` (deploy ich automatycznie nie uruchamia).
+
+**Opcjonalne uruchomienie migracji bez pełnego deployu:** przesłać aktualne pliki projektu i z katalogu
+repozytorium wykonać `sh scripts/migrate-reminders.sh`. Skrypt wymaga działającego kontenera
+`api` z aktualnymi plikami (obecny Compose montuje repozytorium) i jego konfiguracją bazy.
+Wykonuje `npm run migrate:deploy`, następnie `npm run prisma:generate` wewnątrz kontenera.
+Stosuje **wszystkie oczekujące migracje** w tej wersji repozytorium, nie tylko przypomnienia;
+przed uruchomieniem przejrzeć ich zakres. Nie robi pull, restartu, resetu ani usuwania danych.
+Ponowne uruchomienie korzysta z historii migracji Prisma. Nie uruchamiać SQL ręcznie obok
+tego skryptu, aby zachować spójny rejestr migracji. Skrypt przejrzano statycznie;
+nie testowano jego wykonania na serwerze. Ten etap nie zmienia jeszcze UI ani API.
 
 ### 4. API samodzielnych przypomnień
 
@@ -301,8 +340,8 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | --- | --- | --- | --- | --- |
 | Plan | Do review | Ten dokument | Sprawdzenie zgodności z obecnym kodem i linków lokalnych | Po uwagach użytkownika: kontekst dowolnego modułu, dodatkowe informacje jako tekst, ręczne terminy i niezależny opis wizyty; bez odnawiania |
 | 1 | DONE / Do review | [Widok auta](../src/pages/car-log.html), [JS auta](../public/js/modules/car-log.js): nagłówki, przycisk, komunikaty ładowania, pustej listy i błędów; aktualizacja tego planu | `node --check public/js/modules/car-log.js` i `git diff --check` — OK; przegląd diffu | Test ręczny na działającej aplikacji pozostaje użytkownikowi; bez zmian API/bazy/licznika oleju |
-| 2 | DONE / Do review | [Kontrakt](../src/modules/car/domain/repository/ServiceRecordRepository.ts), [dodawanie](../src/modules/car/application/CreateServiceRecordUseCase.ts), [listowanie](../src/modules/car/application/ListServiceRecordsUseCase.ts), [adapter Prisma](../src/modules/car/infrastructure/ServiceRecordRepositoryPrisma.ts), [kontroler](../src/modules/car/interface/ServiceController.ts), [composition root](../src/index.ts), [testy](../tests/car-service.test.cjs), ten plan | TypeScript — OK; 3/3 testy bez bazy — OK; diff check — OK | Zachowane API i zapytania Prisma; rzeczywisty zapis/odczyt do sprawdzenia na serwerze |
-| 3 | Do zrobienia | — | — | — |
+| 2 | DONE / Do review | [Kontrakt](../src/modules/car/domain/repository/ServiceRecordRepository.ts), [dodawanie](../src/modules/car/application/CreateServiceRecordUseCase.ts), [listowanie](../src/modules/car/application/ListServiceRecordsUseCase.ts), [adapter Prisma](../src/modules/car/infrastructure/ServiceRecordRepositoryPrisma.ts), [kontroler](../src/modules/car/interface/ServiceController.ts), [composition root](../src/index.ts), [testy](../tests/modules/car/interface/ServiceController.test.cjs), ten plan | TypeScript — OK; 3/3 testy bez bazy — OK; diff check — OK | Zachowane API i zapytania Prisma; rzeczywisty zapis/odczyt do sprawdzenia na serwerze |
+| 3 | DONE / Do review | [Domena](../src/modules/reminders/domain/Reminder.ts), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010180000_add_reminders/migration.sql), [skrypt](../scripts/migrate-reminders.sh), [testy jednostkowe](../tests/modules/reminders/domain/Reminder.test.cjs), ten plan | 49/49 nowych testów i 3/3 regresji OK; TypeScript, Prisma validate i diff check OK | Baza nietknięta; migracja i skrypt do uruchomienia na serwerze; API w etapie 4 |
 | 4 | Do zrobienia | — | — | — |
 | 5 | Do zrobienia | — | — | — |
 | 6 | Do zrobienia | — | — | — |
