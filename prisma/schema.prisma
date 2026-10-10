@@ -143,6 +143,17 @@ enum ReminderLifecycle {
   ARCHIVED
 }
 
+model LegacyOilReminderImport {
+  carId           String   @id
+  carName         String
+  status          String
+  note            String
+  serviceRecordId String?
+  reminderId      String?
+  dueMileageKm    Int?
+  createdAt       DateTime @default(now())
+}
+
 model Reminder {
   id             String            @id @default(uuid())
   title          String            @db.VarChar(200)

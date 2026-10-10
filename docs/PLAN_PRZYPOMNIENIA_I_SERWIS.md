@@ -330,23 +330,23 @@ powinien wyświetlić się dosłownie. Sprawdzić dostępność przycisku zapisu
 Testy jednostkowe są po angielsku, z Given / When / Then; test kontrolera sprawdza przepływ
 zapisu/odczytu na atrapach. Nie jest to test rzeczywistego połączenia z PostgreSQL.
 
-### 6. Przeniesienie istniejących ustawień oleju
+### DONE 6. Przeniesienie istniejących ustawień oleju
 
-- [ ] Przygotować jawnie uruchamianą konwersję z trybem podglądu, poza startem serwera i odczytem API.
-- [ ] Dla auta z dodatnim starym interwałem i zapisaną wymianą zaproponować jednorazowy
-  termin (przebieg wymiany + dawny interwał), z kontekstem `car` i ID auta.
-  To jednorazowy import do zatwierdzenia/poprawienia, nie reguła cykliczna.
-  Zachować dotychczasowy wybór według najwyższego przebiegu, rozbieżności dat raportować.
-- [ ] Dla auta bez zapisanej wymiany raportować potrzebę wskazania podstawy; nie traktować
-  automatycznie zakupu auta jako wymiany oleju i nie tworzyć terminu od zera.
-- [ ] Zapewnić trwałe oznaczenie pochodzenia i unikalność konwersji dla auta; ponowne
-  uruchomienie nie duplikuje wpisu ani nie nadpisuje późniejszych zmian użytkownika.
-- [ ] Sprawdzić podgląd i konwersję na danych testowych, zachowanie historii i ponowne uruchomienie.
+- [x] Zgodnie z nową decyzją użytkownika import wykonuje automatycznie migracja przy deployu, zamiast osobnego podglądu i zatwierdzania każdego wpisu.
+- [x] Wybrać wymianę o najwyższym przebiegu; remisy rozstrzygać datą i ID.
+- [x] Przenosić poprawny interwał + przebieg wymiany, bez używania przebiegu zakupu jako wymiany.
+- [x] Zachować trwały raport w tabeli `LegacyOilReminderImport` i deterministyczne ID przypomnienia.
+- [x] Nie nadpisywać istniejących przypomnień; aktywne kilometrowe kierują auto do ręcznego review.
+- [x] Raportować brak wymiany, błędne wartości, rozbieżności dat i przebiegu. Nieaktywne auta importować jako archiwalne.
+- [x] Prisma validate, składnia skryptu raportu i diff check — OK; statyczny przegląd SQL.
+- [ ] Wykonanie SQL i sprawdzenie danych po migracji na serwerze — nie uruchamiano lokalnej ani serwerowej bazy.
 
-**Gotowe, gdy:** jest raport utworzonych/pominiętych/problemowych pozycji i sposób bezpiecznego uruchomienia.
-Przed konwersją rzeczywistych danych użytkownik wykonuje kopię zapasową i przegląda podgląd.
-Stare pola i licznik nadal istnieją do przełączenia UI; nie dopuszczamy długiego równoległego
-używania dwóch źródeł ustawień. Przed przełączeniem ponownie uzgadniamy nowe serwisy od czasu podglądu.
+Import jest transakcyjny, blokuje zmiany źródeł na czas odczytu i zapisu. Standardowa historia
+migracji Prisma zapobiega ponownemu wykonaniu; nie uruchamiać tego SQL ręcznie drugi raz.
+Raport nie zmienia się po późniejszych edycjach przypomnienia i nie nadpisuje ich.
+Stare kolumny i historia wizyt pozostają w bazie. Auta bez ustawionego interwału nie wymagają importu.
+Instrukcja: standardowy deploy, następnie `docker compose exec api node scripts/report-oil-import.cjs`.
+Brak wiarygodnej podstawy oznacza ręczne dodanie przypomnienia przez użytkownika po wdrożeniu UI.
 
 ### 7. Interfejs przypomnień w sekcji auta
 
@@ -411,6 +411,6 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | 3 | DONE / Do review | [Domena](../src/modules/reminders/domain/Reminder.ts), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010180000_add_reminders/migration.sql), [skrypt](../scripts/migrate-reminders.sh), [testy jednostkowe](../tests/modules/reminders/domain/Reminder.test.cjs), ten plan | 49/49 nowych testów i 3/3 regresji OK; TypeScript, Prisma validate i diff check OK | Baza nietknięta; migracja i skrypt do uruchomienia na serwerze; API w etapie 4 |
 | 4 | DONE / Do review | [Operacje](../src/modules/reminders/application/ReminderUseCases.ts), kontrakty domeny, adapter Prisma, kontroler/trasy/OpenAPI w module reminders; adapter auta, composition root i testy odpowiadające klasom | TypeScript OK; 89/89 testów OK; parsowanie OpenAPI i diff check OK | Rzeczywiste HTTP i baza do sprawdzenia po deployu; bez nowej migracji i UI |
 | 5 | DONE / Do review | [Moduł car](../src/modules/car/), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010190000_add_service_location/migration.sql), [formularz](../src/pages/car-log.html), [JS](../public/js/modules/car-log.js), [CSS](../public/style.css), [testy](../tests/modules/car/), ten plan | 100/100 testów OK; TypeScript, Prisma validate, składnia JS, OpenAPI i diff check OK | Migracja, test rzeczywistej bazy i wizualny odbiór po deployu; zapis wizyty niezależny od przypomnień |
-| 6 | Do zrobienia | — | — | — |
+| 6 | DONE / Do review | Migracja importu, model raportu, skrypt raportu, README i plan | Prisma validate, node --check, diff check OK; SQL przejrzany statycznie | Wykonanie na serwerze przez deploy; automatyczny import zgodnie z nową decyzją |
 | 7 | Do zrobienia | — | — | — |
 | 8 | Do zrobienia | — | — | — |

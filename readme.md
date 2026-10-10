@@ -83,6 +83,23 @@ Nowe testy zapisujemy w sekcjach `//Given` (dane), `//When` (wywołanie),
 
 ### Deploy i migracje
 
+Po wdrożeniu przypomnień wykonaj standardowo:
+
+```bash
+bash scripts/deploy.sh
+docker compose exec api node scripts/report-oil-import.cjs
+docker compose exec api npm test
+```
+
+Migracja automatycznie przenosi stare ustawienia oleju do przypomnień, gdy istnieje
+zapisana wymiana i poprawny interwał. Zachowuje historię serwisów. Raport pokazuje
+`IMPORTED` albo powód pominięcia: brak wymiany, niepoprawne dane lub istniejące aktywne
+przypomnienie kilometrowe. Dla pominiętych aut ustaw termin ręcznie w sekcji
+„Przypomnienia”. Sprawdź również uwagi o rozbieżności daty i przebiegu.
+Importowane przypomnienia nie odnawiają się automatycznie; nieaktywne auta dostają wpisy archiwalne.
+Historia migracji Prisma zapobiega ponownemu importowi przy następnym deployu.
+Raport można uruchamiać wielokrotnie — tylko odczytuje zapisany wynik importu.
+
 [scripts/deploy.sh](scripts/deploy.sh) wykonuje `npm run migrate:deploy` przed
 uruchomieniem kontenerów. Standardowy deploy stosuje więc oczekujące migracje;
 dodatkowy [skrypt migracji przypomnień](scripts/migrate-reminders.sh) nie jest wtedy
