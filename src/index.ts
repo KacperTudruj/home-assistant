@@ -1,4 +1,9 @@
 import express from 'express';
+import {ReminderUseCases} from '@modules/reminders/application/ReminderUseCases';
+import {ReminderRepositoryPrisma} from '@modules/reminders/infrastructure/ReminderRepositoryPrisma';
+import {ReminderController} from '@modules/reminders/interface/ReminderController';
+import {ReminderRoutes} from '@modules/reminders/interface/ReminderRoutes';
+import {CarReminderContextProvider} from '@modules/car/infrastructure/CarReminderContextProvider';
 import path from 'path';
 import {PrismaClient} from '@prisma/client';
 import dotenv from 'dotenv';
@@ -121,6 +126,11 @@ const serviceRecordRepository = new ServiceRecordRepositoryPrisma(prisma);
 const createServiceRecordUseCase = new CreateServiceRecordUseCase(carRepository, serviceRecordRepository);
 const listServiceRecordsUseCase = new ListServiceRecordsUseCase(serviceRecordRepository);
 const serviceController = new ServiceController(createServiceRecordUseCase, listServiceRecordsUseCase);
+const reminderRepository = new ReminderRepositoryPrisma(prisma);
+const reminderUseCases = new ReminderUseCases(reminderRepository, new Map([
+    ['car', new CarReminderContextProvider(carRepository)]
+]));
+const reminderController = new ReminderController(reminderUseCases);
 
 // --- SmartThings Connector (Shared Kernel) ---
 const stConfigRepo = new SmartThingsConfigRepositoryPrisma(prisma);
@@ -158,6 +168,7 @@ const smartHomeController = new SmartHomeController(getSmartHomeDevicesUseCase, 
 app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
 app.use('/api', CarRoutes(carController, fuelController, serviceController));
+app.use('/api', ReminderRoutes(reminderController));
 app.use('/api', AgdRoutes(agdController));
 app.use('/api', SmartHomeRoutes(smartHomeController));
 

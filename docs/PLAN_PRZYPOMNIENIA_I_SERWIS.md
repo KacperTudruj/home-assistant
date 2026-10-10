@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: etapy 1–2 zakończone; etap 3 zaimplementowany, do review; kolejne etapy nierozpoczęte.
+Data: 2026-10-10. Status: etapy 1–3 zakończone; etap 4 zaimplementowany, do review; kolejne etapy nierozpoczęte.
 
 ## Cel i sposób pracy
 
@@ -241,17 +241,62 @@ Ponowne uruchomienie korzysta z historii migracji Prisma. Nie uruchamiać SQL r�
 tego skryptu, aby zachować spójny rejestr migracji. Skrypt przejrzano statycznie;
 nie testowano jego wykonania na serwerze. Ten etap nie zmienia jeszcze UI ani API.
 
-### 4. API samodzielnych przypomnień
+### DONE 4. API samodzielnych przypomnień
 
-- [ ] Dodać repozytorium, use case'y, kontroler i trasy tworzenia/listy/edycji/archiwizacji/wykonania.
-- [ ] Podłączyć źródło przebiegu z `car`, walidację oraz OpenAPI.
-- [ ] Sprawdzić przypomnienie ogólne na dzień, olej na wskazany przebieg i akumulator na datę.
-- [ ] Sprawdzić izolację modułów i obiektów (także jednakowe ID w różnych modułach),
+- [x] Dodać repozytorium, use case'y, kontroler i trasy tworzenia/listy/edycji/archiwizacji/wykonania.
+- [x] Podłączyć źródło przebiegu z `car`, walidację oraz OpenAPI.
+- [x] Sprawdzić przypomnienie ogólne na dzień, olej na wskazany przebieg i akumulator na datę.
+- [x] Sprawdzić izolację modułów i obiektów (także jednakowe ID w różnych modułach),
   nieaktywne auto, błędne dane i ponowienie wykonania. Drugi kontekst można sprawdzić adapterem testowym.
-- [ ] Sprawdzić zapis/edycję/odczyt dodatkowych informacji i brak wymogu serwisu.
-- [ ] Uruchomić `npx tsc --noEmit` i testy dotkniętych reguł/API.
+- [x] Sprawdzić zapis/edycję/odczyt dodatkowych informacji i brak wymogu serwisu.
+- [x] Uruchomić `npx.cmd tsc --noEmit` — OK; `npm.cmd test` — 89/89 OK (37 nowych testów).
+- [x] Sprawdzić parsowanie OpenAPI i obecność trzech ścieżek przypomnień — OK; `git diff --check` — OK.
+- [ ] Po deployu sprawdzić rzeczywiste HTTP i zapis/odczyt na bazie serwerowej.
 
 **Gotowe, gdy:** przypomnienie działa bez wpisu serwisowego i zwraca jednostkę, pozostałą wartość i status.
+
+**Implementacja:** [ReminderUseCases](../src/modules/reminders/application/ReminderUseCases.ts)
+grupuje operacje aplikacyjne; [repozytorium Prisma](../src/modules/reminders/infrastructure/ReminderRepositoryPrisma.ts)
+mapuje daty kalendarzowe przez UTC. [Adapter auta](../src/modules/car/infrastructure/CarReminderContextProvider.ts)
+korzysta z obecnego źródła przebiegu. Zakupowe 0 jest traktowane jako brak wiarygodnej podstawy;
+dodatni przebieg zakupu ma źródło `PURCHASE`, zapisany odczyt `READING` i datę odczytu.
+Wszystkie zależności podłączono w [composition root](../src/index.ts).
+
+**API do review** (dokumentacja w `/api/docs`, istniejące Basic Auth nadal obowiązuje):
+
+| Metoda i ścieżka | Zachowanie |
+| --- | --- |
+| `POST /api/reminders` | Tworzenie, odpowiedź 201 z przypomnieniem i obliczeniami |
+| `GET /api/reminders` | Lista; opcjonalne `moduleKey`, `resourceId`, `lifecycle`; domyślnie wszystkie cykle życia |
+| `PATCH /api/reminders/:id` | Ręczna edycja; `{"lifecycle":"ARCHIVED"}` archiwizuje |
+| `POST /api/reminders/:id/complete` | Wykonanie bez kolejnego terminu; ponowienie zwraca wykonany wpis bez następnego zapisu |
+
+Kontekst (`moduleKey`, `resourceId`) jest niezmienny po utworzeniu. Przy zmianie rodzaju
+trzeba wyczyścić poprzedni termin przez `null`. Dodatkowe informacje można wyczyścić przez `null`.
+Błędy danych mają 400, brak wpisu/obiektu przy zapisie 404, nieaktywne auto 409.
+Nieaktywne lub usunięte auto nie blokuje listowania i samej archiwizacji. Lista oznacza
+brak kontekstu przez `contextAvailable: false`; brak przebiegu daje `UNKNOWN` dla aktywnego
+przypomnienia kilometrowego. Obecnie zarejestrowano `general` i `car`; drugi moduł
+sprawdzono adapterem testowym. Kolejny moduł wymaga dodania dostawcy kontekstu i wpisu w OpenAPI,
+bez zmiany schematu bazy. Nie dodano nowych migracji ani UI.
+
+Przykładowe body do utworzenia przypomnienia (podstawić rzeczywiste ID auta):
+
+```json
+{
+  "title": "Wymiana oleju",
+  "moduleKey": "car",
+  "resourceId": "ID_AUTA",
+  "kind": "MILEAGE",
+  "dueMileageKm": 190000,
+  "additionalInfo": "Ostatnia wymiana przy 180 000 km"
+}
+```
+
+Testy jednostkowe sprawdzają operacje, adaptery i mapowanie HTTP na atrapach zależności;
+nie łączą się z bazą i nie uruchamiają serwera. Lokalnie wygenerowano klienta Prisma
+(`npx.cmd prisma generate`, poza sandboxem ze względu na blokadę katalogu tymczasowego).
+Nie zastosowano migracji. Po standardowym deployu testy: `docker compose exec api npm test`.
 
 ### 5. Opis wizyty i miejsce serwisu
 
@@ -342,7 +387,7 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | 1 | DONE / Do review | [Widok auta](../src/pages/car-log.html), [JS auta](../public/js/modules/car-log.js): nagłówki, przycisk, komunikaty ładowania, pustej listy i błędów; aktualizacja tego planu | `node --check public/js/modules/car-log.js` i `git diff --check` — OK; przegląd diffu | Test ręczny na działającej aplikacji pozostaje użytkownikowi; bez zmian API/bazy/licznika oleju |
 | 2 | DONE / Do review | [Kontrakt](../src/modules/car/domain/repository/ServiceRecordRepository.ts), [dodawanie](../src/modules/car/application/CreateServiceRecordUseCase.ts), [listowanie](../src/modules/car/application/ListServiceRecordsUseCase.ts), [adapter Prisma](../src/modules/car/infrastructure/ServiceRecordRepositoryPrisma.ts), [kontroler](../src/modules/car/interface/ServiceController.ts), [composition root](../src/index.ts), [testy](../tests/modules/car/interface/ServiceController.test.cjs), ten plan | TypeScript — OK; 3/3 testy bez bazy — OK; diff check — OK | Zachowane API i zapytania Prisma; rzeczywisty zapis/odczyt do sprawdzenia na serwerze |
 | 3 | DONE / Do review | [Domena](../src/modules/reminders/domain/Reminder.ts), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010180000_add_reminders/migration.sql), [skrypt](../scripts/migrate-reminders.sh), [testy jednostkowe](../tests/modules/reminders/domain/Reminder.test.cjs), ten plan | 49/49 nowych testów i 3/3 regresji OK; TypeScript, Prisma validate i diff check OK | Baza nietknięta; migracja i skrypt do uruchomienia na serwerze; API w etapie 4 |
-| 4 | Do zrobienia | — | — | — |
+| 4 | DONE / Do review | [Operacje](../src/modules/reminders/application/ReminderUseCases.ts), kontrakty domeny, adapter Prisma, kontroler/trasy/OpenAPI w module reminders; adapter auta, composition root i testy odpowiadające klasom | TypeScript OK; 89/89 testów OK; parsowanie OpenAPI i diff check OK | Rzeczywiste HTTP i baza do sprawdzenia po deployu; bez nowej migracji i UI |
 | 5 | Do zrobienia | — | — | — |
 | 6 | Do zrobienia | — | — | — |
 | 7 | Do zrobienia | — | — | — |
