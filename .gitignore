@@ -7,3 +7,4 @@ mosquitto/
 # Ignorujemy pliki z realnymi, lokalnymi sekretami
 .env.local
 .env.*.local
+AGENTS.md
