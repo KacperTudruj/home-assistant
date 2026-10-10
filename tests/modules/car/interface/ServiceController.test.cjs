@@ -35,12 +35,12 @@ function response() {
 }
 
 const input = {
-    description: 'Olej, tuleje i sworzeń', cost: 800, mileageKm: 180000,
+    description: 'Oil, bushings and ball joint', cost: 800, mileageKm: 180000,
     date: '2026-10-10', isOilChange: true
 };
 
-test('zapis zachowuje 204, pola listy i podstawę licznika oleju', async () => {
-    const car = new Car({ id: 'car-1', name: 'Auto', year: 2020, isActive: true, oilChangeIntervalKm: 10000 });
+test('creation preserves 204, list fields and the oil change baseline', async () => {
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true, oilChangeIntervalKm: 10000 });
     const { controller } = setup(car);
     const created = response();
     await controller.create({ params: { id: car.id }, body: input }, created);
@@ -53,7 +53,7 @@ test('zapis zachowuje 204, pola listy i podstawę licznika oleju', async () => {
     assert.deepEqual(listed.body, [{ ...input, id: '1', carId: car.id, date: '2026-10-10T00:00:00.000Z' }]);
 });
 
-test('brak auta: POST zwraca 404 bez zapisu, GET zachowuje pustą listę', async () => {
+test('missing car: POST returns 404 without saving and GET returns an empty list', async () => {
     const { controller, records } = setup(null);
     const created = response();
     await controller.create({ params: { id: 'missing' }, body: input }, created);
@@ -66,8 +66,8 @@ test('brak auta: POST zwraca 404 bez zapisu, GET zachowuje pustą listę', async
     assert.deepEqual(listed.body, []);
 });
 
-test('brak flagi oleju i ujemny koszt zachowują dotychczasowe reguły', async () => {
-    const car = new Car({ id: 'car-1', name: 'Auto', year: 2020, isActive: true });
+test('missing oil change flag and negative cost preserve existing rules', async () => {
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
     const { controller, records } = setup(car);
     await controller.create({ params: { id: car.id }, body: { ...input, isOilChange: undefined } }, response());
     assert.equal(records[0].isOilChange, false);
