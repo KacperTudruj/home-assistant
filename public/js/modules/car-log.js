@@ -1,4 +1,9 @@
+import { initCarReminders, loadCarReminders } from './car-reminders.js';
+
+let carLoadVersion = 0;
+
 export async function initCarLog() {
+    initCarReminders();
     const carOverlay = document.getElementById("car-selection-overlay");
     const carListEl = document.getElementById("car-selection-list");
     const changeCarBtn = document.getElementById("change-car-btn");
@@ -66,10 +71,13 @@ async function showCarSelection(carOverlay, carListEl) {
 }
 
 async function loadCarData(carId) {
+    const version = ++carLoadVersion;
     try {
         const res = await fetch(`/api/cars/${carId}`);
         if (!res.ok) throw new Error("Car not found");
         const car = await res.json();
+        if (version !== carLoadVersion) return;
+        loadCarReminders(car);
 
         // Update UI
         setText("car-name-display", car.name);
@@ -175,16 +183,10 @@ async function loadCarStatistics(carId) {
     if (!avgPriceEl) return;
 
     try {
-        // We need both fuel statistics and general car stats (oil change)
-        const [fuelStatsRes, carStatsRes] = await Promise.all([
-            fetch(`/api/cars/${carId}/fuel/statistics`),
-            fetch(`/api/cars/${carId}/stats`)
-        ]);
-
-        if (!fuelStatsRes.ok || !carStatsRes.ok) throw new Error("Failed to fetch statistics");
+        const fuelStatsRes = await fetch(`/api/cars/${carId}/fuel/statistics`);
+        if (!fuelStatsRes.ok) throw new Error("Failed to fetch statistics");
         
         const fuelStats = await fuelStatsRes.json();
-        const carStats = await carStatsRes.json();
 
         // Fuel stats
         avgPriceEl.textContent = `${fuelStats.overallAvgPricePerLiter.toFixed(2)} zł/L`;
@@ -211,32 +213,6 @@ async function loadCarStatistics(carId) {
         setText("stats-avg-liters", `${fuelStats.overallAvgLitersPerRefuel.toFixed(2)} L`);
         setText("stats-total-liters", `${fuelStats.overallTotalLiters.toLocaleString()} L`);
         setText("stats-total-cost", `${fuelStats.overallTotalSpent.toLocaleString()} zł`);
-
-        // Oil change info from carStats
-        const oilRemainingEl = document.getElementById("stats-oil-remaining");
-        const oilCard = document.getElementById("oil-change-card");
-        const progressBar = document.getElementById("oil-progress-bar");
-
-        if (carStats.oilChange && carStats.oilChange.intervalKm) {
-            oilCard.classList.remove("hidden");
-            const remaining = carStats.oilChange.remainingKm;
-            const interval = carStats.oilChange.intervalKm;
-            
-            if (remaining !== null) {
-                oilRemainingEl.textContent = `${remaining.toLocaleString()} km`;
-                const percent = Math.max(0, Math.min(100, (remaining / interval) * 100));
-                progressBar.style.width = `${percent}%`;
-                
-                if (percent < 10) progressBar.style.background = "#f44336";
-                else if (percent < 25) progressBar.style.background = "#ff9800";
-                else progressBar.style.background = "#ffc107";
-            } else {
-                oilRemainingEl.textContent = "brak danych";
-                progressBar.style.width = "0%";
-            }
-        } else {
-            oilCard.classList.add("hidden");
-        }
 
         const yearlyListEl = document.getElementById("stats-yearly");
         if (yearlyListEl) {

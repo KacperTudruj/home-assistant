@@ -88,13 +88,7 @@
         <span class="label">💰 Łączny koszt</span>
         <span class="value" id="stats-total-cost">—</span>
       </div>
-      <div id="oil-change-card" class="oil-change-info">
-        <span class="label">🛢️ Kolejna wymiana oleju za</span>
-        <span class="value" id="stats-oil-remaining">—</span>
-        <div class="progress-bar-container">
-          <div id="oil-progress-bar" class="progress-bar"></div>
-        </div>
-      </div>
+
     </div>
 
     <h3>Rocznie</h3>
@@ -135,6 +129,59 @@
       <a class="btn-link" href="/car-fuel-history.html">Zobacz wszystkie tankowania →</a>
     </div>
   </section>
+
+  <section class="card" aria-labelledby="reminders-heading">
+    <h2 id="reminders-heading">Przypomnienia</h2>
+    <p id="reminder-inactive" hidden>Auto jest nieaktywne. Możesz przeglądać i archiwizować przypomnienia.</p>
+    <div class="reminder-actions">
+      <button type="button" class="btn-primary" id="add-reminder-btn" disabled>Dodaj przypomnienie</button>
+      <label for="reminder-filter">Pokaż</label>
+      <select id="reminder-filter">
+        <option value="ACTIVE">Aktywne</option>
+        <option value="COMPLETED">Wykonane</option>
+        <option value="ARCHIVED">Archiwalne</option>
+        <option value="">Wszystkie</option>
+      </select>
+      <button type="button" class="btn-secondary" id="refresh-reminders-btn">Odśwież</button>
+    </div>
+    <p id="reminder-error" role="alert"></p>
+    <ul id="reminder-list" aria-live="polite"></ul>
+  </section>
+
+  <dialog id="reminder-dialog" aria-labelledby="reminder-dialog-title">
+    <h2 id="reminder-dialog-title">Dodaj przypomnienie</h2>
+    <form id="reminder-form">
+      <div class="form-row">
+        <label for="reminder-title">O czym przypomnieć?</label>
+        <input id="reminder-title" maxlength="200" required />
+      </div>
+      <div class="form-row">
+        <label for="reminder-kind">Termin według</label>
+        <select id="reminder-kind"><option value="MILEAGE">Przebiegu</option><option value="DATE">Daty</option></select>
+      </div>
+      <div class="form-row" id="reminder-mileage-row">
+        <label for="reminder-mileage">Przebieg docelowy (km)</label>
+        <input id="reminder-mileage" type="number" min="0" max="2147483647" step="1" required />
+      </div>
+      <div class="form-row" id="reminder-date-row" hidden>
+        <label for="reminder-date">Data docelowa</label>
+        <input id="reminder-date" type="date" />
+      </div>
+      <div class="form-row">
+        <label for="reminder-info">Dodatkowe informacje (opcjonalnie)</label>
+        <textarea id="reminder-info" maxlength="5000" rows="4"></textarea>
+      </div>
+      <div class="form-row">
+        <label for="reminder-lifecycle">Status</label>
+        <select id="reminder-lifecycle"><option value="ACTIVE">Aktywne</option><option value="COMPLETED">Wykonane</option><option value="ARCHIVED">Archiwalne</option></select>
+      </div>
+      <p id="reminder-form-error" role="alert"></p>
+      <div class="form-actions">
+        <button id="cancel-reminder" type="button" class="btn-secondary">Anuluj</button>
+        <button id="save-reminder" type="submit" class="btn-primary">Zapisz</button>
+      </div>
+    </form>
+  </dialog>
 
   <!-- KARTA: HISTORIA SERWISOWA -->
   <section class="card">
