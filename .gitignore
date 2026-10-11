@@ -2,7 +2,9 @@ node_modules
 .env
 .idea
 .notes.md
-mosquitto/
+# Runtime MQTT state and logs; keep broker configuration versioned.
+mosquitto/data/
+mosquitto/log/
 
 # Ignorujemy pliki z realnymi, lokalnymi sekretami
 .env.local
