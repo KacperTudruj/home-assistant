@@ -26,7 +26,7 @@ export class CarAnalyticsController {
      *         schema: { type: string, format: date }
      *       - in: query
      *         name: fuelType
-     *         schema: { type: string, enum: [PB95, PB98, DIESEL, LPG, ELECTRIC], default: PB95 }
+     *         schema: { type: string, enum: [PB95, PB98, DIESEL, LPG, ELECTRIC] }
      *     responses:
      *       200:
      *         description: Dokument wykresów v1, auto, czas obliczenia i analiza; brak tankowań daje puste serie. ELECTRIC nie ma metryk litrowych.

@@ -26,23 +26,18 @@ function harness(search = '?carId=test') {
     return { context, get, requests, draws, payload };
 }
 
-test('loads once and waits for submit before requesting changed filters', async () => {
+test('loads all history once without filter parameters', async () => {
     //Given
     const h = harness();
     //When
     const loading = h.context.initCarAnalytics();
     h.requests[0].resolve({ ok: true, json: async () => h.payload('Car') });
     await loading;
-    h.get('analytics-period').value = '3';
-    h.get('analytics-period').handlers.change();
     //Then
     assert.equal(h.requests.length, 1);
     assert.equal(h.draws.length, 1);
-    assert.match(h.get('analytics-back').href, /carId=test/);
-    //When
-    h.get('analytics-filters').handlers.submit({ preventDefault() {} });
-    //Then
-    assert.equal(h.requests.length, 2);
+    assert.equal(h.requests[0].url, '/api/cars/test/analytics');
+
 });
 
 test('aborts previous requests and ignores stale successes', async () => {
@@ -50,7 +45,7 @@ test('aborts previous requests and ignores stale successes', async () => {
     const h = harness();
     const first = h.context.initCarAnalytics();
     //When
-    h.get('analytics-filters').handlers.submit({ preventDefault() {} });
+    h.get('analytics-retry').handlers.click();
     h.requests[1].resolve({ ok: true, json: async () => h.payload('New') });
     await new Promise(resolve => setImmediate(resolve));
     h.requests[0].resolve({ ok: true, json: async () => h.payload('Old') });
@@ -77,14 +72,11 @@ test('shows API errors and retries the failed query', async () => {
     assert.equal(h.requests[0].url, h.requests[1].url);
 });
 
-test('does not fetch without a car and clamps calendar month boundaries', async () => {
+test('does not fetch without a car', async () => {
     //Given
     const h = harness('');
     //When
     await h.context.initCarAnalytics();
-    const range = h.context.dateRange(3, new Date('2026-05-31T22:00:00Z'));
     //Then
     assert.equal(h.requests.length, 0);
-    assert.equal(range.from, '2026-02-28');
-    assert.equal(range.to, '2026-05-31');
 });

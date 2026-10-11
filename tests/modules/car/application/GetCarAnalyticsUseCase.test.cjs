@@ -8,6 +8,22 @@ const { AnalyticsLimitError, AnalyticsNotFoundError } = require('../../../../src
 const { InvalidFuelAnalyticsInputError } = require('../../../../src/modules/car/domain/FuelAnalyticsCalculator');
 
 const query = { from: '2026-01-01', to: '2026-10-11', fuelType: 'PB95' };
+test('includes refuels older than five years and detects diesel without user filters', async () => {
+    //Given
+    const records = [
+        { id: '1', date: '2010-01-01', fuelType: 'DIESEL', liters: 40, totalPrice: 200, mileageAtRefuelKm: 1000, tripDistance: 500 },
+        { id: '2', date: '2026-01-01', fuelType: 'DIESEL', liters: 40, totalPrice: 240, mileageAtRefuelKm: 1500, tripDistance: 500 },
+    ];
+    const { useCase, counts } = setup(async () => ({ car: { id: 'car', name: 'Car' }, records, availableFuelTypes: ['DIESEL'] }));
+    //When
+    const result = await useCase.execute('car', {});
+    await useCase.execute('car', {});
+    //Then
+    assert.equal(result.analytics.filter.from, '2010-01-01');
+    assert.equal(result.analytics.filter.fuelType, 'DIESEL');
+    assert.equal(result.analytics.points.length, 2);
+    assert.equal(counts.reads, 1);
+});
 function setup(read = async () => ({ car: { id: 'car', name: 'Car' }, records: [], availableFuelTypes: ['LPG'] })) {
     const cache = new MemoryCarAnalyticsCache();
     const counts = { reads: 0, generations: 0 };
@@ -44,7 +60,7 @@ test('normalizes omitted filters and preserves explicit date range boundaries', 
     await useCase.execute('car', { from: '2025-10-11', to: '2026-10-11', fuelType: 'PB95' });
     //Then
     assert.deepEqual(received, { from: '2025-10-11', to: '2026-10-11', fuelType: 'PB95' });
-    assert.equal(counts.reads, 1);
+    assert.equal(counts.reads, 2);
 });
 
 for (const invalid of [{ from: '2026-01-01' }, { from: '2026-02-30', to: '2026-10-11' },
@@ -116,7 +132,7 @@ test('concurrent identical requests share both the repository and generator', as
     assert.deepEqual(counts, { reads: 1, generations: 1 });
 });
 
-test('clamps the default leap-day range and accepts four-digit year boundaries', async () => {
+test('loads all history by default and accepts four-digit year boundaries', async () => {
     //Given
     const source = { car: { id: 'car', name: 'Car' }, records: [], availableFuelTypes: [] };
     const useCase = new GetCarAnalyticsUseCase({ read: async () => source },
@@ -126,6 +142,6 @@ test('clamps the default leap-day range and accepts four-digit year boundaries',
     const leap = await useCase.execute('car', {});
     const boundary = await useCase.execute('car', { from: '9999-01-01', to: '9999-12-31' });
     //Then
-    assert.equal(leap.analytics.filter.from, '2023-02-28');
+    assert.equal(leap.analytics.filter.from, '0001-01-01');
     assert.equal(boundary.analytics.filter.to, '9999-12-31');
 });

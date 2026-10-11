@@ -45,7 +45,7 @@ export function renderCharts(root, documentSpec, ChartClass = globalThis.Chart) 
     try {
         for (const spec of documentSpec.charts) {
             const card = element('section'); card.className = 'card analytics-chart';
-            card.append(element('h2', spec.title), element('p', spec.description));
+            card.append(element('h2', spec.title));
             const valid = spec.series.some(series => series.points.some(point => point.y !== null));
             if (valid && ChartClass) {
                 const holder = element('div'); holder.className = 'analytics-canvas';

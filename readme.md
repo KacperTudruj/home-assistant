@@ -45,11 +45,15 @@ Projekt jest rozwijany **bez presji**, bez „enterprise overengineering”.
 
 ### Analiza auta
 
-W widoku samochodu wybierz **Analiza auta**. Osobna strona pokazuje cztery wykresy,
-filtry 3/6/12 miesięcy lub własny zakres oraz rozwijane tabele danych. Dopiero przycisk
-„Pokaż” zatwierdza zmienione filtry. Powrót prowadzi do tego samego samochodu.
+W widoku samochodu wybierz **Analiza auta**. Strona od razu pokazuje cztery wykresy
+od pierwszego tankowania do dziś, bez formularza filtrów. Paliwo jest wybierane
+automatycznie według liczby tankowań. Pasek „Home / 🚗 Car Log / Analiza auta” pozwala
+wrócić do tego samego samochodu. Opisy obliczeń i tabele są schowane pod „Szczegóły i dane”.
 
 Wykresy korzystają z lokalnie serwowanego Chart.js 4.5.1 (licencja MIT), bez CDN.
+Gotowy plik i licencja są zapisane w [public/vendor](public/vendor/), aby starszy
+wolumen `node_modules` na serwerze nie powodował błędu 404/MIME przy ładowaniu wykresów.
+Przy aktualizacji Chart.js należy też zaktualizować tę kopię z paczki npm.
 Biblioteka jest izolowana w [rendererze](public/js/modules/chart-renderer.js).
 [Dokumentacja integracji Chart.js](https://www.chartjs.org/docs/latest/getting-started/integration.html)
 opisuje użyty wariant skryptu UMD. Spalanie jest szacunkowe, ponieważ dane nie zawierają

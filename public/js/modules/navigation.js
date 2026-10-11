@@ -49,5 +49,19 @@ export function renderAppNav() {
                 <span class="app-nav-title active">${title}</span>
             </nav>
         `;
+        if (pageType === 'car-analytics') {
+            const nav = root.querySelector('nav');
+            const current = nav.lastElementChild;
+            const carId = new URLSearchParams(location.search).get('carId');
+            const carLink = document.createElement('a');
+            carLink.className = 'app-nav-back';
+            carLink.textContent = '🚗 Car Log';
+            carLink.href = carId ? `/car-log?carId=${encodeURIComponent(carId)}` : '/car-log';
+            const separator = document.createElement('span');
+            separator.className = 'app-nav-separator';
+            separator.textContent = '/';
+            nav.insertBefore(carLink, current);
+            nav.insertBefore(separator, current);
+        }
     }
 }

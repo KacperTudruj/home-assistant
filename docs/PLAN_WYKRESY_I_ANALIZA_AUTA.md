@@ -1,5 +1,17 @@
 # Plan: moduł wykresów i analiza auta
 
+## Korekta po review interfejsu
+
+Aktualne zachowanie zastępuje opis filtrów w historycznych etapach poniżej:
+- Pasek „Home / 🚗 Car Log / Analiza auta”, bez osobnego linku powrotu.
+- Automatyczne pobranie całej historii do dziś; brak wyboru dat i paliwa w UI.
+  Backend wybiera najczęściej występujące paliwo (remis rozstrzyga klucz paliwa).
+  Jawne filtry API nadal działają; limit pięciu lat dotyczy tylko jawnego zakresu.
+  Limity 5000 rekordów i 1000 punktów na serię pozostają zabezpieczeniem API.
+- Informacje techniczne usunięte z nagłówka; opisy i tabele rozwijane pod wykresem.
+- Chart.js 4.5.1 i licencja w statycznych zasobach repozytorium, niezależnie od
+  zawartości serwerowego wolumenu zależności. Nie zmieniano bazy ani reguł spalania.
+
 Status: **etapy 1–3 DONE / do review; odbiór rzeczywistej bazy po deployu**.
 
 ## Cel i zakres
