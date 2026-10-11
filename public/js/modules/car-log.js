@@ -32,7 +32,9 @@ export async function initCarLog() {
     const addServiceBtn = document.getElementById("add-service-btn");
     const addServiceForm = document.getElementById("add-service-form");
 
-    const savedCarId = localStorage.getItem("selectedCarId");
+    const requestedCarId = new URLSearchParams(location.search).get('carId');
+    const savedCarId = requestedCarId || localStorage.getItem("selectedCarId");
+    if (requestedCarId) localStorage.setItem('selectedCarId', requestedCarId);
     if (savedCarId) {
         loadCarData(savedCarId);
     } else {
@@ -92,11 +94,17 @@ async function showCarSelection(carOverlay, carListEl) {
 
 async function loadCarData(carId) {
     const version = ++carLoadVersion;
+    const analyticsLink = document.getElementById('car-analytics-link');
+    if (analyticsLink) analyticsLink.hidden = true;
     try {
         const res = await fetch(`/api/cars/${carId}`);
         if (!res.ok) throw new Error("Car not found");
         const car = await res.json();
         if (version !== carLoadVersion) return;
+        if (analyticsLink) {
+            analyticsLink.href = `/car-analytics?carId=${encodeURIComponent(carId)}`;
+            analyticsLink.hidden = false;
+        }
         loadCarReminders(car);
 
         // Update UI

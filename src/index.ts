@@ -193,3 +193,9 @@ app.get('/api/health', (_, res) => {
 app.listen(PORT, '0.0.0.0', () => {
     console.log('Jamnik Henryk uruchomi system');
 });
+app.get('/car-analytics', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'car-analytics.html'));
+});
+app.get('/vendor/chart.umd.js', (_, res) => {
+    res.sendFile(path.join(__dirname, '..', 'node_modules', 'chart.js', 'dist', 'chart.umd.js'));
+});

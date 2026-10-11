@@ -43,6 +43,37 @@ Projekt jest rozwijany **bez presji**, bez „enterprise overengineering”.
 
 ## Testy
 
+### Analiza auta
+
+W widoku samochodu wybierz **Analiza auta**. Osobna strona pokazuje cztery wykresy,
+filtry 3/6/12 miesięcy lub własny zakres oraz rozwijane tabele danych. Dopiero przycisk
+„Pokaż” zatwierdza zmienione filtry. Powrót prowadzi do tego samego samochodu.
+
+Wykresy korzystają z lokalnie serwowanego Chart.js 4.5.1 (licencja MIT), bez CDN.
+Biblioteka jest izolowana w [rendererze](public/js/modules/chart-renderer.js).
+[Dokumentacja integracji Chart.js](https://www.chartjs.org/docs/latest/getting-started/integration.html)
+opisuje użyty wariant skryptu UMD. Spalanie jest szacunkowe, ponieważ dane nie zawierają
+informacji o tankowaniu do pełna. Plus na wykresie porównania oznacza mniejsze spalanie.
+
+Jedno żądanie analityczne pobiera wszystkie wykresy. Backend przechowuje wynik do 5 minut
+(do 100 wpisów / 20 MiB), a zapis tankowania unieważnia cache auta. Zwykła strona auta,
+zapis paliwa, zmiana rozmiaru wykresu i otwarcie tabeli nie pobierają analizy.
+Cache jest lokalny dla jednej instancji API; aktualizacja bazy poza API może być widoczna
+po upływie TTL. Nie potrzeba migracji danych ani skryptu przeliczającego historię.
+
+Na serwerze standardowo `bash scripts/deploy.sh`. Lokalnie bez sprzętu Zigbee wystarczy
+`docker compose up -d api postgres`; nie uruchamia to Zigbee2MQTT ani pozostałych usług.
+Po zmianie zależności, jeśli lokalny wolumen `node_modules` jest starszy, wykonaj
+`docker compose exec api npm ci`, następnie `docker compose restart api`.
+Nie usuwaj wolumenów bazy w celu aktualizacji biblioteki.
+
+Testy frontendu (bez przeglądarki, na atrapach DOM) są w
+[tests/public/js/modules](tests/public/js/modules/). Testy ręczne z przykładowym API
+nie zastępują odbioru rzeczywistego serwera i bazy. Szczegóły w
+[planie](docs/PLAN_WYKRESY_I_ANALIZA_AUTA.md).
+
+### Uruchamianie testów
+
 Testy korzystają z `node:test` i `ts-node`. Po zainstalowaniu zależności uruchom
 z katalogu projektu wszystkie testy (również w podkatalogach):
 

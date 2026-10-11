@@ -17,6 +17,10 @@ document.addEventListener("DOMContentLoaded", () => {
         initCarLog();
     } else if (pageType === "car-fuel-history") {
         initFullFuelHistory();
+    } else if (pageType === "car-analytics") {
+        import('./js/modules/car-analytics.js').then(module => module.initCarAnalytics()).catch(() => {
+            document.getElementById('analytics-status').textContent = 'Nie udało się załadować strony. Odśwież widok.';
+        });
     } else if (pageType === "smart-agd") {
         initAgd();
     }

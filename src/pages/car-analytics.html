@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Analiza auta – Tudruj</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/car-analytics.css">
+</head>
+<body data-page="car-analytics" data-app-title="Analiza auta">
+<script>window.FEATURE_KEY = 'car-log';</script>
+<main class="container analytics-page">
+  <div id="app-nav-root"></div>
+  <a id="analytics-back" href="/car-log">← Powrót do auta</a>
+  <h1>Analiza auta</h1>
+  <p id="analytics-car">Wykresy kosztów i spalania</p>
+  <form id="analytics-filters" class="card analytics-filters">
+    <label>Zakres<select id="analytics-period"><option value="3">3 miesiące</option><option value="6">6 miesięcy</option><option value="12" selected>12 miesięcy</option><option value="custom">Własny zakres</option></select></label>
+    <label>Od<input id="analytics-from" type="date" required></label>
+    <label>Do<input id="analytics-to" type="date" required></label>
+    <label>Paliwo<select id="analytics-fuel"><option value="PB95">PB95</option><option value="PB98">PB98</option><option value="DIESEL">Diesel</option><option value="LPG">LPG</option><option value="ELECTRIC">Elektryczne (brak metryk litrowych)</option></select></label>
+    <button class="btn-primary" type="submit">Pokaż</button>
+  </form>
+  <p id="analytics-status" role="status" aria-live="polite"></p>
+  <button id="analytics-retry" class="btn-secondary" type="button" hidden>Spróbuj ponownie</button>
+  <div id="analytics-results" hidden>
+    <p id="analytics-generated"></p>
+    <p id="analytics-range"></p>
+    <p id="analytics-quality"></p>
+    <p class="analytics-note">Spalanie i koszt przejazdu są szacunkowe: historia nie rozróżnia dolewek i tankowań do pełna. Porównanie: średnia ważona dystansem poprzednich 5 poprawnych tankowań minus bieżące spalanie. Plus oznacza poprawę.</p>
+    <div id="analytics-charts" class="analytics-grid"></div>
+  </div>
+</main>
+<script src="/vendor/chart.umd.js" defer></script>
+<script type="module" src="/app.js"></script>
+</body>
+</html>

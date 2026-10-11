@@ -1,6 +1,6 @@
 # Plan: moduł wykresów i analiza auta
 
-Status: **etapy 1–2 DONE / do review; etap 3 do zrobienia**.
+Status: **etapy 1–3 DONE / do review; odbiór rzeczywistej bazy po deployu**.
 
 ## Cel i zakres
 
@@ -300,23 +300,23 @@ Do sprawdzenia na serwerze: dwa odczyty mają ten sam `generatedAt`; po dodaniu 
 (również wstecznego) kolejny odczyt daje nowy czas i aktualne dane. Standardowy deploy
 wystarcza, bez dodatkowych skryptów. Strona analizy powstanie dopiero w etapie 3.
 
-### 3. Osobna strona, integracja i końcowy odbiór
+### DONE 3. Osobna strona, integracja i końcowy odbiór
 
-- [ ] Dodać stronę „Analiza auta”, link w samochodzie i powrót do właściwego auta,
+- [x] Dodać stronę „Analiza auta”, link w samochodzie i powrót do właściwego auta,
   integrację istniejącej nawigacji oraz inicjalizację tylko na nowej stronie.
-- [ ] Dodać lokalnie dostarczaną bibliotekę wykresów i wspólny renderer; zasoby wykresów
+- [x] Dodać lokalnie dostarczaną bibliotekę wykresów i wspólny renderer; zasoby wykresów
   ładować dopiero na stronie analizy. Moduł auta nie zna opcji biblioteki.
-- [ ] Wyświetlić cztery wykresy, filtry, jednostki, wyjaśnienie porównania i szacunków,
+- [x] Wyświetlić cztery wykresy, filtry, jednostki, wyjaśnienie porównania i szacunków,
   czas obliczenia, stany ładowania, pustych danych i błędu z możliwością ponowienia.
-- [ ] Zapewnić układ mobilny, czytelne etykiety i tekstowy/tabelaryczny dostęp do
+- [x] Zapewnić układ mobilny, czytelne etykiety i tekstowy/tabelaryczny dostęp do
   wartości także bez wskazywania punktu myszą. Nie polegać wyłącznie na kolorze.
-- [ ] Sprawdzić w przeglądarce żądania: zwykła strona auta i zapis paliwa = zero nowych
+- [x] Sprawdzić w przeglądarce żądania: zwykła strona auta i zapis paliwa = zero nowych
   żądań analitycznych; wejście na analizę = jedno; zatwierdzenie filtrów = jedno;
   resize i interakcje z wykresem = zero. Oddzielić żądania analityczne od pobierania
   statycznych zasobów i istniejących żądań nawigacji.
-- [ ] Zweryfikować wykresy na danych przykładowych oraz pustym aucie, jednym tankowaniu,
+- [x] Zweryfikować wykresy na danych przykładowych oraz pustym aucie, jednym tankowaniu,
   dolewkach, brakującym przebiegu, różnych paliwach i spóźnionych odpowiedziach API.
-- [ ] Uruchomić odpowiednie testy regresji, TypeScript, sprawdzenie JS i `git diff --check`.
+- [x] Uruchomić odpowiednie testy regresji, TypeScript, sprawdzenie JS i `git diff --check`.
   Uzupełnić README o stronę, zasady cache i instrukcję testów/deployu.
 
 **Odbiór:** użytkownik musi świadomie wejść w analizę, aby pobrać wykresy. Dodawanie
@@ -324,6 +324,31 @@ tankowania zachowuje dotychczasowy przebieg. Renderer można wykorzystać z przy
 zestawem danych niezwiązanym z samochodami.
 
 ### Konwencja testów
+
+Wynik etapu 3:
+
+- [Strona](../src/pages/car-analytics.html), [sterowanie](../public/js/modules/car-analytics.js)
+  i [renderer](../public/js/modules/chart-renderer.js): cztery wykresy, daty, jednostki,
+  luki w danych, linia zera, szczegóły punktu, tabele dostępne klawiaturą i układ mobilny.
+  Chart.js 4.5.1 (MIT) jest zależnością npm i jest serwowany lokalnie tylko dla strony analizy.
+- [Testy sterowania](../tests/public/js/modules/car-analytics.test.cjs) sprawdzają brak
+  pobierania przed zatwierdzeniem filtrów, anulowanie i ignorowanie starych odpowiedzi,
+  ponowienie błędu i daty. [Test renderera](../tests/public/js/modules/chart-renderer.test.cjs)
+  sprawdza rzeczywiste odstępy dat, luki i linię odniesienia na danych spoza modułu aut.
+- Docker: `npm ci`, `prisma generate`, TypeScript i 220/220 testów przeszło. Pierwsza
+  próba w świeżym kontenerze nie miała wygenerowanego klienta Prisma; po wygenerowaniu
+  klienta kontrola TypeScript przeszła. Nie wymagało to zmiany bazy.
+- Przeglądarka z przykładowym API: cztery wykresy; zakres pusty; błąd 500 i ponowienie;
+  tabela i mobilna szerokość 390 px bez poziomego przepełnienia całej strony.
+  Wejście = 1 żądanie analizy, zmiana filtra = 0, zatwierdzenie = 1, resize/tabela = 0.
+  Powrót do auta i zapis paliwa = 0 żądań analizy oraz 0 zasobów wykresów.
+- Przypadki niepełnych danych, różnych paliw i pojedynczego tankowania weryfikują
+  testy kalkulatora; spóźnione odpowiedzi — testy sterowania. Dane z dolewek nadal
+  są oznaczane jako szacunki, bo brak flagi tankowania do pełna.
+- Podgląd nie był rzeczywistym API ani bazą PostgreSQL. Jego uproszczone odpowiedzi
+  dla starych statystyk/etykiet wywoływały błędy tych sekcji; nie były to błędy nowej
+  analizy. Pomocniczy serwer usunięto po kontroli. Końcowy odbiór danych produkcyjnych
+  pozostaje po standardowym deployu, bez migracji dla wykresów.
 
 Nazwy i treść testów po angielsku, sekcje `//Given`, `//When`, `//Then`.
 Ścieżki testów odzwierciedlają pliki źródłowe pod `tests/modules/...`.
@@ -361,4 +386,4 @@ w review danego etapu, zamiast dokładać migrację bez uzasadnienia.
 | Plan | Do review | Ten dokument; usunięty zakończony plan przypomnień | Przegląd aktualnego kodu paliwa, tras i schematu | Do zatwierdzenia założenie porównania z 5 poprzednimi tankowaniami |
 | 1 | DONE / Do review | Kontrakt i generator charts, kalkulator car, use case czterech wykresów, 3 pliki testów | 176/176 testów OK (51 nowych); TypeScript i diff check OK | Porównanie z 5 poprzednikami; jawne pominięcia niejednoznacznych dni i danych elektrycznych; stare API bez zmian |
 | 2 | DONE / Do review | Repozytorium analizy, use case, cache, kontroler i OpenAPI, integracja tras i zapisu paliwa; 5 plików testów | TypeScript i parsowanie OpenAPI OK; 213/213 testów, następnie 13/13 testów use case po dodaniu 2 przypadków granicznych | Bez migracji; rzeczywista baza i HTTP do odbioru na serwerze |
-| 3 | Do zrobienia | — | — | — |
+| 3 | DONE / Do review | Strona analizy, renderer Chart.js, nawigacja i powrót do auta, CSS, zależności, README, testy frontendu | Docker: TypeScript i 220/220 testów OK; JS i diff check OK; przeglądarka z przykładowym API | Bez migracji i commitów; rzeczywisty serwer do odbioru po deployu |
