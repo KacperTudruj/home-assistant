@@ -14,6 +14,8 @@ export function CarRoutes(
       carController.create(req, res)
   );
 
+  router.get("/cars/service-labels", (req, res) => serviceController.labels(req, res));
+
   router.get("/cars/:id", (req, res) =>
       carController.getById(req, res)
   );

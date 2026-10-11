@@ -13,7 +13,7 @@ export class ServiceRecordRepositoryPrisma implements ServiceRecordRepository {
                 cost: record.cost,
                 mileageKm: record.mileageKm,
                 date: record.date,
-                isOilChange: record.isOilChange,
+                label: record.label,
                 workshopName: record.workshopName,
                 workshopAddress: record.workshopAddress
             }

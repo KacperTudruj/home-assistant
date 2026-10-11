@@ -1,6 +1,6 @@
 # Historia serwisowa i przypomnienia — plan prac
 
-Data: 2026-10-10. Status: etapy 1–4 zakończone; etap 5 zaimplementowany, do review; kolejne etapy nierozpoczęte.
+Aktualizacja: 2026-10-11. Status: etapy 1–8 zaimplementowane; odbiór na serwerze po deployu pozostaje użytkownikowi.
 
 ## Cel i sposób pracy
 
@@ -345,35 +345,53 @@ Import jest transakcyjny, blokuje zmiany źródeł na czas odczytu i zapisu. Sta
 migracji Prisma zapobiega ponownemu wykonaniu; nie uruchamiać tego SQL ręcznie drugi raz.
 Raport nie zmienia się po późniejszych edycjach przypomnienia i nie nadpisuje ich.
 Stare kolumny i historia wizyt pozostają w bazie. Auta bez ustawionego interwału nie wymagają importu.
-Instrukcja: standardowy deploy, następnie `docker compose exec api node scripts/report-oil-import.cjs`.
+Historyczna instrukcja raportu została zastąpiona w punkcie 8: tabela i skrypt raportu są usuwane zgodnie z decyzją użytkownika. Wystarczy standardowy deploy.
 Brak wiarygodnej podstawy oznacza ręczne dodanie przypomnienia przez użytkownika po wdrożeniu UI.
 
-### 7. Interfejs przypomnień w sekcji auta
+### DONE 7. Interfejs przypomnień w sekcji auta
 
-- [ ] Dodać niezależnie ładowaną sekcję przypomnień; awaria statystyk paliwa jej nie blokuje.
-- [ ] Dodać formularz ręcznego terminu i dodatkowych informacji oraz edycję, wykonanie i archiwizację.
-- [ ] Kontekst modułu i auta ustawiać z otwartego widoku, bez ręcznego wpisywania ID.
-- [ ] Wyświetlać dodatkowe informacje jako zwykły tekst pod przypomnieniem, również wielowierszowy.
-- [ ] Zastąpić kartę oleju wspólną prezentacją przypomnień. Nie przełączać do czasu
+- [x] Dodać niezależnie ładowaną sekcję przypomnień; awaria statystyk paliwa jej nie blokuje.
+- [x] Dodać formularz ręcznego terminu i dodatkowych informacji oraz edycję, wykonanie i archiwizację.
+- [x] Kontekst modułu i auta ustawiać z otwartego widoku, bez ręcznego wpisywania ID.
+- [x] Wyświetlać dodatkowe informacje jako zwykły tekst pod przypomnieniem, również wielowierszowy.
+- [x] Zastąpić kartę oleju wspólną prezentacją przypomnień. Nie przełączać do czasu
   uzgodnienia danych z etapu 6. Pokazać brak danych i przekroczenie terminu czytelnym tekstem.
-- [ ] Renderować własne teksty użytkownika bez wstrzykiwania HTML; odświeżać po zapisie
+- [x] Renderować własne teksty użytkownika bez wstrzykiwania HTML; odświeżać po zapisie
   i powrocie do karty. Obsłużyć błędy, pustą listę i auto nieaktywne.
-- [ ] Sprawdzić składnię JS i ręcznie scenariusze na szerokim/wąskim ekranie.
+- [x] Sprawdzić składnię JS i ręcznie scenariusze na szerokim/wąskim ekranie.
 
 **Gotowe, gdy:** cały przepływ działa z UI, a olej nie ma oddzielnych reguł frontendowych.
 W razie potrzeby oddzielić odczyt listy od formularzy, z osobnym review każdej części
 i pozostawieniem starej karty do zakończenia przełączenia.
 
-### 8. Wyłączenie starej logiki oleju
 
-- [ ] Po sprawdzeniu konwersji i UI usunąć zależność aplikacji od `isOilChange`,
-  `oilChangeIntervalKm`, starej metody w `Car` i odpowiedzi `stats.oilChange`.
-- [ ] Przejrzeć mappery, DTO, OpenAPI i wszystkie użycia, sprawdzić statystyki paliwa.
-- [ ] Stare kolumny pozostawić na razie w bazie jako dane historyczne. Ich fizyczne
-  usunięcie to osobna przyszła decyzja, poza tym planem.
-- [ ] Uruchomić `npx tsc --noEmit`, odpowiednie testy i przejść pełne scenariusze odbioru.
+Implementacja zapisana w commicie `329b372`. Weryfikacja 2026-10-11: 108/108 testów, TypeScript i składnia JS — OK. W przeglądarce na atrapach API sprawdzono listę, tworzenie, edycję, wykonanie, archiwizację, filtry oraz formularz przy szerokości 390 px. Tekst HTML wyświetla się dosłownie, dodatkowe informacje zachowują nowe linie. Nie wykonywano żądań do rzeczywistego serwera; odbiór po deployu pozostaje użytkownikowi.
 
-**Gotowe, gdy:** nowe przypomnienia są jedynym aktywnym źródłem terminów, historia i ceny pozostają zachowane.
+### DONE 8. Wyłączenie starej logiki oleju i etykiety serwisu
+
+- [x] Usunąć zależność kodu aplikacji od `isOilChange`, `oilChangeIntervalKm`, metody licznika w `Car` i odpowiedzi `stats.oilChange`.
+- [x] Zastąpić checkbox jedną opcjonalną etykietą (`null` = brak): `OIL_CHANGE`, `FILTERS`, `BATTERY`, `INSPECTION`, `REPAIR`.
+- [x] Dodać enum Prisma, walidację domenową, DTO, zapis/odczyt i dokumentację OpenAPI.
+- [x] Udostępnić `GET /api/cars/service-labels`, aby frontend pobierał listę kluczy i nazw do formularza oraz badge'ów.
+- [x] Dodać migrację przenoszącą `isOilChange = true` do `label = OIL_CHANGE`, następnie usuwającą flagę i tabelę `LegacyOilReminderImport` — zgodnie z nową decyzją użytkownika.
+- [x] Usunąć skrypt raportu i poprawić instrukcję deployu. Nie zmieniać już zapisanych migracji.
+- [x] Zachować nieużywaną kolumnę `Car.oilChangeIntervalKm` jako dane historyczne; nie służy do nowych przypomnień.
+- [x] TypeScript, Prisma validate/generate, składnia JS, parsowanie OpenAPI i diff check — OK.
+- [x] 125/125 testów — OK, w tym etykiety, brak etykiety, błędne wartości i regresja statystyk paliwa.
+- [x] Przeglądarka z atrapami API: zapis i lista z etykietą/bez niej, brak checkboxa, tekst HTML wyświetlany dosłownie.
+- [ ] Rzeczywista migracja i zapis na serwerze — pozostaje do wykonania przez deploy użytkownika.
+
+Etykiety są opisowe: nie ustawiają ani nie odnawiają przypomnień. Jedna wizyta nadal
+ma swobodny opis i jedną cenę; etykieta oznacza jej główny temat. Nowa etykieta wymaga
+rozszerzenia enumu bazy, listy domenowej i nazw w DTO oraz OpenAPI; frontend nie wymaga
+nowej mapy. Szczegóły w README.
+
+Migracje wykona standardowy `bash scripts/deploy.sh`: najpierw wcześniejszy import
+przypomnień, następnie zamiana historycznych flag na etykiety i usunięcie raportu.
+Przypomnienia i historia wizyt pozostają. Stare migracje zostają bez zmian, również
+przy instalacji od zera. Raport importu nie jest już dostępny; po deployu należy
+przejrzeć przypomnienia każdego auta i ręcznie uzupełnić brakujące terminy.
+SQL sprawdzono statycznie; nie uruchamiano bazy ani migracji lokalnie lub na serwerze.
 
 ## Scenariusze końcowego odbioru
 
@@ -412,5 +430,5 @@ oznacza wykonanie, nie akceptację użytkownika. Po review zapisujemy również 
 | 4 | DONE / Do review | [Operacje](../src/modules/reminders/application/ReminderUseCases.ts), kontrakty domeny, adapter Prisma, kontroler/trasy/OpenAPI w module reminders; adapter auta, composition root i testy odpowiadające klasom | TypeScript OK; 89/89 testów OK; parsowanie OpenAPI i diff check OK | Rzeczywiste HTTP i baza do sprawdzenia po deployu; bez nowej migracji i UI |
 | 5 | DONE / Do review | [Moduł car](../src/modules/car/), [schemat](../prisma/schema.prisma), [migracja](../prisma/migrations/20261010190000_add_service_location/migration.sql), [formularz](../src/pages/car-log.html), [JS](../public/js/modules/car-log.js), [CSS](../public/style.css), [testy](../tests/modules/car/), ten plan | 100/100 testów OK; TypeScript, Prisma validate, składnia JS, OpenAPI i diff check OK | Migracja, test rzeczywistej bazy i wizualny odbiór po deployu; zapis wizyty niezależny od przypomnień |
 | 6 | DONE / Do review | Migracja importu, model raportu, skrypt raportu, README i plan | Prisma validate, node --check, diff check OK; SQL przejrzany statycznie | Wykonanie na serwerze przez deploy; automatyczny import zgodnie z nową decyzją |
-| 7 | Do zrobienia | — | — | — |
-| 8 | Do zrobienia | — | — | — |
+| 7 | DONE / Do review | UI przypomnień, integracja strony auta, CSS i testy; commit 329b372 | 108/108 testów, TypeScript, składnia JS OK; przeglądarka z atrapami API | Rzeczywiste API do odbioru po deployu; punkt 8 pozostaje do wykonania |
+| 8 | DONE / Do review | Usunięcie starego licznika, enum etykiet, API/formularz/badge, migracja flagi i usunięcia raportu, testy, README i plan | 125/125 testów, TypeScript, Prisma, JS, OpenAPI i diff check OK; przeglądarka z atrapami | Migracja i odbiór z rzeczywistą bazą po deployu |

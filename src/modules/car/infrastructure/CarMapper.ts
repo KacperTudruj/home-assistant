@@ -11,7 +11,6 @@ export class CarMapper {
             engine: car.engine,
             vin: car.vin,
             mileageAtPurchase: car.mileageAtPurchase,
-            oilChangeIntervalKm: car.oilChangeIntervalKm,
         });
     }
 }

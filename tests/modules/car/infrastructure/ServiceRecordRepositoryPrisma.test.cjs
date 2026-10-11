@@ -11,7 +11,7 @@ test('persists and reads multiline descriptions and workshop details', async () 
         async findMany() { return [saved]; }
     } };
     const repository = new ServiceRecordRepositoryPrisma(prisma);
-    const record = new ServiceRecord({ description: 'Oil\nFilters', cost: 800, mileageKm: 180000, date: new Date('2026-10-10'), workshopName: 'Garage', workshopAddress: 'Street\nCity' });
+    const record = new ServiceRecord({ description: 'Oil\nFilters', cost: 800, mileageKm: 180000, date: new Date('2026-10-10'), workshopName: 'Garage', workshopAddress: 'Street\nCity', label: 'OIL_CHANGE' });
     //When
     await repository.create('car-1', record);
     const [result] = await repository.findByCarId('car-1');
@@ -20,4 +20,6 @@ test('persists and reads multiline descriptions and workshop details', async () 
     assert.equal(result.workshopName, 'Garage');
     assert.equal(result.workshopAddress, 'Street\nCity');
     assert.equal(result.cost, 800);
+    assert.equal(result.label, 'OIL_CHANGE');
+    assert.equal(Object.hasOwn(result, 'isOilChange'), false);
 });

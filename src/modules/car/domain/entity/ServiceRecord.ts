@@ -1,3 +1,5 @@
+import { parseServiceLabel, ServiceLabel } from '../value-object/ServiceLabel';
+
 export class InvalidServiceLocationError extends Error {}
 
 function optionalLocation(value: string | null | undefined, field: string, maxLength: number): string | null {
@@ -15,14 +17,14 @@ export class ServiceRecord {
     readonly cost: number;
     readonly mileageKm: number;
     readonly date: Date;
-    readonly isOilChange: boolean;
+    readonly label: ServiceLabel | null;
 
     constructor(params: {
         description: string;
         cost: number;
         mileageKm: number;
         date: Date;
-        isOilChange?: boolean;
+        label?: ServiceLabel | null;
         workshopName?: string | null;
         workshopAddress?: string | null;
     }) {
@@ -34,7 +36,7 @@ export class ServiceRecord {
         this.cost = params.cost;
         this.mileageKm = params.mileageKm;
         this.date = params.date;
-        this.isOilChange = params.isOilChange ?? false;
+        this.label = parseServiceLabel(params.label);
         this.workshopName = optionalLocation(params.workshopName, 'Workshop name', 200);
         this.workshopAddress = optionalLocation(params.workshopAddress, 'Workshop address', 500);
     }

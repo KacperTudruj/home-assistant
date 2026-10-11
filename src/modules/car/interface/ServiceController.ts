@@ -3,6 +3,8 @@ import { CreateServiceRecordUseCase } from '../application/CreateServiceRecordUs
 import { ListServiceRecordsUseCase } from '../application/ListServiceRecordsUseCase';
 import { CreateServiceRecordRequest } from './dto/CreateServiceRecordRequest';
 import { InvalidServiceLocationError } from '../domain/entity/ServiceRecord';
+import { InvalidServiceLabelError } from '../domain/value-object/ServiceLabel';
+import { serviceLabelOptions } from './dto/ServiceLabelOptions';
 
 export class ServiceController {
     constructor(
@@ -48,13 +50,15 @@ export class ServiceController {
      *               date:
      *                 type: string
      *                 format: date-time
-     *               isOilChange:
-     *                 type: boolean
+     *               label:
+     *                 type: string
+     *                 nullable: true
+     *                 enum: [OIL_CHANGE, FILTERS, BATTERY, INSPECTION, REPAIR]
      *     responses:
      *       204:
      *         description: Rekord dodany
      *       400:
-     *         description: Niepoprawna nazwa lub adres warsztatu
+     *         description: Niepoprawna etykieta, nazwa lub adres warsztatu
      *       404:
      *         description: Samochód nie istnieje
      */
@@ -66,7 +70,7 @@ export class ServiceController {
         try {
             created = await this.createServiceRecordUseCase.execute(id, body);
         } catch (error) {
-            if (!(error instanceof InvalidServiceLocationError)) throw error;
+            if (!(error instanceof InvalidServiceLocationError) && !(error instanceof InvalidServiceLabelError)) throw error;
             res.status(400).json({ error: error.message });
             return;
         }
@@ -107,7 +111,7 @@ export class ServiceController {
      *                   cost: { type: number }
      *                   mileageKm: { type: integer }
      *                   date: { type: string, format: date-time }
-     *                   isOilChange: { type: boolean }
+     *                   label: { type: string, nullable: true, enum: [OIL_CHANGE, FILTERS, BATTERY, INSPECTION, REPAIR] }
      *                   workshopName: { type: string, nullable: true, maxLength: 200 }
      *                   workshopAddress: { type: string, nullable: true, maxLength: 500 }
      */
@@ -117,5 +121,28 @@ export class ServiceController {
         const services = await this.listServiceRecordsUseCase.execute(id);
 
         res.json(services);
+    }
+
+    /**
+     * @openapi
+     * /api/cars/service-labels:
+     *   get:
+     *     tags: [Car]
+     *     summary: Dostępne etykiety wpisów serwisowych
+     *     responses:
+     *       200:
+     *         description: Klucze etykiet i nazwy do wyświetlenia; brak etykiety to null
+     *         content:
+     *           application/json:
+     *             schema:
+     *               type: array
+     *               items:
+     *                 type: object
+     *                 properties:
+     *                   value: { type: string, enum: [OIL_CHANGE, FILTERS, BATTERY, INSPECTION, REPAIR] }
+     *                   label: { type: string }
+     */
+    labels(_req: Request, res: Response): void {
+        res.json(serviceLabelOptions);
     }
 }

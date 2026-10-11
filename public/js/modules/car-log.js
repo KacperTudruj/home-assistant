@@ -1,6 +1,26 @@
 import { initCarReminders, loadCarReminders } from './car-reminders.js';
 
 let carLoadVersion = 0;
+let serviceLabels = [];
+let serviceLabelsRequest = null;
+
+async function loadServiceLabels() {
+    if (!serviceLabelsRequest) {
+        serviceLabelsRequest = fetch('/api/cars/service-labels').then(async res => {
+            if (!res.ok) throw new Error('Failed to fetch service labels');
+            serviceLabels = await res.json();
+            const select = document.getElementById('service-label');
+            select.replaceChildren(new Option('Bez etykiety', ''));
+            serviceLabels.forEach(item => select.add(new Option(item.label, item.value)));
+            document.getElementById('service-label-error').textContent = '';
+        }).catch(error => {
+            serviceLabelsRequest = null;
+            document.getElementById('service-label-error').textContent = 'Nie udało się wczytać etykiet. Możesz zapisać wpis bez etykiety.';
+            console.error(error);
+        });
+    }
+    return serviceLabelsRequest;
+}
 
 export async function initCarLog() {
     initCarReminders();
@@ -243,6 +263,7 @@ async function loadServiceHistory(carId) {
     container.innerHTML = '<li class="loading">Ładowanie historii serwisowej...</li>';
 
     try {
+        await loadServiceLabels();
         const res = await fetch(`/api/cars/${carId}/services`);
         if (!res.ok) throw new Error("Failed to fetch service history");
         const services = await res.json();
@@ -261,7 +282,6 @@ async function loadServiceHistory(carId) {
                 <div class="service-main-info">
                   <span class="service-description">
                     <span class="service-description-text"></span>
-                    ${service.isOilChange ? '<span class="oil-change-badge">OLEJ</span>' : ''}
                   </span>
                   <span class="service-cost">${service.cost.toFixed(2)} zł</span>
                 </div>
@@ -270,6 +290,12 @@ async function loadServiceHistory(carId) {
                 </div>
             `;
             li.querySelector('.service-description-text').textContent = service.description;
+            if (service.label) {
+                const badge = document.createElement('span');
+                badge.className = 'service-label-badge';
+                badge.textContent = serviceLabels.find(item => item.value === service.label)?.label ?? service.label;
+                li.querySelector('.service-description').appendChild(badge);
+            }
             if (service.workshopName || service.workshopAddress) {
                 const location = document.createElement('div');
                 location.className = 'service-sub-info service-location';
@@ -285,6 +311,7 @@ async function loadServiceHistory(carId) {
 }
 
 function openAddServiceModal() {
+    loadServiceLabels();
     document.getElementById("add-service-overlay")?.classList.remove("hidden");
     const dateInput = document.getElementById("service-date");
     if (dateInput) dateInput.value = new Date().toISOString().split('T')[0];
@@ -306,7 +333,7 @@ async function submitAddServiceForm(e) {
         description: document.getElementById("service-description").value,
         cost: parseFloat(getValue("service-cost")),
         mileageKm: parseInt(getValue("service-meter")),
-        isOilChange: document.getElementById("service-is-oil-change").checked,
+        label: document.getElementById("service-label").value || null,
         workshopName: document.getElementById("service-workshop-name").value.trim() || null,
         workshopAddress: document.getElementById("service-workshop-address").value.trim() || null
     };

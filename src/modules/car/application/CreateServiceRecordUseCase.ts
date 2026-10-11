@@ -1,3 +1,4 @@
+import { ServiceLabel } from '../domain/value-object/ServiceLabel';
 import { ServiceRecord } from '../domain/entity/ServiceRecord';
 import { CarRepository } from '../domain/repository/CarRepository';
 import { ServiceRecordRepository } from '../domain/repository/ServiceRecordRepository';
@@ -7,7 +8,7 @@ export interface CreateServiceRecordInput {
     cost: number;
     mileageKm: number;
     date: string;
-    isOilChange?: boolean;
+    label?: ServiceLabel | null;
     workshopName?: string | null;
     workshopAddress?: string | null;
 }
@@ -27,7 +28,7 @@ export class CreateServiceRecordUseCase {
             cost: Number(input.cost),
             mileageKm: Number(input.mileageKm),
             date: new Date(input.date),
-            isOilChange: input.isOilChange,
+            label: input.label,
             workshopName: input.workshopName,
             workshopAddress: input.workshopAddress
         });

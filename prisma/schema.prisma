@@ -114,6 +114,14 @@ model FuelRecord {
   @@map("CarFuelRecord")
 }
 
+enum ServiceLabel {
+  OIL_CHANGE
+  FILTERS
+  BATTERY
+  INSPECTION
+  REPAIR
+}
+
 model ServiceRecord {
   id        String   @id @default(uuid())
   carId    String
@@ -122,7 +130,7 @@ model ServiceRecord {
   cost        Float
   mileageKm   Int
   date        DateTime
-  isOilChange Boolean  @default(false)
+  label       ServiceLabel?
   workshopName String? @db.VarChar(200)
   workshopAddress String? @db.VarChar(500)
 
@@ -141,17 +149,6 @@ enum ReminderLifecycle {
   ACTIVE
   COMPLETED
   ARCHIVED
-}
-
-model LegacyOilReminderImport {
-  carId           String   @id
-  carName         String
-  status          String
-  note            String
-  serviceRecordId String?
-  reminderId      String?
-  dueMileageKm    Int?
-  createdAt       DateTime @default(now())
 }
 
 model Reminder {

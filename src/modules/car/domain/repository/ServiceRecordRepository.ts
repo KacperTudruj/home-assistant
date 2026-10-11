@@ -1,3 +1,4 @@
+import { ServiceLabel } from '../value-object/ServiceLabel';
 import { ServiceRecord } from '../entity/ServiceRecord';
 
 export interface StoredServiceRecord {
@@ -7,7 +8,7 @@ export interface StoredServiceRecord {
     cost: number;
     mileageKm: number;
     date: Date;
-    isOilChange: boolean;
+    label: ServiceLabel | null;
     workshopName: string | null;
     workshopAddress: string | null;
 }

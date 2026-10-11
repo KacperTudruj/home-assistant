@@ -87,18 +87,28 @@ Po wdrożeniu przypomnień wykonaj standardowo:
 
 ```bash
 bash scripts/deploy.sh
-docker compose exec api node scripts/report-oil-import.cjs
 docker compose exec api npm test
 ```
 
 Migracja automatycznie przenosi stare ustawienia oleju do przypomnień, gdy istnieje
-zapisana wymiana i poprawny interwał. Zachowuje historię serwisów. Raport pokazuje
-`IMPORTED` albo powód pominięcia: brak wymiany, niepoprawne dane lub istniejące aktywne
-przypomnienie kilometrowe. Dla pominiętych aut ustaw termin ręcznie w sekcji
-„Przypomnienia”. Sprawdź również uwagi o rozbieżności daty i przebiegu.
+zapisana wymiana i poprawny interwał. Zachowuje historię serwisów. Import pomija auta
+bez wymiany, z niepoprawnymi danymi lub istniejącym aktywnym przypomnieniem kilometrowym.
+Po deployu przejrzyj sekcję „Przypomnienia” każdego auta i ustaw brakujące terminy ręcznie.
 Importowane przypomnienia nie odnawiają się automatycznie; nieaktywne auta dostają wpisy archiwalne.
 Historia migracji Prisma zapobiega ponownemu importowi przy następnym deployu.
-Raport można uruchamiać wielokrotnie — tylko odczytuje zapisany wynik importu.
+Kolejna migracja zamienia dawną flagę wymiany oleju na etykietę `OIL_CHANGE`, usuwa
+flagę i tymczasową tabelę raportu importu. Nie usuwa przypomnień ani wizyt.
+Dotychczasowy skrypt raportu został usunięty; nie trzeba go uruchamiać.
+
+### Etykiety serwisu
+
+Wpis może mieć jedną etykietę lub żadnej: wymiana oleju, filtry, akumulator, przegląd,
+naprawa. Etykieta opisuje wizytę i nie tworzy ani nie odnawia przypomnień.
+Formularz pobiera opcje z `GET /api/cars/service-labels`.
+Aby dodać kolejną, rozszerz enum `ServiceLabel` w [schemacie](prisma/schema.prisma),
+listę [SERVICE_LABELS](src/modules/car/domain/value-object/ServiceLabel.ts), nazwy w
+[ServiceLabelOptions](src/modules/car/interface/dto/ServiceLabelOptions.ts) oraz OpenAPI;
+przygotuj migrację enumu. Frontend wyświetli nową opcję bez dopisywania własnej mapy.
 
 [scripts/deploy.sh](scripts/deploy.sh) wykonuje `npm run migrate:deploy` przed
 uruchomieniem kontenerów. Standardowy deploy stosuje więc oczekujące migracje;

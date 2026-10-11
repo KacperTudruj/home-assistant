@@ -266,9 +266,10 @@
           <label>Koszt (zł)</label>
           <input type="number" id="service-cost" step="0.01" min="0" required />
         </div>
-        <div class="form-row checkbox-row">
-          <input type="checkbox" id="service-is-oil-change" />
-          <label for="service-is-oil-change">Czy to była wymiana oleju?</label>
+        <div class="form-row">
+          <label for="service-label">Etykieta (opcjonalnie)</label>
+          <select id="service-label"><option value="">Bez etykiety</option></select>
+          <span id="service-label-error" role="status"></span>
         </div>
         <div class="form-actions">
           <button type="button" class="btn-secondary" id="cancel-add-service">Anuluj</button>

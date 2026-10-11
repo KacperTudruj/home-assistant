@@ -36,17 +36,16 @@ function response() {
 
 const input = {
     description: 'Oil, bushings and ball joint', cost: 800, mileageKm: 180000,
-    date: '2026-10-10', isOilChange: true
+    date: '2026-10-10', label: 'OIL_CHANGE'
 };
 
-test('creation preserves 204, list fields and the oil change baseline', async () => {
-    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true, oilChangeIntervalKm: 10000 });
+test('creation preserves 204, list fields and the service label', async () => {
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
     const { controller } = setup(car);
     const created = response();
     await controller.create({ params: { id: car.id }, body: input }, created);
     assert.equal(created.statusCode, 204);
     assert.equal(created.body, undefined);
-    assert.equal(car.getRemainingKmToOilChange(), 10000);
 
     const listed = response();
     await controller.list({ params: { id: car.id } }, listed);
@@ -97,11 +96,35 @@ test('missing car: POST returns 404 without saving and GET returns an empty list
     assert.deepEqual(listed.body, []);
 });
 
-test('missing oil change flag and negative cost preserve existing rules', async () => {
+test('rejects an unknown label with 400 and no service record', async () => {
+    //Given
     const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
     const { controller, records } = setup(car);
-    await controller.create({ params: { id: car.id }, body: { ...input, isOilChange: undefined } }, response());
-    assert.equal(records[0].isOilChange, false);
+    const res = response();
+    //When
+    await controller.create({ params: { id: car.id }, body: { ...input, label: 'UNKNOWN' } }, res);
+    //Then
+    assert.equal(res.statusCode, 400);
+    assert.equal(records.length, 0);
+});
+
+test('provides a display name for every supported label', () => {
+    //Given
+    const { SERVICE_LABELS } = require('../../../../src/modules/car/domain/value-object/ServiceLabel');
+    const { controller } = setup(null);
+    const res = response();
+    //When
+    controller.labels({}, res);
+    //Then
+    assert.deepEqual(res.body.map(item => item.value), [...SERVICE_LABELS]);
+    assert.ok(res.body.every(item => typeof item.label === 'string' && item.label.length > 0));
+});
+
+test('missing label and negative cost preserve existing rules', async () => {
+    const car = new Car({ id: 'car-1', name: 'Car', year: 2020, isActive: true });
+    const { controller, records } = setup(car);
+    await controller.create({ params: { id: car.id }, body: { ...input, label: undefined } }, response());
+    assert.equal(records[0].label, null);
     await assert.rejects(
         controller.create({ params: { id: car.id }, body: { ...input, cost: -1 } }, response()),
         /Service cost cannot be negative/

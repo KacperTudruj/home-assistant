@@ -35,7 +35,6 @@ export class CarRepositoryPrisma implements CarRepository {
             engine: carData.engine || undefined,
             vin: carData.vin || undefined,
             mileageAtPurchase: carData.mileageAtPurchase || undefined,
-            oilChangeIntervalKm: carData.oilChangeIntervalKm || undefined,
         });
 
         // Posortuj rekordy po przebiegu rosnąco, aby walidacje w encji nie wybuchały podczas hydratacji
@@ -76,7 +75,7 @@ export class CarRepositoryPrisma implements CarRepository {
                     cost: record.cost,
                     mileageKm: record.mileageKm,
                     date: record.date,
-                    isOilChange: record.isOilChange,
+                    label: record.label,
                     workshopName: record.workshopName,
                     workshopAddress: record.workshopAddress,
                 }),
@@ -108,7 +107,6 @@ export class CarRepositoryPrisma implements CarRepository {
                 engine: car.engine,
                 vin: car.vin,
                 mileageAtPurchase: car.mileageAtPurchase,
-                oilChangeIntervalKm: car.oilChangeIntervalKm,
             },
             create: {
                 id: car.id,
@@ -117,7 +115,6 @@ export class CarRepositoryPrisma implements CarRepository {
                 engine: car.engine,
                 vin: car.vin,
                 mileageAtPurchase: car.mileageAtPurchase,
-                oilChangeIntervalKm: car.oilChangeIntervalKm,
             },
         });
     }
