@@ -7,7 +7,11 @@ import { GetFuelStatisticsUseCase } from "../application/GetFuelStatisticsUseCas
 const prisma = new PrismaClient();
 
 export class FuelController {
-    constructor(private readonly getFuelStatisticsUseCase: GetFuelStatisticsUseCase) {}
+    constructor(
+        private readonly getFuelStatisticsUseCase: GetFuelStatisticsUseCase,
+        private readonly analyticsCache: { invalidate(carId: string): void },
+        private readonly database: PrismaClient = prisma,
+    ) {}
 
     /**
      * @openapi
@@ -60,7 +64,7 @@ export class FuelController {
             }
 
             // Sprawdź czy auto istnieje
-            const car = await prisma.car.findUnique({ where: { id: carId } });
+            const car = await this.database.car.findUnique({ where: { id: carId } });
             if (!car) {
                 res.status(404).json({ error: "Samochód nie istnieje" });
                 return;
@@ -89,7 +93,7 @@ export class FuelController {
                 return;
             }
 
-            const created = await prisma.fuelRecord.create({
+            const created = await this.database.fuelRecord.create({
                 data: {
                     carId,
                     fuelType: (fuelType as any) || "PB95",
@@ -102,8 +106,11 @@ export class FuelController {
                 },
             });
 
+            // Invalidate immediately after persistence, even if response preparation fails.
+            this.analyticsCache.invalidate(carId);
+
             // policz statystyki względem poprzedniego tankowania
-            const prev = await prisma.fuelRecord.findFirst({
+            const prev = await this.database.fuelRecord.findFirst({
                 where: { carId, date: { lt: created.date } },
                 orderBy: { date: "desc" },
             });

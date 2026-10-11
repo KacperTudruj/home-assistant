@@ -1,6 +1,6 @@
 # Plan: moduł wykresów i analiza auta
 
-Status: **etap 1 DONE / do review; etapy 2–3 do zrobienia**.
+Status: **etapy 1–2 DONE / do review; etap 3 do zrobienia**.
 
 ## Cel i zakres
 
@@ -228,24 +228,77 @@ Decyzje i różnice względem istniejących statystyk do review:
   paliw auta do filtrów; kalkulator nie odgaduje nieprzekazanych danych.
 - Ten etap nie udostępnia endpointu ani strony i nie wymaga migracji bazy.
 
-### 2. API analizy auta i cache
+### DONE 2. API analizy auta i cache
 
-- [ ] Dodać repozytorium odczytu analitycznego, adapter Prisma i use case składający
+- [x] Dodać repozytorium odczytu analitycznego, adapter Prisma i use case składający
   pełną odpowiedź. Uniknąć zapytań per tankowanie oraz pobierania całej historii bez limitu.
-- [ ] Dodać `GET /api/cars/:id/analytics`, walidację parametrów i dokumentację OpenAPI.
+- [x] Dodać `GET /api/cars/:id/analytics`, walidację parametrów i dokumentację OpenAPI.
   Brak auta: 404; niepoprawne filtry/za szeroki zakres: 400; brak tankowań: 200 z pustym
   zestawem i opisem. Błąd generowania nie udaje pustych danych.
-- [ ] Dodać ograniczony cache, współdzielenie trwających odczytów i unieważnienie
+- [x] Dodać ograniczony cache, współdzielenie trwających odczytów i unieważnienie
   po udanym zapisie paliwa, w tym zabezpieczenie wyścigu zapis–odczyt.
-- [ ] Dodać testy use case i cache z atrapą repozytorium i kontrolowanym zegarem:
+- [x] Dodać testy use case i cache z atrapą repozytorium i kontrolowanym zegarem:
   hit/miss, TTL, limity/eksmisja, niezależność aut i filtrów, równoległe odczyty,
   błędy, zapis wsteczny i unieważnienie w trakcie obliczeń.
-- [ ] Sprawdzić TypeScript, testy oraz OpenAPI. Sprawdzić zapytania z rzeczywistą bazą
-  dopiero w dostępnym środowisku; wyraźnie oddzielić to od testów jednostkowych.
+- [x] Sprawdzić TypeScript, testy oraz OpenAPI.
+- [ ] Odbiór na serwerze: sprawdzić zapytania z rzeczywistą bazą. Lokalne testy używają
+  atrap Prisma, nie stanowią testu integracyjnego PostgreSQL.
 
 **Odbiór:** kolejne żądanie w TTL nie pobiera ponownie paliwa ani nie generuje wykresów;
 zapis tankowania wymusza świeże obliczenie przy następnym odczycie. Równoczesne
 identyczne żądania wykonują jedną operację odczytu/generowania, a nie po jednej na klienta.
+
+Realizacja etapu 2:
+
+- [Use case](../src/modules/car/application/GetCarAnalyticsUseCase.ts) normalizuje
+  zakres i paliwo przed sprawdzeniem cache. Domyślnie: ostatnie 12 miesięcy UTC i PB95.
+  Przy własnym zakresie wymagane są obie daty. 29 lutego jest ograniczany do 28 lutego
+  w roku nieprzestępnym. Odpowiedź zawiera `car`, `generatedAt`, `document`, `analytics`.
+- [Repozytorium](../src/modules/car/infrastructure/CarAnalyticsRepositoryPrisma.ts)
+  odczytuje zakres i kontekst w transakcji Repeatable Read. Kontekst pobiera partiami
+  po 100 rekordów, kończąc po znalezieniu pięciu wiarygodnych poprzedników albo końca
+  historii. Nie wykorzystuje niepełnego najstarszego dnia do wyznaczania kolejności.
+  Limit wynosi 5000 rekordów; dodatkowy rekord kontrolny wykrywa przekroczenie.
+  Katalog paliw pochodzi ze wszystkich tankowań auta i nie zależy od wybranego zakresu.
+- [Cache](../src/modules/car/infrastructure/MemoryCarAnalyticsCache.ts): TTL 5 minut,
+  100 wpisów, 20 MiB JSON, maksymalnie 100 aktywnych operacji. Wspólna obietnica dla
+  identycznych żądań; LRU; brak cache błędów i zbyt dużych odpowiedzi. Zwracane dane
+  są odłączone od cache, więc modyfikacja odpowiedzi nie zmienia kolejnych odczytów.
+  Trwające zadania mają token ważności, bez rosnącej mapy generacji wszystkich aut.
+- [Kontroler paliwa](../src/modules/car/interface/FuelController.ts) unieważnia cache
+  bezpośrednio po udanym zapisie, przed przygotowaniem odpowiedzi. Błąd późniejszego
+  odczytu nie pozostawia starego cache. Nie ma obecnie tras usuwania auta ani
+  edycji/usuwania tankowań; przyszłe operacje muszą wywołać to samo `invalidate`.
+- [Kontroler analizy](../src/modules/car/interface/CarAnalyticsController.ts),
+  [schematy OpenAPI](../src/modules/car/interface/dto/CarAnalyticsResponse.ts),
+  [trasy](../src/modules/car/interface/CarRoutes.ts) i [wiring](../src/index.ts)
+  udostępniają endpoint. HTTP `Cache-Control: no-store` zapobiega niezależnemu cache
+  przeglądarki. Zajęta pula obliczeń daje 503 z `Retry-After`; pozostałe błędy: 400/404/500.
+
+Ważne ograniczenia do review:
+
+- Unieważnienie nie anuluje starego zapytania w bazie. Żądanie rozpoczęte przed zapisem
+  może jeszcze dostać swój stary wynik; żądania rozpoczęte po unieważnieniu nie dołączają
+  do niego, a stary wynik nigdy nie zapełnia cache. Limit aktywnych operacji obejmuje
+  także te unieważnione, do chwili ich zakończenia.
+- Cache zakłada jedną instancję API, chronioną istniejącym Basic Auth. Nie jest cache
+  per użytkownik. Przed wprowadzeniem uprawnień do pojedynczych aut należy dodać kontrolę
+  dostępu przed odczytem cache i odpowiedni kontekst właściciela w kluczu.
+- Bardzo długa lub błędna historia może wyczerpać limit kontekstu pomimo wąskiego zakresu.
+  API wtedy jawnie odmawia obliczenia, zamiast zmieniać bazę porównania. Nie ma migracji.
+- Testy jednostkowe pokrywają cache, use case, kontrolery i adapter z atrapą Prisma.
+  Rzeczywisty PostgreSQL, czas zapytań i działające HTTP pozostają do odbioru na serwerze.
+  Testy są po angielsku i mają sekcje Given/When/Then w ścieżkach odpowiadających klasom.
+
+Przykładowe wywołanie po deployu:
+
+```text
+GET /api/cars/ID_AUTA/analytics?from=2026-01-01&to=2026-10-11&fuelType=PB95
+```
+
+Do sprawdzenia na serwerze: dwa odczyty mają ten sam `generatedAt`; po dodaniu tankowania
+(również wstecznego) kolejny odczyt daje nowy czas i aktualne dane. Standardowy deploy
+wystarcza, bez dodatkowych skryptów. Strona analizy powstanie dopiero w etapie 3.
 
 ### 3. Osobna strona, integracja i końcowy odbiór
 
@@ -307,5 +360,5 @@ w review danego etapu, zamiast dokładać migrację bez uzasadnienia.
 | --- | --- | --- | --- | --- |
 | Plan | Do review | Ten dokument; usunięty zakończony plan przypomnień | Przegląd aktualnego kodu paliwa, tras i schematu | Do zatwierdzenia założenie porównania z 5 poprzednimi tankowaniami |
 | 1 | DONE / Do review | Kontrakt i generator charts, kalkulator car, use case czterech wykresów, 3 pliki testów | 176/176 testów OK (51 nowych); TypeScript i diff check OK | Porównanie z 5 poprzednikami; jawne pominięcia niejednoznacznych dni i danych elektrycznych; stare API bez zmian |
-| 2 | Do zrobienia | — | — | — |
+| 2 | DONE / Do review | Repozytorium analizy, use case, cache, kontroler i OpenAPI, integracja tras i zapisu paliwa; 5 plików testów | TypeScript i parsowanie OpenAPI OK; 213/213 testów, następnie 13/13 testów use case po dodaniu 2 przypadków granicznych | Bez migracji; rzeczywista baza i HTTP do odbioru na serwerze |
 | 3 | Do zrobienia | — | — | — |

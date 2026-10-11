@@ -2,13 +2,16 @@ import { Router } from "express";
 import { CarController } from "./CarController";
 import { FuelController } from "./FuelController";
 import { ServiceController } from "./ServiceController";
+import { CarAnalyticsController } from './CarAnalyticsController';
 
 export function CarRoutes(
     carController: CarController,
     fuelController: FuelController,
-    serviceController: ServiceController
+    serviceController: ServiceController,
+    analyticsController: CarAnalyticsController,
 ): Router {
   const router = Router();
+  router.get('/cars/:id/analytics', (req, res) => analyticsController.get(req, res));
 
   router.post("/cars", (req, res) =>
       carController.create(req, res)

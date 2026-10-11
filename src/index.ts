@@ -37,6 +37,12 @@ import {ServiceRecordRepositoryPrisma} from '@modules/car/infrastructure/Service
 import {CreateServiceRecordUseCase} from '@modules/car/application/CreateServiceRecordUseCase';
 import {ListServiceRecordsUseCase} from '@modules/car/application/ListServiceRecordsUseCase';
 import {GetFuelStatisticsUseCase} from '@modules/car/application/GetFuelStatisticsUseCase';
+import {GetCarAnalyticsUseCase, CarAnalyticsResponse} from '@modules/car/application/GetCarAnalyticsUseCase';
+import {GenerateFuelChartsUseCase} from '@modules/car/application/GenerateFuelChartsUseCase';
+import {CarAnalyticsRepositoryPrisma} from '@modules/car/infrastructure/CarAnalyticsRepositoryPrisma';
+import {MemoryCarAnalyticsCache} from '@modules/car/infrastructure/MemoryCarAnalyticsCache';
+import {CarAnalyticsController} from '@modules/car/interface/CarAnalyticsController';
+import {LocalChartGenerator} from '@modules/charts/application/LocalChartGenerator';
 
 // Shared Connectors
 import {SmartThingsHttpClient} from './shared/connectors/smartthings/infrastructure/SmartThingsHttpClient';
@@ -120,7 +126,12 @@ const listFeaturesUseCase = new ListFeaturesUseCase(featuresRepo);
 const featureController = new FeatureController(listFeaturesUseCase);
 const carController = new CarController();
 const fuelStatisticsUseCase = new GetFuelStatisticsUseCase(prisma);
-const fuelController = new FuelController(fuelStatisticsUseCase);
+const analyticsCache = new MemoryCarAnalyticsCache<CarAnalyticsResponse>();
+const analyticsUseCase = new GetCarAnalyticsUseCase(
+    new CarAnalyticsRepositoryPrisma(prisma), new GenerateFuelChartsUseCase(new LocalChartGenerator()), analyticsCache,
+);
+const analyticsController = new CarAnalyticsController(analyticsUseCase);
+const fuelController = new FuelController(fuelStatisticsUseCase, analyticsCache, prisma);
 const carRepository = new CarRepositoryPrisma(prisma);
 const serviceRecordRepository = new ServiceRecordRepositoryPrisma(prisma);
 const createServiceRecordUseCase = new CreateServiceRecordUseCase(carRepository, serviceRecordRepository);
@@ -167,7 +178,7 @@ const smartHomeController = new SmartHomeController(getSmartHomeDevicesUseCase, 
 // commentary
 app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
-app.use('/api', CarRoutes(carController, fuelController, serviceController));
+app.use('/api', CarRoutes(carController, fuelController, serviceController, analyticsController));
 app.use('/api', ReminderRoutes(reminderController));
 app.use('/api', AgdRoutes(agdController));
 app.use('/api', SmartHomeRoutes(smartHomeController));
