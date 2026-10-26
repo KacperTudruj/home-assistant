@@ -14,7 +14,7 @@ let disposeChart = () => {};
 function status(message) { get('health-status').textContent = message; }
 function formError(form, message) { form.querySelector('.health-form-error').textContent = message; }
 function setReady(ready) {
-    for (const id of ['quick-weight', 'add-weight', 'add-distance', 'edit-goal', 'choose-path']) get(id).disabled = !ready;
+    for (const id of ['add-weight', 'add-distance', 'edit-goal', 'choose-path']) get(id).disabled = !ready;
     for (const button of document.querySelectorAll('[data-range]')) button.disabled = !ready;
 }
 
@@ -144,7 +144,7 @@ async function load() {
 function init() {
     renderAppNav();
     for (const button of document.querySelectorAll('[data-close]')) button.addEventListener('click', () => button.closest('dialog').close());
-    for (const id of ['add-weight', 'quick-weight']) get(id).addEventListener('click', () => openEntry('weight'));
+    get('add-weight').addEventListener('click', () => openEntry('weight'));
     get('add-distance').addEventListener('click', () => openEntry('distance'));
     get('weight-form').addEventListener('submit', event => handleEntrySubmit('weight', event));
     get('distance-form').addEventListener('submit', event => handleEntrySubmit('distance', event));
