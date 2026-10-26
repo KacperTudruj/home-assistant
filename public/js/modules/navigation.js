@@ -62,7 +62,7 @@ export function renderAppNav() {
     if (!root) return;
 
     const pageType = document.body.dataset.page;
-    const isAppPage = pageType === "app" || pageType === "car-fuel-history" || pageType === "car-analytics" || pageType === "smart-agd" || pageType === "camera" || pageType === "car-log";
+    const isAppPage = pageType === "app" || pageType === "car-fuel-history" || pageType === "car-analytics" || pageType === "smart-agd" || pageType === "camera" || pageType === "car-log" || pageType === "health";
     if (isAppPage) {
         const title = document.body.dataset.appTitle || "";
         root.innerHTML = `

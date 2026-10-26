@@ -4,6 +4,7 @@ const date = value => new Date(value).toLocaleDateString('pl-PL', { timeZone: 'U
 
 export function chartConfig(spec) {
     const dates = spec.series.flatMap(series => series.points.map(point => Date.parse(point.x)));
+    const firstDate = Math.min(...dates), lastDate = Math.max(...dates);
     const datasets = spec.series.map((series, index) => ({
         label: series.label,
         data: series.points.map(point => ({ x: Date.parse(point.x), y: point.y, details: point.details })),
@@ -12,7 +13,10 @@ export function chartConfig(spec) {
         pointRadius: 3, pointHoverRadius: 6, borderWidth: 2, spanGaps: false,
     }));
     if (dates.length) for (const line of spec.referenceLines) datasets.push({
-        label: line.label, data: [{ x: Math.min(...dates), y: line.value }, { x: Math.max(...dates), y: line.value }],
+        label: line.label, data: [
+            { x: firstDate === lastDate ? firstDate - 86400000 : firstDate, y: line.value },
+            { x: firstDate === lastDate ? lastDate + 86400000 : lastDate, y: line.value },
+        ],
         borderColor: '#aebbb2', borderDash: [4, 4], pointRadius: 0, borderWidth: 1,
     });
     return {

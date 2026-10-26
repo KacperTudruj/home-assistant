@@ -96,6 +96,9 @@ app.get('/car-log', (_, res) => {
 app.get('/car-analytics', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'car-analytics.html'));
 });
+app.get('/health', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'health.html'));
+});
 app.get('/smart-agd', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
 });

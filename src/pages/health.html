@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Health – Tudruj</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/car-analytics.css">
+  <link rel="stylesheet" href="/health.css">
+</head>
+<body data-page="health" data-app-title="Health">
+<main class="container health-page">
+  <div id="app-nav-root"></div>
+  <header class="health-heading">
+    <div>
+      <p class="eyebrow"><span class="terminal-mark" aria-hidden="true">&gt;_</span> Osobisty dziennik postępu</p>
+      <h1>Małe kroki. <span class="accent">Długa droga.</span></h1>
+      <p class="health-intro">Zapisuj wagę i przebyty dystans. Zobacz, jak zmienia się Twój wynik i dokąd prowadzi Cię droga.</p>
+    </div>
+    <div class="health-demo"><span>Dane demonstracyjne</span><button type="button" id="reset-demo" class="btn-link">Przywróć przykładowe dane</button></div>
+  </header>
+  <p id="health-status" class="health-status" role="status" aria-live="polite"></p>
+
+  <section class="health-weight" aria-labelledby="weight-title">
+    <div class="health-section-top">
+      <div><p class="health-kicker">01 / Waga</p><h2 id="weight-title">Twój punkt odniesienia</h2></div>
+      <button type="button" id="add-weight" class="btn-primary health-main-action"><span aria-hidden="true">＋</span> Zapisz wagę</button>
+    </div>
+    <div class="weight-hero">
+      <div class="weight-current"><span class="health-label">Ostatni pomiar</span><strong id="latest-weight">—</strong><span id="latest-date" class="health-muted">Dodaj pierwszy pomiar</span></div>
+      <div class="weight-goal"><span class="health-label">Twój cel</span><strong id="goal-weight">—</strong><button type="button" id="edit-goal" class="btn-link">Zmień cel</button></div>
+    </div>
+    <div class="weight-progress"><div class="weight-progress-labels"><span>Od wagi początkowej do celu</span><strong id="weight-percent">0%</strong></div><div id="weight-track" class="health-track" role="progressbar" aria-label="Postęp do celu wagi" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0"><span id="weight-fill"></span></div><p id="weight-progress-note" class="health-muted"></p></div>
+    <dl class="weight-facts"><div><dt>Waga początkowa</dt><dd id="start-weight">—</dd></div><div><dt>Zmiana od początku</dt><dd id="weight-change">—</dd></div><div><dt>Do celu</dt><dd id="weight-remaining">—</dd></div></dl>
+  </section>
+
+  <section class="health-chart-section" aria-labelledby="chart-title">
+    <div class="health-section-top"><div><p class="health-kicker">02 / Historia</p><h2 id="chart-title">Przebieg wagi</h2></div><div class="health-ranges" role="group" aria-label="Zakres wykresu"><button type="button" data-range="month">Miesiąc</button><button type="button" data-range="three">3 miesiące</button><button type="button" data-range="all">Całość</button></div></div>
+    <p class="health-muted">Punkty oznaczają zapisane pomiary. Linia przerywana pokazuje Twój cel.</p>
+    <div id="weight-chart"></div>
+    <div class="health-list-heading"><h3>Wpisy wagi</h3><span id="weight-count" class="health-muted"></span></div>
+    <div id="weight-history" class="health-history"></div>
+  </section>
+
+  <section class="health-journey" aria-labelledby="journey-title">
+    <div class="health-section-top"><div><p class="health-kicker">03 / Podróż</p><h2 id="journey-title">Każdy kilometr przybliża</h2></div><button type="button" id="add-distance" class="btn-secondary">＋ Dodaj dystans</button></div>
+    <div class="journey-layout"><div class="journey-overview"><p class="health-label">Wybrana ścieżka</p><h3 id="path-name"></h3><button type="button" id="choose-path" class="btn-link">Wybierz ścieżkę <span aria-hidden="true">↗</span></button><div class="journey-numbers"><div><strong id="journey-total">—</strong><span>pokonane łącznie</span></div><div><strong id="journey-percent">—</strong><span>ukończenia trasy</span></div></div><p class="journey-current"><span class="health-label">Aktualny etap</span><strong id="journey-stage">—</strong><span id="journey-next" class="health-muted"></span></p><p class="journey-hint">Spacer i bieg liczą się razem. Wpisujesz wyłącznie faktycznie przebyty dystans.</p></div><div class="journey-route" aria-label="Przystanki na trasie"><div class="route-rail"><span id="route-fill"></span></div><ol id="route-stops"></ol><span id="route-position" class="route-position" aria-label="Twoja pozycja"></span></div></div>
+    <div class="health-list-heading"><h3>Historia dystansu</h3><span id="distance-count" class="health-muted"></span></div>
+    <div id="distance-history" class="health-history"></div>
+  </section>
+</main>
+
+<dialog id="weight-dialog" class="health-dialog"><form id="weight-form"><h2 id="weight-dialog-title">Zapisz wagę</h2><input type="hidden" name="id"><div class="form-row"><label for="weight-value">Waga w kg</label><input id="weight-value" name="value" type="text" inputmode="decimal" placeholder="np. 105,2" required></div><div class="form-row"><label for="weight-date">Data</label><input id="weight-date" name="date" type="date" required></div><div class="form-row"><label for="weight-note">Notatka (opcjonalnie)</label><textarea id="weight-note" name="note" rows="2" maxlength="300"></textarea></div><p class="health-form-error" role="alert"></p><div class="form-actions"><button type="button" class="btn-secondary" data-close>Anuluj</button><button type="submit" class="btn-primary">Zapisz wagę</button></div></form></dialog>
+<dialog id="goal-dialog" class="health-dialog"><form id="goal-form"><h2>Zmień cel wagi</h2><div class="form-row"><label for="goal-value">Cel w kg</label><input id="goal-value" name="value" type="text" inputmode="decimal" required></div><p class="health-form-error" role="alert"></p><div class="form-actions"><button type="button" class="btn-secondary" data-close>Anuluj</button><button type="submit" class="btn-primary">Zapisz cel</button></div></form></dialog>
+<dialog id="distance-dialog" class="health-dialog"><form id="distance-form"><h2 id="distance-dialog-title">Dodaj dystans</h2><input type="hidden" name="id"><div class="form-row"><label for="distance-value">Dystans w km</label><input id="distance-value" name="value" type="text" inputmode="decimal" placeholder="np. 5,4" required></div><div class="form-row"><label for="distance-date">Data</label><input id="distance-date" name="date" type="date" required></div><div class="form-row"><label for="distance-note">Notatka (opcjonalnie)</label><textarea id="distance-note" name="note" rows="2" maxlength="300"></textarea></div><p class="health-form-error" role="alert"></p><div class="form-actions"><button type="button" class="btn-secondary" data-close>Anuluj</button><button type="submit" class="btn-primary">Zapisz dystans</button></div></form></dialog>
+<dialog id="path-dialog" class="health-dialog health-path-dialog"><div class="path-dialog-heading"><h2>Wybierz ścieżkę</h2><button type="button" class="btn-link" data-close>Zamknij</button></div><div id="path-catalog"></div><p class="health-muted">Kolejne ścieżki w przyszłości.</p></dialog>
+
+<script src="/vendor/chart.umd.js" defer></script>
+<script type="module" src="/js/modules/health.js"></script>
+</body>
+</html>

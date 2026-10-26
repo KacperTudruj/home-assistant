@@ -19,3 +19,13 @@ test('uses actual date spacing, preserves gaps and adds a reference series', () 
     assert.equal(config.data.datasets[0].data[1].x - config.data.datasets[0].data[0].x, 10 * 86400000);
     assert.equal(config.data.datasets[1].data[0].y, 0);
 });
+
+test('draws a horizontal reference line around a single real measurement', () => {
+    const context = vm.createContext({});
+    vm.runInContext(source, context);
+    const spec = { xAxis: { label: 'Data' }, yAxis: { unit: 'kg' }, referenceLines: [{ value: 100, label: 'Cel' }],
+        series: [{ label: 'Waga', points: [{ x: '2026-10-26', y: 105, details: [] }] }] };
+    const config = context.chartConfig(spec);
+    assert.equal(config.data.datasets[0].data.length, 1);
+    assert.equal(config.data.datasets[1].data[1].x - config.data.datasets[1].data[0].x, 2 * 86400000);
+});
