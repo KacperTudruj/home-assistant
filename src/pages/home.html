@@ -2,41 +2,35 @@
 <html lang="pl">
 
 <head>
-    <meta charset="UTF-8">
-    <title>Tudruj HomeAssistant</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <link rel="stylesheet" href="/style.css">
+  <meta charset="UTF-8">
+  <title>Tudruj Home Assistant</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="/style.css">
 </head>
 
 <body data-page="home">
 <script>window.FEATURE_KEY = "app";</script>
 
-<main class="container">
-    <h1>Tudruj HomeAssistant</h1>
-    <p>Wybierz aplikację:</p>
 
-    <div id="app-nav-root"></div>
-    <div class="apps">
-        <a class="app-card" href="/car-log">
-            🚗 Car Log
-            <small>Mój samochód</small>
-        </a>
-        <a class="app-card" href="/smart-agd">
-            🏢 Smart AGD
-            <small>Pralka, lodowka i inne</small>
-        </a>
-        <a class="app-card" href="/camera">
-            🏠 Smart Home
-            <small>Kamery i sensory</small>
-        </a>
-        <a class="app-card" href="/media-storage">
-            📁 Media Storage
-            <small>Pliki i multimedia</small>
-        </a>
+
+  <main class="container home-page">
+    <header class="home-heading">
+      <p class="eyebrow"><span class="terminal-mark" aria-hidden="true">&gt;_</span> Panel domowy</p>
+      <h1>Tudruj <span class="accent">Home Assistant</span></h1>
+      <p class="subtitle">Twój dom, w jednym miejscu.</p>
+    </header>
+
+    <div class="section-heading">
+      <h2 id="apps-heading">Twoje aplikacje</h2>
+      <span class="section-caption">Wybierz moduł, aby zacząć</span>
     </div>
-</main>
+    <section class="apps-panel" id="apps-panel" aria-labelledby="apps-heading" aria-live="polite">
+      <p class="loading">Ładowanie aplikacji…</p>
+    </section>
+  </main>
 
-<script type="module" src="/app.js"></script>
+  <script type="module" src="/app.js"></script>
 </body>
 
 </html>

@@ -4,6 +4,7 @@ export async function loadApps() {
 
     try {
         const res = await fetch("/api/features");
+        if (!res.ok) throw new Error("Failed to fetch applications");
         const features = await res.json();
 
         features.sort((a, b) => a.order - b.order);
@@ -15,22 +16,44 @@ export async function loadApps() {
 
             if (!feature.enabled) {
                 tile.classList.add("disabled");
-                tile.href = "#";
+                tile.setAttribute("aria-disabled", "true");
             } else {
                 tile.href = feature.route;
             }
 
-            tile.innerHTML = `
-                <div class="icon">${feature.icon}</div>
-                <div class="name">${feature.name}</div>
-                <div class="desc">${feature.description}</div>
-            `;
+            const icon = document.createElement("div");
+            icon.className = "icon";
+            icon.setAttribute("aria-hidden", "true");
+            icon.textContent = feature.icon;
+
+            const name = document.createElement("h3");
+            name.className = "name";
+            name.textContent = feature.name;
+
+            const description = document.createElement("p");
+            description.className = "desc";
+            description.textContent = feature.description;
+
+            const footer = document.createElement("div");
+            footer.className = "tile-footer";
+            const action = document.createElement("span");
+            action.textContent = feature.enabled ? "Otwórz moduł" : "Niedostępne";
+            const arrow = document.createElement("span");
+            arrow.className = "tile-arrow";
+            arrow.setAttribute("aria-hidden", "true");
+            arrow.textContent = feature.enabled ? "↗" : "—";
+            footer.append(action, arrow);
+
+            tile.append(icon, name, description, footer);
 
             panel.appendChild(tile);
         }
+        if (features.length === 0) {
+            panel.innerHTML = '<p class="loading">Brak dostępnych aplikacji.</p>';
+        }
     } catch (err) {
         console.error("Nie udało się załadować aplikacji", err);
-        panel.innerHTML = "<p>Błąd ładowania aplikacji</p>";
+        panel.innerHTML = '<p class="load-error" role="alert">Nie udało się załadować aplikacji. Odśwież stronę, aby spróbować ponownie.</p>';
     }
 }
 
@@ -43,10 +66,10 @@ export function renderAppNav() {
     if (isAppPage) {
         const title = document.body.dataset.appTitle || "";
         root.innerHTML = `
-            <nav class="app-nav">
+            <nav class="app-nav" aria-label="Nawigacja okruszkowa">
                 <a href="/" class="app-nav-back">Home</a>
                 <span class="app-nav-separator">/</span>
-                <span class="app-nav-title active">${title}</span>
+                <span class="app-nav-title active" aria-current="page">${title}</span>
             </nav>
         `;
         if (pageType === 'car-analytics') {

@@ -14,11 +14,19 @@
 
 
 
-  <main class="container">
-    <h1>Tudruj <span class="accent">Home Assistant</span></h1>
-    <p class="subtitle">Wybierz aplikację:</p>
+  <main class="container home-page">
+    <header class="home-heading">
+      <p class="eyebrow"><span class="terminal-mark" aria-hidden="true">&gt;_</span> Panel domowy</p>
+      <h1>Tudruj <span class="accent">Home Assistant</span></h1>
+      <p class="subtitle">Twój dom, w jednym miejscu.</p>
+    </header>
 
-    <section class="apps-panel" id="apps-panel">
+    <div class="section-heading">
+      <h2 id="apps-heading">Twoje aplikacje</h2>
+      <span class="section-caption">Wybierz moduł, aby zacząć</span>
+    </div>
+    <section class="apps-panel" id="apps-panel" aria-labelledby="apps-heading" aria-live="polite">
+      <p class="loading">Ładowanie aplikacji…</p>
     </section>
   </main>
 

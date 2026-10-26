@@ -4,12 +4,12 @@
 .analytics-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-top: 24px; }
 .analytics-chart { min-width: 0; margin: 0; }
 .analytics-chart h2 { font-size: 1.1rem; }
-.analytics-chart p { color: #b4d3bd; font-size: .9rem; margin: 12px 0; }
+.analytics-chart p { color: var(--muted); font-size: .9rem; margin: 12px 0; }
 .analytics-canvas { height: 300px; position: relative; }
 .analytics-table-scroll { max-height: 360px; overflow: auto; margin-top: 12px; }
 .analytics-chart table { width: 100%; border-collapse: collapse; font-size: .85rem; }
-.analytics-chart th, .analytics-chart td { padding: 8px; border-bottom: 1px solid #294332; text-align: left; white-space: nowrap; }
+.analytics-chart th, .analytics-chart td { padding: 8px; border-bottom: 1px solid var(--border); text-align: left; white-space: nowrap; }
 .analytics-chart summary { cursor: pointer; padding: 12px 0; }
-.analytics-page :focus-visible { outline: 2px solid #a5e9ff; outline-offset: 4px; }
+.analytics-page :focus-visible { outline: 2px solid var(--accent); outline-offset: 4px; }
 #analytics-status { margin: 16px 0; }
 @media (max-width: 800px) { .analytics-grid { grid-template-columns: 1fr; } .analytics-canvas { height: 260px; } }

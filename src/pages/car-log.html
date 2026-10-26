@@ -11,7 +11,7 @@
 <body data-page="app" data-app-title="🚗 Car Log">
 <script>window.FEATURE_KEY = "car-log";</script>
 
-<main class="container">
+<main class="container car-page">
 
   <!-- NAWIGACJA -->
   <div id="app-nav-root"></div>
@@ -28,8 +28,10 @@
 
   <!-- TOOLBAR AUTA -->
   <section class="car-toolbar">
+    <p class="eyebrow"><span class="terminal-mark" aria-hidden="true">&gt;_</span> Car Log / Twój garaż</p>
     <div class="car-current">
-      🚗 <strong id="car-name-display">---</strong>
+      <span class="car-symbol" aria-hidden="true">🚗</span>
+      <h1 id="car-name-display">---</h1>
       <span class="car-year" id="car-year-display">---</span>
       <span class="car-status">---</span>
     </div>
@@ -37,14 +39,14 @@
     <div class="car-actions">
       <a class="btn-secondary" id="car-analytics-link" hidden>Analiza auta</a>
       <button class="btn-secondary" id="change-car-btn">Zmień auto</button>
-      <button class="btn-primary" id="add-service-btn">Dodaj wpis serwisowy</button>
-      <button class="btn-primary" id="add-fuel-btn">Dodaj tankowanie</button>
+      <button class="btn-secondary" id="add-service-btn"><span aria-hidden="true">＋</span> Dodaj wpis serwisowy</button>
+      <button class="btn-primary" id="add-fuel-btn"><span aria-hidden="true">＋</span> Dodaj tankowanie</button>
     </div>
   </section>
 
   <!-- KARTA: PODSTAWOWE INFO -->
-  <section class="card">
-    <h2>🚗 Podstawowe informacje</h2>
+  <section class="card car-info">
+    <h2><span class="section-icon" aria-hidden="true">🚗</span> Podstawowe informacje</h2>
     <ul class="info-list">
       <li><strong>Model:</strong> <span id="info-model">---</span></li>
       <li><strong>Rok:</strong> <span id="info-year">---</span></li>
@@ -55,50 +57,50 @@
 
   <!-- KAFELEK: STATYSTYKI -->
   <section class="card" id="stats-card">
-    <h2>📈 Statystyki</h2>
+    <h2><span class="section-icon" aria-hidden="true">📈</span> Statystyki</h2>
     <div class="mileage-grid">
       <div>
-        <span class="label">🏙️ Miasto</span>
+        <span class="label">Miasto</span>
         <span class="value" id="stats-city">—</span>
       </div>
       <div>
-        <span class="label">🛣️ Trasa</span>
+        <span class="label">Trasa</span>
         <span class="value" id="stats-highway">—</span>
       </div>
       <div>
-        <span class="label">🔄 Mieszany</span>
+        <span class="label">Mieszany</span>
         <span class="value" id="stats-mixed">—</span>
       </div>
       <div>
-        <span class="label">⛽ Średnio zł/L</span>
+        <span class="label">Średnia cena litra</span>
         <span class="value" id="stats-avg-price">—</span>
       </div>
       <div>
-        <span class="label">💸 Średni koszt 100km</span>
+        <span class="label">Średni koszt 100 km</span>
         <span class="value" id="stats-avg-cost">—</span>
       </div>
       <div>
-        <span class="label">🧪 Średnio L/tank</span>
+        <span class="label">Średnie tankowanie</span>
         <span class="value" id="stats-avg-liters">—</span>
       </div>
       <div>
-        <span class="label">⛽ Łącznie litrów</span>
+        <span class="label">Łącznie litrów</span>
         <span class="value" id="stats-total-liters">—</span>
       </div>
       <div>
-        <span class="label">💰 Łączny koszt</span>
+        <span class="label">Łączny koszt</span>
         <span class="value" id="stats-total-cost">—</span>
       </div>
 
     </div>
 
     <h3>Rocznie</h3>
-    <ul class="info-list" style="margin-top:0" id="stats-yearly"></ul>
+    <ul class="info-list" id="stats-yearly"></ul>
   </section>
 
   <!-- KARTA: PRZEBIEG -->
   <section class="card mileage-card">
-    <h2>📊 Przebieg</h2>
+    <h2><span class="section-icon" aria-hidden="true">📊</span> Przebieg</h2>
 
     <div class="mileage-grid">
       <div>
@@ -120,7 +122,7 @@
 
   <!-- KARTA: OSTATNIE TANKOWANIA -->
   <section class="card">
-    <h2>⛽ Ostatnie tankowania</h2>
+    <h2><span class="section-icon" aria-hidden="true">⛽</span> Ostatnie tankowania</h2>
 
     <ul class="fuel-list" id="fuel-list-container">
       <li class="loading">Ładowanie tankowań...</li>
@@ -132,7 +134,7 @@
   </section>
 
   <section class="card" aria-labelledby="reminders-heading">
-    <h2 id="reminders-heading">Przypomnienia</h2>
+    <h2 id="reminders-heading"><span class="section-icon" aria-hidden="true">◷</span> Przypomnienia</h2>
     <p id="reminder-inactive" hidden>Auto jest nieaktywne. Możesz przeglądać i archiwizować przypomnienia.</p>
     <div class="reminder-actions">
       <button type="button" class="btn-primary" id="add-reminder-btn" disabled>Dodaj przypomnienie</button>
@@ -186,7 +188,7 @@
 
   <!-- KARTA: HISTORIA SERWISOWA -->
   <section class="card">
-    <h2>🛠️ Historia serwisowa</h2>
+    <h2><span class="section-icon" aria-hidden="true">🛠️</span> Historia serwisowa</h2>
 
     <ul class="service-list" id="service-list-container">
       <li class="loading">Ładowanie historii serwisowej...</li>
@@ -199,31 +201,31 @@
       <h2>Dodaj tankowanie</h2>
       <form id="add-fuel-form">
         <div class="form-row">
-          <label>Data</label>
+          <label for="fuel-date">Data</label>
           <input type="date" id="fuel-date" required />
         </div>
         <div class="form-row">
-          <label>Litry</label>
+          <label for="fuel-liters">Litry</label>
           <input type="number" id="fuel-liters" step="0.01" min="0" required />
         </div>
         <div class="form-row">
-          <label>Licznik całkowity (km)</label>
+          <label for="fuel-meter">Licznik całkowity (km)</label>
           <input type="number" id="fuel-meter" step="0.1" min="0" required />
         </div>
         <div class="form-row">
-          <label>Dystans od tankowania (km)</label>
+          <label for="fuel-trip">Dystans od tankowania (km)</label>
           <input type="number" id="fuel-trip" step="0.1" min="0" />
         </div>
         <div class="form-row">
-          <label>Łączna cena (zł)</label>
+          <label for="fuel-total-price">Łączna cena (zł)</label>
           <input type="number" id="fuel-total-price" step="0.01" min="0" required />
         </div>
         <div class="form-row">
-          <label>Cena za litr (zł)</label>
+          <label for="fuel-price-per-liter">Cena za litr (zł)</label>
           <input type="number" id="fuel-price-per-liter" step="0.01" min="0" required />
         </div>
         <div class="form-row">
-          <label>Tryb jazdy</label>
+          <label for="fuel-driving-mode">Tryb jazdy</label>
           <select id="fuel-driving-mode">
             <option value="MIXED" selected>Mieszany</option>
             <option value="CITY">Miasto</option>
@@ -244,11 +246,11 @@
       <h2>Dodaj wpis serwisowy</h2>
       <form id="add-service-form">
         <div class="form-row">
-          <label>Data</label>
+          <label for="service-date">Data</label>
           <input type="date" id="service-date" required />
         </div>
         <div class="form-row">
-          <label>Opis</label>
+          <label for="service-description">Opis</label>
           <textarea id="service-description" rows="4" placeholder="np. Wymiana oleju i filtrów, tulei oraz sworznia" required></textarea>
         </div>
         <div class="form-row">
@@ -260,11 +262,11 @@
           <textarea id="service-workshop-address" rows="2" maxlength="500"></textarea>
         </div>
         <div class="form-row">
-          <label>Przebieg (km)</label>
+          <label for="service-meter">Przebieg (km)</label>
           <input type="number" id="service-meter" step="1" min="0" required />
         </div>
         <div class="form-row">
-          <label>Koszt (zł)</label>
+          <label for="service-cost">Koszt (zł)</label>
           <input type="number" id="service-cost" step="0.01" min="0" required />
         </div>
         <div class="form-row">

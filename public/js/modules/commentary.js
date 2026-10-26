@@ -8,7 +8,7 @@ export function initCommentary() {
         commentaryHeader.className = 'commentary';
         commentaryHeader.innerHTML = `
             <div class="commentary-line">
-                <select id="commentator-select"></select>
+                <select id="commentator-select" aria-label="Komentator"></select>
                 <span class="colon">:</span>
                 <span id="commentary-text">Ładowanie komentarza…</span>
             </div>
