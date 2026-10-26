@@ -4,23 +4,24 @@ const fs = require('node:fs');
 const path = require('node:path');
 const vm = require('node:vm');
 
-const modules = ['health-mocks.js', 'health-calculations.js', 'health-repository.js'];
+const modules = ['health-paths.js', 'health-calculations.js', 'health-repository.js'];
 const source = modules.map(name => fs.readFileSync(path.resolve(__dirname, '../../../../public/js/modules', name), 'utf8')
-    .replace(/^import .*;\r?\n/gm, '').replace(/^export /gm, '')).join('\n');
+    .replace(/^export /gm, '')).join('\n');
 const context = vm.createContext({ Date, Math, Number, String, JSON });
 vm.runInContext(source, context);
 const { weightProgress, journeyProgress, filterWeights, paths, HealthRepository } = vm.runInContext(
     '({ weightProgress, journeyProgress, filterWeights, paths, HealthRepository })', context);
 
-test('weight progress uses actual measurements and clamps reached goals', () => {
+test('weight progress handles empty history, no goal, fluctuations and a reached goal', () => {
     const entries = [
         { id: 'a', date: '2026-07-01', kg: 112 },
         { id: 'b', date: '2026-07-10', kg: 110 },
         { id: 'c', date: '2026-07-20', kg: 111 },
     ];
-    assert.equal(weightProgress(entries, 100).latest.kg, 111);
+    assert.equal(weightProgress([], null).percent, 0);
+    assert.equal(weightProgress(entries, null).change, -1);
+    assert.equal(weightProgress(entries, null).remaining, null);
     assert.equal(weightProgress(entries, 100).remaining, 11);
-    assert.equal(weightProgress([], 100).percent, 0);
     const reached = weightProgress([...entries, { id: 'd', date: '2026-08-01', kg: 99 }], 100);
     assert.equal(reached.remaining, 0);
     assert.equal(reached.percent, 100);
@@ -28,35 +29,31 @@ test('weight progress uses actual measurements and clamps reached goals', () => 
     assert.equal(filterWeights(entries, 'month', new Date(2026, 6, 25)).length, 3);
 });
 
-test('journey totals use all distance entries and respect route endpoints', () => {
-    const path = paths[0];
-    const middle = journeyProgress([{ km: 130 }, { km: 15 }], path);
+test('journey includes same-day distances and clamps completed route', () => {
+    const middle = journeyProgress([{ km: 130 }, { km: 15 }], paths[0]);
     assert.equal(middle.total, 145);
     assert.equal(middle.current.name, 'Rivendell');
     assert.equal(middle.next.name, 'Moria');
     assert.equal(middle.toNext, 60);
-    const finished = journeyProgress([{ km: 500 }], path);
-    assert.equal(finished.percent, 100);
-    assert.equal(finished.next, null);
+    assert.equal(journeyProgress([{ km: 500 }], paths[0]).percent, 100);
 });
 
-test('repository persists edits, replaces duplicate-day weights and keeps same-day distances', () => {
-    const values = new Map();
-    const storage = { getItem: key => values.get(key) ?? null, setItem: (key, value) => values.set(key, value) };
-    const repo = new HealthRepository(storage);
-    const day = '2026-10-26';
-    repo.saveWeight({ id: 'first', date: day, kg: 105, note: '' });
-    repo.saveWeight({ id: 'replacement', date: day, kg: 104, note: '' });
-    repo.saveDistance({ id: 'walk', date: day, km: 3, note: '' });
-    repo.saveDistance({ id: 'run', date: day, km: 5, note: '' });
-    repo.saveDistance({ id: 'walk', date: day, km: 4, note: '' });
-    const restored = new HealthRepository(storage).getState();
-    assert.equal(restored.weights.filter(item => item.date === day).length, 1);
-    assert.equal(restored.weights.find(item => item.date === day).kg, 104);
-    assert.equal(restored.distances.filter(item => item.date === day).length, 2);
-    assert.equal(restored.distances.find(item => item.id === 'walk').km, 4);
-    repo.deleteDistance('run');
-    assert.equal(repo.getState().distances.filter(item => item.date === day).length, 1);
-    repo.deleteWeight('replacement');
-    assert.equal(repo.getState().weights.filter(item => item.date === day).length, 0);
+test('API repository sends weight replacement explicitly and creates independent distance entries', async () => {
+    const calls = [];
+    context.fetch = async (url, options) => {
+        calls.push({ url, options });
+        return { ok: true, status: 204 };
+    };
+    const repository = new HealthRepository();
+    await repository.saveWeight({ date: '2026-10-26', kg: 105, note: '' }, true);
+    await repository.saveDistance({ date: '2026-10-26', km: 3, note: '' });
+    await repository.saveDistance({ date: '2026-10-26', km: 5, note: '' });
+    await repository.deleteWeight('weight-id');
+    assert.equal(calls[0].url, '/api/health/weights');
+    assert.equal(calls[0].options.method, 'POST');
+    assert.equal(JSON.parse(calls[0].options.body).replaceExisting, true);
+    assert.equal(calls[1].url, '/api/health/distances');
+    assert.equal(calls[2].url, '/api/health/distances');
+    assert.equal(calls[3].url, '/api/health/weights/weight-id');
+    assert.equal(calls[3].options.method, 'DELETE');
 });

@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Wpisy wagi – Tudruj</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="stylesheet" href="/health.css">
+</head>
+<body data-page="health-weights" data-app-title="Wpisy wagi">
+<main class="container health-page health-weights-page">
+  <div id="app-nav-root"></div>
+  <header class="health-heading">
+    <div>
+      <p class="eyebrow"><span class="terminal-mark" aria-hidden="true">&gt;_</span> Health / Pomiary</p>
+      <h1>Wpisy wagi</h1>
+      <p class="health-intro">Tutaj możesz poprawić lub usunąć zapisane pomiary.</p>
+    </div>
+    <button type="button" id="add-weight" class="btn-primary health-main-action">＋ Zapisz wagę</button>
+  </header>
+  <p id="health-status" class="health-status" role="status" aria-live="polite"></p>
+  <div class="health-list-heading"><h2>Wszystkie pomiary</h2><span id="weight-count" class="health-muted"></span></div>
+  <div id="weight-history" class="health-history"></div>
+</main>
+
+<dialog id="weight-dialog" class="health-dialog"><form id="weight-form"><h2 id="weight-dialog-title">Zapisz wagę</h2><input type="hidden" name="id"><div class="form-row"><label for="weight-value">Waga w kg</label><input id="weight-value" name="value" type="text" inputmode="decimal" placeholder="np. 105,2" required></div><div class="form-row"><label for="weight-date">Data</label><input id="weight-date" name="date" type="date" required></div><div class="form-row"><label for="weight-note">Notatka (opcjonalnie)</label><textarea id="weight-note" name="note" rows="2" maxlength="300"></textarea></div><p class="health-form-error" role="alert"></p><div class="form-actions"><button type="button" class="btn-secondary" data-close>Anuluj</button><button type="submit" class="btn-primary">Zapisz wagę</button></div></form></dialog>
+
+<script type="module" src="/js/modules/health-weights.js"></script>
+</body>
+</html>

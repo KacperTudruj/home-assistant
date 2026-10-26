@@ -43,6 +43,10 @@ import {CarAnalyticsRepositoryPrisma} from '@modules/car/infrastructure/CarAnaly
 import {MemoryCarAnalyticsCache} from '@modules/car/infrastructure/MemoryCarAnalyticsCache';
 import {CarAnalyticsController} from '@modules/car/interface/CarAnalyticsController';
 import {LocalChartGenerator} from '@modules/charts/application/LocalChartGenerator';
+import {HealthRepositoryPrisma} from '@modules/health/infrastructure/HealthRepositoryPrisma';
+import {HealthUseCases} from '@modules/health/application/HealthUseCases';
+import {HealthController} from '@modules/health/interface/HealthController';
+import {HealthRoutes} from '@modules/health/interface/HealthRoutes';
 
 // Shared Connectors
 import {SmartThingsHttpClient} from './shared/connectors/smartthings/infrastructure/SmartThingsHttpClient';
@@ -99,6 +103,9 @@ app.get('/car-analytics', (_, res) => {
 app.get('/health', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'health.html'));
 });
+app.get('/health/weights', (_, res) => {
+    res.sendFile(path.join(PAGES_DIR, 'health-weights.html'));
+});
 app.get('/smart-agd', (_, res) => {
     res.sendFile(path.join(PAGES_DIR, 'smart-agd.html'));
 });
@@ -148,6 +155,7 @@ const reminderUseCases = new ReminderUseCases(reminderRepository, new Map([
     ['car', new CarReminderContextProvider(carRepository)]
 ]));
 const reminderController = new ReminderController(reminderUseCases);
+const healthController = new HealthController(new HealthUseCases(new HealthRepositoryPrisma(prisma)));
 
 // --- SmartThings Connector (Shared Kernel) ---
 const stConfigRepo = new SmartThingsConfigRepositoryPrisma(prisma);
@@ -186,6 +194,7 @@ app.use('/api', CommentaryRoutes(commentaryController));
 app.use('/api', featureRoutes(featureController));
 app.use('/api', CarRoutes(carController, fuelController, serviceController, analyticsController));
 app.use('/api', ReminderRoutes(reminderController));
+app.use('/api', HealthRoutes(healthController));
 app.use('/api', AgdRoutes(agdController));
 app.use('/api', SmartHomeRoutes(smartHomeController));
 

@@ -1,52 +1,31 @@
-import { createHealthMocks, paths } from './health-mocks.js';
-
-const STORAGE_KEY = 'tudruj-health-demo-v1';
-const newId = () => globalThis.crypto?.randomUUID?.() || `${Date.now()}-${Math.random()}`;
-
-// Replace this repository with an API implementation when persistence is added.
 export class HealthRepository {
-    constructor(storage = localStorage) { this.storage = storage; }
-
-    getState() {
-        const saved = this.storage.getItem(STORAGE_KEY);
-        if (!saved) return createHealthMocks();
-        const state = JSON.parse(saved);
-        if (!state || !Array.isArray(state.weights) || !Array.isArray(state.distances)
-            || !paths.some(path => path.id === state.pathId) || !(state.goalKg > 0)) {
-            throw new Error('Nie można odczytać zapisanych danych demonstracyjnych.');
+    async request(path, method = 'GET', data) {
+        const response = await fetch(`/api/health${path}`, {
+            method,
+            cache: 'no-store',
+            headers: data ? { 'Content-Type': 'application/json' } : undefined,
+            body: data ? JSON.stringify(data) : undefined,
+        });
+        if (!response.ok) {
+            const result = await response.json().catch(() => ({}));
+            throw new Error(result.error || 'Nie udało się zapisać danych. Spróbuj ponownie.');
         }
-        return state;
+        return response.status === 204 ? undefined : response.json();
     }
 
-    update(change) {
-        const state = this.getState();
-        change(state);
-        this.storage.setItem(STORAGE_KEY, JSON.stringify(state));
-        return state;
-    }
-
-    setGoal(kg) { return this.update(state => { state.goalKg = kg; }); }
-    saveWeight(entry) {
-        return this.update(state => {
-            state.weights = state.weights.filter(item => item.id !== entry.id && item.date !== entry.date);
-            state.weights.push({ ...entry, id: entry.id || newId() });
+    getState() { return this.request('/overview'); }
+    setGoal(kg) { return this.request('/goal', 'PUT', { kg }); }
+    choosePath(pathId) { return this.request('/path', 'PUT', { pathId }); }
+    saveWeight(entry, replaceExisting = false) {
+        const path = entry.id ? `/weights/${encodeURIComponent(entry.id)}` : '/weights';
+        return this.request(path, entry.id ? 'PUT' : 'POST', {
+            date: entry.date, kg: entry.kg, note: entry.note, replaceExisting,
         });
     }
-    deleteWeight(id) { return this.update(state => { state.weights = state.weights.filter(item => item.id !== id); }); }
+    deleteWeight(id) { return this.request(`/weights/${encodeURIComponent(id)}`, 'DELETE'); }
     saveDistance(entry) {
-        return this.update(state => {
-            state.distances = state.distances.filter(item => item.id !== entry.id);
-            state.distances.push({ ...entry, id: entry.id || newId() });
-        });
+        const path = entry.id ? `/distances/${encodeURIComponent(entry.id)}` : '/distances';
+        return this.request(path, entry.id ? 'PUT' : 'POST', { date: entry.date, km: entry.km, note: entry.note });
     }
-    deleteDistance(id) { return this.update(state => { state.distances = state.distances.filter(item => item.id !== id); }); }
-    choosePath(id) {
-        if (!paths.some(path => path.id === id)) throw new Error('Nieznana ścieżka.');
-        return this.update(state => { state.pathId = id; });
-    }
-    reset() {
-        const state = createHealthMocks();
-        this.storage.setItem(STORAGE_KEY, JSON.stringify(state));
-        return state;
-    }
+    deleteDistance(id) { return this.request(`/distances/${encodeURIComponent(id)}`, 'DELETE'); }
 }

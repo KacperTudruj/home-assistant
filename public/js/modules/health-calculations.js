@@ -6,6 +6,7 @@ export function weightProgress(weights, goalKg) {
     const first = entries[0] || null;
     const latest = entries.at(-1) || null;
     if (!first || !latest) return { first, latest, change: null, remaining: null, percent: 0, reached: false };
+    if (goalKg === null) return { first, latest, change: roundOne(latest.kg - first.kg), remaining: null, percent: 0, reached: false };
     const difference = first.kg - goalKg;
     const reached = latest.kg <= goalKg;
     const percent = difference > 0

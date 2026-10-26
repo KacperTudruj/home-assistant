@@ -167,6 +167,34 @@ model Reminder {
   @@index([moduleKey, resourceId, lifecycle])
 }
 
+/// =======================
+/// Health MODULE
+/// =======================
+
+model HealthProfile {
+  id     Int     @id @default(1)
+  goalKg Float?
+  pathId String  @default("frodo") @db.VarChar(64)
+}
+
+model HealthWeightRecord {
+  id        String   @id @default(uuid())
+  date      DateTime @unique @db.Date
+  kg        Float
+  note      String?  @db.VarChar(300)
+  createdAt DateTime @default(now())
+}
+
+model HealthDistanceRecord {
+  id        String   @id @default(uuid())
+  date      DateTime @db.Date
+  km        Float
+  note      String?  @db.VarChar(300)
+  createdAt DateTime @default(now())
+
+  @@index([date])
+}
+
 model SystemConfigurationSmartAgd {
   id    String @id @default(uuid())
   key   String @unique

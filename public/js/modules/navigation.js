@@ -62,7 +62,7 @@ export function renderAppNav() {
     if (!root) return;
 
     const pageType = document.body.dataset.page;
-    const isAppPage = pageType === "app" || pageType === "car-fuel-history" || pageType === "car-analytics" || pageType === "smart-agd" || pageType === "camera" || pageType === "car-log" || pageType === "health";
+    const isAppPage = pageType === "app" || pageType === "car-fuel-history" || pageType === "car-analytics" || pageType === "smart-agd" || pageType === "camera" || pageType === "car-log" || pageType === "health" || pageType === "health-weights";
     if (isAppPage) {
         const title = document.body.dataset.appTitle || "";
         root.innerHTML = `
@@ -84,6 +84,19 @@ export function renderAppNav() {
             separator.className = 'app-nav-separator';
             separator.textContent = '/';
             nav.insertBefore(carLink, current);
+            nav.insertBefore(separator, current);
+        }
+        if (pageType === 'health-weights') {
+            const nav = root.querySelector('nav');
+            const current = nav.lastElementChild;
+            const healthLink = document.createElement('a');
+            healthLink.className = 'app-nav-back';
+            healthLink.textContent = 'Health';
+            healthLink.href = '/health';
+            const separator = document.createElement('span');
+            separator.className = 'app-nav-separator';
+            separator.textContent = '/';
+            nav.insertBefore(healthLink, current);
             nav.insertBefore(separator, current);
         }
     }
